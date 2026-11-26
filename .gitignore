@@ -1,0 +1,26 @@
+# dependencies & build
+node_modules/
+dist/
+build/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# python (design generator)
+__pycache__/
+*.pyc
+
+# editor & OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# local agent settings
+.claude/settings.local.json
