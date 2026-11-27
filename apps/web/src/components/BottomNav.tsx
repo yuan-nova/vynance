@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router"
 import type { IconName } from "@vynance/shared"
 import { useRef } from "react"
+import { useKeyboardOpen } from "@/lib/hooks/useKeyboardOpen"
 import { Icon } from "./Icon"
 
 const TABS: { to: "/" | "/transaksi" | "/anggaran" | "/lainnya"; label: string; icon: IconName }[] = [
@@ -19,6 +20,7 @@ type BottomNavProps = { onAdd: () => void; onScan: () => void }
 /** Navigasi bawah lima slot (DS-NAV-01, ADR 0001). Tekan lama tombol tengah membuka Scan struk. */
 export function BottomNav({ onAdd, onScan }: BottomNavProps) {
   const path = useRouterState({ select: (s) => s.location.pathname })
+  const keyboardOpen = useKeyboardOpen()
   const pressTimer = useRef<number | undefined>(undefined)
   const longPressed = useRef(false)
   const tab = (t: (typeof TABS)[number]) => {
@@ -37,6 +39,7 @@ export function BottomNav({ onAdd, onScan }: BottomNavProps) {
       </Link>
     )
   }
+  if (keyboardOpen) return null
   return (
     <nav className="bottom-nav" aria-label="Navigasi utama">
       {TABS.slice(0, 2).map(tab)}
