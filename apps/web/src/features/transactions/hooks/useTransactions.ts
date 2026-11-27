@@ -14,7 +14,9 @@ import type {
   TransactionDetail,
   TransactionSummary,
 } from "@vynance/shared"
+import { useEffect, useRef, useSyncExternalStore } from "react"
 import { qk } from "@/lib/query-keys"
+import { enqueueTransaction, flushOutbox, isNetworkError, readOutbox, subscribeOutbox } from "../services/outbox"
 import {
   commitScan,
   createTransaction,
@@ -24,6 +26,7 @@ import {
   fetchTransactionSummary,
   fetchTransactions,
   restoreTransaction,
+  sendOutboxItem,
   updateTransaction,
 } from "../services/transactions.service"
 
@@ -35,12 +38,61 @@ export function useCategoryUsage(bookId: string, kind: CategoryKind): UseQueryRe
 }
 
 /** Transaksi baru memengaruhi saldo, anggaran, daftar, dan Beranda: invalidasi seluruh data buku (§7.2 butir 3). */
+/**
+ * Catat transaksi. Saat offline atau jaringan putus, transaksi masuk antrean dengan Idempotency-Key yang sama
+ * dan hasilnya `null` (NFR-04). Error dari server tetap dilempar ke form.
+ */
 export function useCreateTransaction(bookId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (v: { input: CreateTransactionInput; key: string }) => createTransaction(bookId, v.input, v.key),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.book(bookId) }),
+    mutationFn: async (v: { input: CreateTransactionInput; key: string }) => {
+      const queue = () => {
+        enqueueTransaction(bookId, v.input, v.key, new Date())
+        return null
+      }
+      if (!navigator.onLine) return queue()
+      try {
+        return await createTransaction(bookId, v.input, v.key)
+      } catch (e) {
+        if (isNetworkError(e)) return queue()
+        throw e
+      }
+    },
+    onSuccess: (r) => (r ? qc.invalidateQueries({ queryKey: qk.book(bookId) }) : undefined),
   })
+}
+
+/** Jumlah transaksi yang menunggu sinkron. */
+export function useOutboxCount(): number {
+  return useSyncExternalStore(
+    subscribeOutbox,
+    () => readOutbox().length,
+    () => 0,
+  )
+}
+
+/** Kirim antrean offline saat aplikasi dibuka dan setiap kali kembali online. */
+export function useOutboxSync(onSynced: (sent: number, rejected: number) => void): void {
+  const qc = useQueryClient()
+  const onSyncedRef = useRef(onSynced)
+  onSyncedRef.current = onSynced
+  useEffect(() => {
+    let running = false
+    const run = async () => {
+      if (running || !navigator.onLine || readOutbox().length === 0) return
+      running = true
+      try {
+        const r = await flushOutbox(sendOutboxItem)
+        for (const b of r.books) void qc.invalidateQueries({ queryKey: qk.book(b) })
+        if (r.sent + r.rejected > 0) onSyncedRef.current(r.sent, r.rejected)
+      } finally {
+        running = false
+      }
+    }
+    void run()
+    window.addEventListener("online", run)
+    return () => window.removeEventListener("online", run)
+  }, [qc])
 }
 
 export function useCommitScan(bookId: string) {

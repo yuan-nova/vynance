@@ -9,7 +9,7 @@ import { Sheet } from "@/components/Sheet"
 import { OfflineBanner } from "@/components/States"
 import { useActiveBook } from "@/features/books"
 import { useNotifications } from "@/features/notifications"
-import { AddTransactionForm, ScanFlow } from "@/features/transactions"
+import { AddTransactionForm, ScanFlow, useOutboxCount, useOutboxSync } from "@/features/transactions"
 import { useBookRealtime } from "@/lib/hooks/useBookRealtime"
 import { useDeviceNotifications } from "@/lib/hooks/useDeviceNotifications"
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh"
@@ -38,6 +38,16 @@ export function TabsLayout() {
       book ? qc.invalidateQueries({ queryKey: qk.book(book.id) }) : null,
     ]),
   )
+  // Antrean offline (NFR-04): kirim saat online, beri tahu hasilnya.
+  const pending = useOutboxCount()
+  useOutboxSync((sent, rejected) =>
+    showSnackbar(
+      rejected > 0
+        ? `${sent} transaksi tersinkron, ${rejected} ditolak server. Periksa daftar transaksi.`
+        : `${sent} transaksi offline tersinkron`,
+      rejected > 0 ? { tone: "error" } : undefined,
+    ),
+  )
   const [sheet, setSheet] = useState<"add" | "scan" | null>(null)
   // Kunci sheet baru tiap dibuka supaya form dan Idempotency-Key selalu baru.
   const [openCount, setOpenCount] = useState(0)
@@ -48,7 +58,7 @@ export function TabsLayout() {
   }
   return (
     <div className="app-shell">
-      <OfflineBanner />
+      <OfflineBanner pending={pending} />
       <PullIndicator state={pull} />
       <main className="app-main">
         <Outlet />
@@ -59,9 +69,9 @@ export function TabsLayout() {
           <AddTransactionForm
             key={openCount}
             bookId={book.id}
-            onSaved={() => {
+            onSaved={(o) => {
               close()
-              showSnackbar("Transaksi dicatat")
+              showSnackbar(o?.queued ? "Disimpan di perangkat, akan disinkronkan saat online" : "Transaksi dicatat")
             }}
           />
         ) : null}
