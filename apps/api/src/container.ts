@@ -20,6 +20,8 @@ import { HealthService } from "./modules/health/health.service"
 import { HealthScoreService } from "./modules/health-score/health-score.service"
 import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
 import { InvestmentsService } from "./modules/investments/investments.service"
+import { InvitationsRepository } from "./modules/invitations/invitations.repository"
+import { InvitationsService } from "./modules/invitations/invitations.service"
 import { AccountRepository } from "./modules/me/account.repository"
 import { AccountService } from "./modules/me/account.service"
 import { MeRepository } from "./modules/me/me.repository"
@@ -119,6 +121,16 @@ const services = {
     })),
     newId: () => newId(),
     now: () => new Date(),
+  }),
+  invitationsService: new InvitationsService({
+    invitations: new InvitationsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      invitations: new InvitationsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+    appUrl: env.APP_URL,
   }),
   goalsService: new GoalsService({
     goals: new GoalsRepository(db),

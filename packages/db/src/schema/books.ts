@@ -65,3 +65,24 @@ export const activityLogs = mysqlTable(
   },
   (t) => [index("activity_logs_book_created_idx").on(t.bookId, t.createdAt)],
 )
+
+/** Undangan lewat tautan (BR-50, TSD §5.4). Hanya hash SHA-256 token yang disimpan. */
+export const bookInvitations = mysqlTable(
+  "book_invitations",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    tokenHash: char("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    usedBy: ref("used_by").references(() => users.id),
+    revokedAt: timestamp("revoked_at"),
+    ...audit,
+  },
+  (t) => [
+    uniqueIndex("book_invitations_token_uq").on(t.tokenHash),
+    index("book_invitations_book_expires_idx").on(t.bookId, t.expiresAt),
+  ],
+)
