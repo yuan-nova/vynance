@@ -1,5 +1,6 @@
 import type { DeleteAccountInput, DeletionPreview, UserCtx } from "@vynance/shared"
 import type { UnitOfWork } from "../../db/unit-of-work"
+import { toCsv } from "../../lib/csv"
 import { BusinessError, NotFound } from "../../lib/errors"
 import type { AccountRepository } from "./account.repository"
 import type { MeRepository } from "./me.repository"
@@ -21,13 +22,6 @@ type ExportBook = Awaited<ReturnType<AccountRepository["bookData"]>> & {
 /** Rupiah bigint → string agar aman di JSON (CODING-GUIDELINES §6.8). */
 function jsonSafe(_key: string, v: unknown): unknown {
   return typeof v === "bigint" ? v.toString() : v
-}
-
-function csvCell(v: unknown): string {
-  const s = v === null || v === undefined ? "" : v instanceof Date ? v.toISOString() : String(v)
-  // Netralkan formula spreadsheet (CSV injection) dan kutip bila perlu.
-  const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s
-  return /[",\n\r;]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe
 }
 
 /** Hak subjek data UU PDP (NFR-08, TSD §10): ekspor semua data dan hapus akun. */
@@ -65,30 +59,25 @@ export class AccountService {
       "kategori",
       "catatan",
     ]
-    const lines = [header.join(",")]
+    const rows: unknown[][] = []
     for (const b of books) {
       const wallet = new Map(b.wallets.map((w) => [w.id, w.name]))
       const cat = new Map(b.categories.map((c) => [c.id, c.name]))
       for (const t of b.transactions) {
-        lines.push(
-          [
-            b.name,
-            b.code,
-            t.txDate,
-            t.type,
-            t.amount.toString(),
-            wallet.get(t.walletId) ?? "",
-            t.toWalletId ? (wallet.get(t.toWalletId) ?? "") : "",
-            t.categoryId ? (cat.get(t.categoryId) ?? "") : "",
-            t.note,
-          ]
-            .map(csvCell)
-            .join(","),
-        )
+        rows.push([
+          b.name,
+          b.code,
+          t.txDate,
+          t.type,
+          t.amount.toString(),
+          wallet.get(t.walletId) ?? "",
+          t.toWalletId ? (wallet.get(t.toWalletId) ?? "") : "",
+          t.categoryId ? (cat.get(t.categoryId) ?? "") : "",
+          t.note,
+        ])
       }
     }
-    // BOM supaya Excel membaca UTF-8.
-    return `﻿${lines.join("\r\n")}\r\n`
+    return toCsv(header, rows)
   }
 
   /** Akibat hapus akun per buku (BR-51): buku tanpa anggota lain ikut dihapus. */

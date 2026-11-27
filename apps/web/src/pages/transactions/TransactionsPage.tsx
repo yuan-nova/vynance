@@ -3,13 +3,14 @@ import { addMonths, dateOnlyOf, formatMonth, monthDateRange, monthOf, type TxTyp
 import { useState } from "react"
 import { Button, IconButton } from "@/components/Button"
 import { ChipGroup } from "@/components/ChipGroup"
+import { Icon } from "@/components/Icon"
 import { Money } from "@/components/Money"
 import { Sheet } from "@/components/Sheet"
 import { EmptyState, ErrorState, NoMatchState, Skeleton } from "@/components/States"
 import { TextField } from "@/components/TextField"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
-import { TransactionList, useTransactionList, useTransactionSummary } from "@/features/transactions"
+import { TransactionList, transactionsCsvUrl, useTransactionList, useTransactionSummary } from "@/features/transactions"
 import { useWallets } from "@/features/wallets"
 import { useDebouncedCallback } from "@/lib/hooks/useDebouncedCallback"
 
@@ -62,11 +63,22 @@ export function TransactionsPage() {
         level={1}
         title="Transaksi"
         actions={
-          <IconButton
-            icon="filter"
-            label={activeFilters ? `Filter · ${activeFilters}` : "Filter"}
-            onClick={() => setFilterOpen(true)}
-          />
+          <span className="home-actions">
+            <a
+              className="icon-btn"
+              href={transactionsCsvUrl(bookId, filter)}
+              download
+              aria-label="Unduh CSV sesuai filter"
+              title="Unduh CSV sesuai filter"
+            >
+              <Icon name="download" />
+            </a>
+            <IconButton
+              icon="filter"
+              label={activeFilters ? `Filter · ${activeFilters}` : "Filter"}
+              onClick={() => setFilterOpen(true)}
+            />
+          </span>
         }
       />
       <div className="month-nav">

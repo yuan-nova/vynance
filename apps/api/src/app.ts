@@ -37,7 +37,7 @@ import { planRoutes } from "./modules/plans/plans.route"
 import type { PlansService } from "./modules/plans/plans.service"
 import { subscriptionRoutes } from "./modules/subscriptions/subscriptions.route"
 import type { SubscriptionsService } from "./modules/subscriptions/subscriptions.service"
-import { transactionRoutes } from "./modules/transactions/transactions.route"
+import { exportRoutes, transactionRoutes } from "./modules/transactions/transactions.route"
 import type { TransactionsService } from "./modules/transactions/transactions.service"
 import { walletRoutes } from "./modules/wallets/wallets.route"
 import type { WalletsService } from "./modules/wallets/wallets.service"
@@ -93,6 +93,7 @@ export const createApp = (deps: Deps) => {
         .route("/categories", categoryRoutes(deps.categoriesService))
         .route("/onboarding", onboardingRoutes(deps.onboardingService))
         .route("/transactions", transactionRoutes(deps.transactionsService))
+        .route("/exports", exportRoutes(deps.transactionsService))
         .route("/plans", planRoutes(deps.plansService))
         .route("/investment-types", investmentTypeRoutes(deps.investmentsService))
         .route("/investments", portfolioRoutes(deps.investmentsService))

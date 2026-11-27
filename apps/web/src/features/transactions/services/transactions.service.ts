@@ -50,6 +50,15 @@ export async function commitScan(
   return (await res.json()).data.length
 }
 
+/** URL unduhan CSV (FR-22) dengan filter daftar yang sama; cookie sesi ikut karena satu origin. */
+export function transactionsCsvUrl(bookId: string, filter: Omit<ListFilter, "cursor">): string {
+  const params = new URLSearchParams(
+    Object.entries(filter).flatMap(([k, v]) => (v ? [[k, String(v)] as [string, string]] : [])),
+  )
+  const qs = params.toString()
+  return `/api/v1/books/${bookId}/exports/transactions.csv${qs ? `?${qs}` : ""}`
+}
+
 export async function fetchCategoryUsage(bookId: string, kind: CategoryKind): Promise<CategoryUsage> {
   const res = await t["category-usage"].$get({ param: { bookId }, query: { kind } })
   await ensureOk(res)

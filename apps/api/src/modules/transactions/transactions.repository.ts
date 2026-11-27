@@ -63,7 +63,10 @@ export class TransactionsRepository {
   }
 
   /** Daftar per tanggal terbaru, cursor (tx_date, id) (TSD §11). Mengambil limit+1 untuk tahu ada halaman berikut. */
-  async list(bookId: string, q: TransactionListQuery): Promise<{ items: TransactionListItem[]; hasMore: boolean }> {
+  async list(
+    bookId: string,
+    q: Omit<TransactionListQuery, "limit"> & { limit: number },
+  ): Promise<{ items: TransactionListItem[]; hasMore: boolean }> {
     const toWallet = alias(wallets, "to_wallet")
     const [cDate, cId] = q.cursor ? q.cursor.split(".") : []
     const rows = await this.db

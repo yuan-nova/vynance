@@ -15,9 +15,11 @@ import {
   type TransactionListQuery,
   type TransactionPage,
   type TransactionSummary,
+  TX_TYPE_LABEL,
   type UpdateTransactionInput,
 } from "@vynance/shared"
 import type { UnitOfWork } from "../../db/unit-of-work"
+import { toCsv } from "../../lib/csv"
 import { BusinessError, NotFound } from "../../lib/errors"
 import type { ActivityRepository } from "../activity/activity.repository"
 import type { CategoriesRepository } from "../categories/categories.repository"
@@ -43,6 +45,8 @@ type Deps = {
   /** Dipanggil setelah commit untuk uang keluar (peringatan anggaran BR-11, #35). Tidak boleh melempar. */
   afterExpense?: (ctx: ServiceCtx, categoryId: string, txDate: string) => Promise<void>
 }
+
+const EXPORT_MAX_ROWS = 50_000
 
 export class TransactionsService {
   constructor(private readonly d: Deps) {}
@@ -187,6 +191,26 @@ export class TransactionsService {
     const { items, hasMore } = await this.d.transactions.list(ctx.bookId, q)
     const last = items[items.length - 1]
     return { data: items, nextCursor: hasMore && last ? `${last.txDate}.${last.id}` : null }
+  }
+
+  /**
+   * Ekspor CSV (FR-22) dengan filter yang sama dengan daftar. Pemisah `;` karena Excel lokal Indonesia memakai koma
+   * sebagai desimal; Google Sheets mendeteksinya otomatis. Nominal bulat, tanggal ISO.
+   */
+  async exportCsv(ctx: ServiceCtx, q: Omit<TransactionListQuery, "limit" | "cursor">): Promise<string> {
+    const { items } = await this.d.transactions.list(ctx.bookId, { ...q, limit: EXPORT_MAX_ROWS })
+    const header = ["tanggal", "jenis", "jumlah", "rekening", "rekening_tujuan", "kategori", "catatan", "dicatat_oleh"]
+    const rows = items.map((t) => [
+      t.txDate,
+      TX_TYPE_LABEL[t.type],
+      t.amount,
+      t.walletName,
+      t.toWalletName ?? "",
+      t.categoryName ?? "",
+      t.note ?? "",
+      t.createdByName,
+    ])
+    return toCsv(header, rows, ";")
   }
 
   async summary(ctx: ServiceCtx, from: string, to: string): Promise<TransactionSummary> {
