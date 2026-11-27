@@ -124,7 +124,7 @@ DILARANG menaruh aksi utama (Simpan, Tambah, Bayar) **hanya** di pojok kanan ata
 
 **Ketentuan.** Navigasi utama berisi tepat lima slot: **Beranda · Transaksi · [ + ] · Anggaran · Lainnya** ([ADR 0001](adr/0001-bottom-nav-five-slots.md)).
 - Tinggi 64 px + `env(safe-area-inset-bottom)`. Ikon 22 px, label 11 px di bawah ikon.
-- Tab aktif: warna `PRI`, latar pil `PRI_S`, `aria-current="page"`. Tab tidak aktif memakai token teks yang lolos 4,5:1 (lihat temuan `FAINT` di THEME-CONTRAST).
+- Tab aktif: warna `PRI`, latar pil `PRI_S`, `aria-current="page"`. Tab tidak aktif memakai `FAINT`, yang sudah diukur ≥ 4,5:1 (lihat THEME-CONTRAST).
 - Slot tengah **+** adalah tombol bulat 54 px yang menonjol ke atas dan membuka bottom sheet Catat transaksi. Tekan lama membuka Scan struk, dan aksi ini WAJIB juga tersedia sebagai opsi di sheet, karena tekan lama tidak bisa ditemukan semua orang.
 - Tab tetap aktif di semua turunan rutenya, misalnya `/transactions/123` mengaktifkan Transaksi.
 - Bottom nav disembunyikan saat keyboard virtual terbuka atau sheet terbuka penuh.
@@ -297,6 +297,7 @@ Struktur sheet: pegangan seret 40 × 4 px, judul sheet, konten yang bisa di-scro
 **Ketentuan.**
 - Label di **atas** kolom isian. DILARANG memakai *floating label* atau placeholder sebagai pengganti label.
 - Tinggi kolom isian 48 px, font isi **≥ 16 px** (mencegah zoom otomatis iOS).
+- Batas kolom isian memakai token `FIELD_LINE` (≥ 3:1 terhadap `SURF` dan `BG`), dan berubah ke `PRI` 1,5 px saat fokus. `LINE` hanya untuk garis pemisah dan kartu dekoratif.
 - Keyboard sesuai data: nominal `inputmode="numeric"`, email `type="email"`, telepon `type="tel"`, dan `autocomplete` yang tepat.
 - Error tampil di bawah kolom isian (12 px, `EXP_D`), dihubungkan lewat `aria-describedby`. Saat submit gagal, fokus pindah ke error pertama.
 - Kolom isian yang fokus digulir ke tengah area di atas keyboard (`scroll-margin`, `visualViewport`).

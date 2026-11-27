@@ -303,7 +303,7 @@ def s_onboard():
             ("card", EXP, EXP_S, "Kartu Kredit", "Utang · limit Rp15 jt", "6.200.000", False)]
     y = 256
     for ic, fg, bg, name, typ, val, focus in rows:
-        o += R(20, y, 350, 66, 20, SURF, PRI if focus else LINE, 1.5 if focus else 1)
+        o += R(20, y, 350, 66, 20, SURF, PRI if focus else FIELD_LINE, 1.5 if focus else 1)
         o += icon_tile(52, y + 33, ic, fg, bg, 40, 19)
         o += T(84, y + 28, name, 14, 700) + T(84, y + 47, typ, 12, 500, MUTED)
         o += T(352, y + 39, "Rp" + val, 16, 800, EXP if ic == "card" else INK, "end", num=True)
@@ -381,7 +381,7 @@ def s_add():
         c, w = chip(x, 334, s, i == 0, 36, 13, ic); o += c; x += w + 8
     fields = [("wallet", "Dari rekening", "Bank BCA · Rp28.640.000"), ("cal", "Tanggal", "Hari ini, 26 Nov"), ("edit", "Catatan", "Indomaret Pratama")]
     y = 386
-    o += R(20, y, 350, 138, 18, SURF, LINE)
+    o += R(20, y, 350, 138, 18, SURF, FIELD_LINE)
     for i, (ic, lab, val) in enumerate(fields):
         yy = y + i * 46
         if i: o += L(56, yy, 370, yy, LINE)
@@ -656,7 +656,7 @@ def s_scan():
         cc = TRF if "Transfer" in cat else (WARN if "Pilih" in cat else INK)
         o += R(68, y + 68, tw(cat, 12, 700) + 40, 28, 14, SURF2) + I("tag", 78, y + 75, 14, cc) + T(97, y + 86, cat, 12, 700, cc) + I("chev_d", 97 + tw(cat, 12, 700) + 2, y + 76, 12, MUTED)
         if warn:
-            p, _ = pill(356, y + 71, warn, WARN if "Cek" in warn else TRF, WARN_S if "Cek" in warn else TRF_S, 10, 22, "end"); o += p
+            p, _ = pill(356, y + 71, warn, WARN_D if "Cek" in warn else TRF, WARN_S if "Cek" in warn else TRF_S, 10, 22, "end"); o += p
         y += h + 10
     o += R(0, 716, W, 128, 0, BG) + L(0, 716, W, 716, LINE)
     o += T(20, 742, "3 transaksi · total bersih", 12, 600, MUTED) + T(370, 742, "+Rp17.712.500", 14, 800, INC, "end", num=True)
@@ -702,7 +702,7 @@ def s_ai():
         c, w = chip(x, 672, s, False, 34, 12); o += c; x += w + 8
     # input
     o += R(0, 728, W, 116, 0, BG)
-    o += R(20, 742, 290, 52, 26, SURF, LINE) + T(42, 773, "Tanya soal keuanganmu…", 14, 500, FAINT) + I("mic", 276, 756, 22, MUTED)
+    o += R(20, 742, 290, 52, 26, SURF, FIELD_LINE) + T(42, 773, "Tanya soal keuanganmu…", 14, 500, FAINT) + I("mic", 276, 756, 22, MUTED)
     o += C(344, 768, 26, PRI) + I("send", 333, 757, 22, ONP, 2)
     return o + home_ind()
 
@@ -852,11 +852,11 @@ def design_system():
     o = R(0, 0, w, h, 0, BG)
     o += T(56, 80, f"Vynance — Design System · {NAME}", 34, 800, INK, ls=-0.8) + T(56, 110, "Mobile first · 390 × 844 · grid 4 px · gutter 20 px", 15, 500, MUTED)
     o += T(56, 168, "WARNA", 12, 700, FAINT, ls=1.2)
-    sw = [("Primary", PRI), ("Primary dark", PRI_D), ("Primary soft", PRI_S), ("Ink", INK), ("Muted", MUTED), ("Line", LINE), ("Background", BG), ("Surface", SURF),
+    sw = [("Primary", PRI), ("Primary dark", PRI_D), ("Primary soft", PRI_S), ("Ink", INK), ("Muted", MUTED), ("Line", LINE), ("Field line", FIELD_LINE), ("Background", BG), ("Surface", SURF),
           ("Masuk", INC), ("Keluar", EXP), ("Transfer", TRF), ("Investasi", INV), ("Peringatan", WARN), ("Emas / aksen", GOLD)]
     for i, (n, c) in enumerate(sw):
-        x = 56 + (i % 7) * 168; y = 184 + (i // 7) * 120
-        o += R(x, y, 152, 64, 14, c, LINE) + T(x, y + 86, n, 13, 700) + T(x, y + 104, c, 12, 500, MUTED)
+        x = 56 + (i % 8) * 146; y = 184 + (i // 8) * 120
+        o += R(x, y, 134, 64, 14, c, LINE) + T(x, y + 86, n, 13, 700) + T(x, y + 104, c, 12, 500, MUTED)
     o += T(56, 452, "TIPOGRAFI · Plus Jakarta Sans", 12, 700, FAINT, ls=1.2)
     ty = [("Angka hero 32/800", 32, 800, "Rp186.450.000"), ("Judul layar 22/800", 22, 800, "Anggaran"), ("Judul kartu 16/800", 16, 800, "Per kategori"),
           ("Isi 14/700", 14, 700, "Indomaret · Belanja Bulanan"), ("Keterangan 12/500", 12, 500, "Sisa Rp580.000 dari Rp4.000.000"), ("Label 11/700 caps", 11, 700, "HARI INI · KAMIS, 26 NOV")]

@@ -35,7 +35,8 @@ PAIRS = [
     ("HERO_FG", "HERO2", 4.5, "teks kartu hero (ujung gelap gradien)"),
     ("GOLD", "HERO2", 3.0, "aksen grafis di hero"),
     ("HERO_NEG", "HERO1", 4.5, "nominal negatif di hero"),
-    ("LINE", "SURF", 3.0, "batas kolom isian (non-teks)"),
+    ("FIELD_LINE", "SURF", 3.0, "batas kolom isian (non-teks)"),
+    ("FIELD_LINE", "BG", 3.0, "batas kolom isian di latar (non-teks)"),
 ]
 
 

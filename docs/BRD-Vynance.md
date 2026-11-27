@@ -430,7 +430,7 @@ Layout dan komponennya sama di semua tema. Yang berbeda hanya token warna dan je
 | Malam | Mode gelap, nyaman malam hari | Arang + mint + emas | Plus Jakarta Sans |
 | Citrus | Tegas, gaya fintech baru | Hitam + hijau limau | Space Grotesk |
 
-Pemilihan tema rilis memakai rubrik penilaian desain (`docs/design-system/DESIGN-DECISION-RUBRIC.md`). Hasil ukur kontras per tema ada di `docs/THEME-CONTRAST.md`. Per 27 November 2026, belum ada tema yang lolos semua pasangan kontras, jadi token wajib diperbaiki sebelum tema rilis dipilih.
+Pemilihan tema rilis memakai rubrik penilaian desain (`docs/design-system/DESIGN-DECISION-RUBRIC.md`). Hasil ukur kontras per tema ada di `docs/THEME-CONTRAST.md`. Per 27 November 2026, keenam tema lolos semua pasangan kontras setelah token diperbaiki, jadi pemilihan tema rilis bisa lanjut ke penilaian rubrik.
 
 Di semua tema, warna yang punya arti tetap sama: hijau untuk uang masuk, merah untuk uang keluar, biru untuk transfer, dan kuning tua untuk investasi. Pengecualiannya: di Samudra, transfer memakai ungu-biru supaya tidak tertukar dengan warna primer.
 

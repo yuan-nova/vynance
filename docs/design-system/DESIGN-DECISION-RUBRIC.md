@@ -233,16 +233,16 @@ Salin ke issue, PR, atau ADR:
 
 **Gerbang G2** (dari [THEME-CONTRAST.md](../THEME-CONTRAST.md), 27 November 2026):
 
-| Tema | Pasangan gagal | G2 |
-|---|---:|---|
-| Hutan | 8 | gagal |
-| Samudra | 9 | gagal |
-| Terakota | 8 | gagal |
-| Anggrek | 9 | gagal |
-| Malam | 2 | gagal |
-| Citrus | 7 | gagal |
+| Tema | Gagal, ukur awal | G2 awal | Gagal, setelah perbaikan token | G2 sekarang |
+|---|---:|---|---:|---|
+| Hutan | 8 | gagal | 0 | lulus |
+| Samudra | 9 | gagal | 0 | lulus |
+| Terakota | 8 | gagal | 0 | lulus |
+| Anggrek | 9 | gagal | 0 | lulus |
+| Malam | 2 | gagal | 0 | lulus |
+| Citrus | 7 | gagal | 0 | lulus |
 
-**Hasil:** belum ada tema yang boleh dinilai, karena semuanya gugur di G2. Sesuai aturan keputusan, tindak lanjutnya memperbaiki token (temuan 2–5 di THEME-CONTRAST), mengukur ulang, lalu menilai K2–K7 untuk tema yang sudah lulus. Contoh ini menunjukkan gerbang mencegah keputusan berbasis tampilan: tema yang "terlihat paling bagus" tetap tidak bisa dipilih sebelum kontrasnya lolos.
+**Hasil:** pada ukur awal tidak ada tema yang boleh dinilai, karena semuanya gugur di G2. Sesuai aturan keputusan, token diperbaiki lalu diukur ulang (lihat bagian Riwayat di THEME-CONTRAST). Sekarang keenam tema lulus G2, jadi langkah berikutnya menilai K2–K7 untuk memilih tema terang bawaan, dengan Malam sebagai tema gelap. Contoh ini menunjukkan gerbang mencegah keputusan berbasis tampilan: tema yang "terlihat paling bagus" tidak bisa dipilih sebelum kontrasnya lolos.
 
 ## Contoh 2 — Catat transaksi: bottom sheet atau layar penuh (ilustrasi)
 
