@@ -62,6 +62,21 @@ export function useCreateTransaction(bookId: string) {
   })
 }
 
+/**
+ * Impor banyak transaksi berurutan, masing-masing dengan Idempotency-Key sendiri (FR-151).
+ * Impor ulang dengan kunci yang sama mengembalikan transaksi lama, jadi tidak ada duplikat.
+ */
+export function useImportTransactions(bookId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (items: readonly { input: CreateTransactionInput; key: string }[]) => {
+      for (const it of items) await createTransaction(bookId, it.input, it.key)
+      return items.length
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: qk.book(bookId) }),
+  })
+}
+
 /** Jumlah transaksi yang menunggu sinkron. */
 export function useOutboxCount(): number {
   return useSyncExternalStore(

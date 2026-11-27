@@ -30,3 +30,13 @@ export type OutboxItem = {
 
 /** Hasil kirim item antrean: `sent`/`rejected` dibuang dari antrean, `retry` dicoba lagi nanti. */
 export type OutboxSendResult = "sent" | "rejected" | "retry"
+
+/** Transaksi mode demo, disimpan hanya di perangkat (FR-151). Amount berupa string rupiah utuh. */
+export type DemoTransaction = {
+  id: string
+  type: "income" | "expense"
+  amount: string
+  txDate: string
+  categoryName: string
+  note: string | null
+}

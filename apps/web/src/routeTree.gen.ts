@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabsRouteImport } from './routes/_tabs'
 import { Route as BukuBaruRouteImport } from './routes/buku-baru'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as MasukRouteImport } from './routes/masuk'
 import { Route as MulaiRouteImport } from './routes/mulai'
 import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
@@ -43,6 +44,11 @@ const TabsRoute = TabsRouteImport.update({
 const BukuBaruRoute = BukuBaruRouteImport.update({
   id: '/buku-baru',
   path: '/buku-baru',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasukRoute = MasukRouteImport.update({
@@ -169,6 +175,7 @@ const TabsLainnyaRekeningIdRoute = TabsLainnyaRekeningIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
   '/buku-baru': typeof BukuBaruRoute
+  '/demo': typeof DemoRoute
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/buku-baru': typeof BukuBaruRoute
+  '/demo': typeof DemoRoute
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_tabs': typeof TabsRouteWithChildren
   '/buku-baru': typeof BukuBaruRoute
+  '/demo': typeof DemoRoute
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/_tabs/anggaran': typeof TabsAnggaranRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/buku-baru'
+    | '/demo'
     | '/masuk'
     | '/mulai'
     | '/anggaran'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/buku-baru'
+    | '/demo'
     | '/masuk'
     | '/mulai'
     | '/anggaran'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_tabs'
     | '/buku-baru'
+    | '/demo'
     | '/masuk'
     | '/mulai'
     | '/_tabs/anggaran'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   TabsRoute: typeof TabsRouteWithChildren
   BukuBaruRoute: typeof BukuBaruRoute
+  DemoRoute: typeof DemoRoute
   MasukRoute: typeof MasukRoute
   MulaiRoute: typeof MulaiRoute
   UndanganTokenRoute: typeof UndanganTokenRoute
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/buku-baru'
       fullPath: '/buku-baru'
       preLoaderRoute: typeof BukuBaruRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/masuk': {
@@ -582,6 +602,7 @@ const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   TabsRoute: TabsRouteWithChildren,
   BukuBaruRoute: BukuBaruRoute,
+  DemoRoute: DemoRoute,
   MasukRoute: MasukRoute,
   MulaiRoute: MulaiRoute,
   UndanganTokenRoute: UndanganTokenRoute,

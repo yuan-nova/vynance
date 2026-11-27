@@ -9,6 +9,7 @@ export {
   useCommitScan,
   useCreateTransaction,
   useDeleteTransaction,
+  useImportTransactions,
   useOutboxCount,
   useOutboxSync,
   useRestoreTransaction,
