@@ -5,6 +5,7 @@ import { bookMembers, bookSettings, books, users } from "./schema"
 
 // Seed data development. Dijalankan: bun run db:seed. Menolak jalan di produksi.
 // Masuk dengan email demo@vynance.local (kode OTP tampil di log api).
+// Buku contoh sengaja kosong (tanpa data bawaan BR-46); buat buku baru dari aplikasi untuk data bawaan lengkap.
 
 type Db = ReturnType<typeof createDb>
 type Seeder = { name: string; run: (db: Db) => Promise<void> }
@@ -18,7 +19,13 @@ const SEEDERS: Seeder[] = [
     run: async (db) => {
       const [exists] = await db.select({ id: users.id }).from(users).where(eq(users.id, DEMO_USER))
       if (exists) return
-      await db.insert(users).values({ id: DEMO_USER, name: "Demo", email: "demo@vynance.local", emailVerified: true })
+      await db.insert(users).values({
+        id: DEMO_USER,
+        name: "Demo",
+        email: "demo@vynance.local",
+        emailVerified: true,
+        onboardedAt: new Date(),
+      })
       const code = bookCodeFromBytes(crypto.getRandomValues(new Uint8Array(8)))
       await db.insert(books).values({ id: DEMO_BOOK, code, name: "Keluarga Contoh", createdBy: DEMO_USER })
       await db
