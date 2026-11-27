@@ -223,7 +223,8 @@ DILARANG membuat varian ad hoc lewat class (misalnya `ghost` + warna merah).
 | Rekening bank | `bank` | | Tunai | `cash` |
 | Kartu / PayLater | `card` | | Dana pendidikan | `school` |
 | Buku | `book` | | Pengaturan | `sliders` |
-| Anggota | `users` | | | |
+| Anggota | `users` | | E-wallet | `wallet` |
+| RDN | `trend` | | | |
 
 Nama ikon sama dengan kunci `ICONS` di `design/_source/gen_svg.py` dan komponen `Icon` di `packages/ui`. Tanda * berarti ikon belum ada di generator dan wajib ditambahkan sebelum dipakai. Makna baru WAJIB ditambahkan ke registri ini sebelum dipakai.
 

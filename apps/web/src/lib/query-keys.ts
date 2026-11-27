@@ -7,4 +7,5 @@ export const qk = {
   /** Awalan semua data milik satu buku. Dibuang saat ganti buku (DS-NAV-04). */
   book: (bookId: string) => ["book", bookId] as const,
   bookDetail: (bookId: string) => ["book", bookId, "detail"] as const,
+  wallets: (bookId: string) => ["book", bookId, "wallets"] as const,
 }

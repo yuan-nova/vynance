@@ -1,10 +1,8 @@
 import { describe, expect, test } from "bun:test"
 import type { Me } from "@vynance/shared"
-import { createApp } from "../../app"
 import { NotFound } from "../../lib/errors"
-import { AuthService } from "../auth/auth.service"
+import { testApp } from "../../testing/test-app"
 import type { BooksService } from "../books/books.service"
-import type { HealthService } from "../health/health.service"
 import { MeService } from "./me.service"
 
 const me: Me = {
@@ -26,18 +24,12 @@ function build(sessionUserId: string | null) {
       stored = { ...stored, ...input }
     },
   }
-  const authService = new AuthService(
-    { getSession: async () => (sessionUserId ? { user: { id: sessionUserId } } : null) },
-    async () => new Response(null, { status: 404 }),
-    false,
-  )
-  const healthService = { check: async () => ({}) } as unknown as HealthService
   const booksService = {
     assertMember: async () => {
       throw new NotFound("BOOK_NOT_FOUND")
     },
   } as unknown as BooksService
-  return createApp({ healthService, authService, meService: new MeService(repo, booksService), booksService })
+  return testApp(sessionUserId, { meService: new MeService(repo, booksService), booksService })
 }
 
 describe("/me", () => {

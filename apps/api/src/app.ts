@@ -11,12 +11,15 @@ import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
 import { meRoutes } from "./modules/me/me.route"
 import type { MeService } from "./modules/me/me.service"
+import { walletRoutes } from "./modules/wallets/wallets.route"
+import type { WalletsService } from "./modules/wallets/wallets.service"
 
 type Deps = {
   healthService: HealthService
   authService: AuthService
   meService: MeService
   booksService: BooksService
+  walletsService: WalletsService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -32,7 +35,13 @@ export const createApp = (deps: Deps) => {
     .route("/auth", authRoutes(deps.authService))
     .route("/me", new Hono<AppEnv>().use(authed).route("/", meRoutes(deps.meService)))
     .route("/books", new Hono<AppEnv>().use(authed).route("/", booksRoutes(deps.booksService)))
-    .route("/books/:bookId", new Hono<AppEnv>().use(authed, bookBound).route("/", bookRoutes(deps.booksService)))
+    .route(
+      "/books/:bookId",
+      new Hono<AppEnv>()
+        .use(authed, bookBound)
+        .route("/", bookRoutes(deps.booksService))
+        .route("/wallets", walletRoutes(deps.walletsService)),
+    )
 }
 
 export type AppType = ReturnType<typeof createApp>
