@@ -1,5 +1,7 @@
 export * from "./date"
 export * from "./errors"
+export * from "./icons"
 export * from "./money"
+export * from "./nav/more-menu"
 export { type Health, healthSchema } from "./schemas/health"
 export * from "./types"

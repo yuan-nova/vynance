@@ -1,0 +1,36 @@
+import type { IconName } from "../icons"
+
+// Isi menu Lainnya (DS-NAV-03, BRD §12.2). Grup dan urutan tetap. `path: null` = belum rilis ("Segera hadir").
+
+export type MoreMenuItem = { key: string; label: string; icon: IconName; path: string | null }
+export type MoreMenuGroup = { title: string; items: MoreMenuItem[] }
+
+export const MORE_MENU: MoreMenuGroup[] = [
+  {
+    title: "Uang",
+    items: [
+      { key: "wallets", label: "Rekening", icon: "bank", path: null },
+      { key: "investments", label: "Investasi", icon: "coins", path: null },
+      { key: "subscriptions", label: "Langganan", icon: "repeat", path: null },
+      { key: "incomes", label: "Sumber penghasilan", icon: "brief", path: null },
+      { key: "payslips", label: "Slip gaji", icon: "doc", path: null },
+    ],
+  },
+  {
+    title: "Perencanaan",
+    items: [
+      { key: "goals", label: "Target tabungan", icon: "target", path: null },
+      { key: "zakat", label: "Zakat", icon: "moon", path: null },
+      { key: "education", label: "Dana pendidikan", icon: "school", path: null },
+      { key: "advisor", label: "AI advisor", icon: "spark", path: null },
+    ],
+  },
+  {
+    title: "Data",
+    items: [
+      { key: "categories", label: "Kategori", icon: "tag", path: null },
+      { key: "books", label: "Buku", icon: "book", path: null },
+      { key: "settings", label: "Pengaturan", icon: "sliders", path: null },
+    ],
+  },
+]
