@@ -47,7 +47,6 @@ export function TransactionDetailPage() {
     })
 
   const d = tx.data
-  const editable = d && d.type !== "asset_buy" && d.type !== "asset_sell"
   return (
     <>
       <TopBar level={2} title="Detail transaksi" backLabel="Kembali ke Transaksi" onBack={back} />
@@ -122,18 +121,14 @@ export function TransactionDetailPage() {
               </div>
             ) : null}
           </dl>
-          {editable ? (
-            <div className="stack section">
-              <Button variant="soft" full icon="edit" onClick={() => setEditing(true)}>
-                Ubah
-              </Button>
-              <Button variant="ghost" full icon="trash" loading={remove.isPending} onClick={del}>
-                Hapus transaksi
-              </Button>
-            </div>
-          ) : (
-            <p className="row-sub section">Transaksi beli/jual aset diubah dari layar Investasi.</p>
-          )}
+          <div className="stack section">
+            <Button variant="soft" full icon="edit" onClick={() => setEditing(true)}>
+              Ubah
+            </Button>
+            <Button variant="ghost" full icon="trash" loading={remove.isPending} onClick={del}>
+              Hapus transaksi
+            </Button>
+          </div>
           <Sheet open={editing} title="Ubah transaksi" onClose={() => setEditing(false)}>
             {editing ? (
               <AddTransactionForm

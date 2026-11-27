@@ -54,8 +54,19 @@ const transfer = z
     path: ["toWalletId"],
   })
 
-/** Beli/jual aset ditambahkan di #32. */
-export const createTransactionSchema = z.union([incomeExpense, transfer])
+/** BR-32: beli/jual aset wajib rekening dan aset. Tidak dihitung pemasukan/pengeluaran (PB-02). */
+const assetTrade = z
+  .object({
+    type: z.enum(["asset_buy", "asset_sell"]),
+    amount: positiveMoneySchema,
+    txDate: dateOnlySchema,
+    walletId: ulid,
+    assetId: ulid,
+    note,
+  })
+  .strict()
+
+export const createTransactionSchema = z.union([incomeExpense, transfer, assetTrade])
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
 
 /** Header `Idempotency-Key` (CODING-GUIDELINES §6.7). */

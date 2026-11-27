@@ -55,3 +55,18 @@ export function groupByDate<T extends { txDate: string; type: TxType; amount: st
   }
   return out
 }
+
+/** Dampak beli/jual ke aset (PB-06, TSD §7.3): beli menambah modal & nilai, jual menguranginya. */
+export function assetTradeDelta(type: TxType, amount: bigint): { cost: bigint; value: bigint } {
+  if (type === "asset_buy") return { cost: amount, value: amount }
+  if (type === "asset_sell") return { cost: -amount, value: -amount }
+  return { cost: 0n, value: 0n }
+}
+
+/** BR-33: jual aset ≤ nilai kini dan ≤ modal aset. */
+export function checkAssetSell(asset: { costBasis: bigint; currentValue: bigint }, amount: bigint): RuleResult {
+  if (amount > asset.currentValue || amount > asset.costBasis) {
+    return { ok: false, code: "ASSET_SELL_EXCEEDS", field: "amount" }
+  }
+  return { ok: true }
+}

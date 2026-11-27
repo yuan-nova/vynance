@@ -72,6 +72,7 @@ const txRepos = (exec: Parameters<typeof makeBookRepos>[0]) => ({
   transactions: new TransactionsRepository(exec),
   wallets: new WalletsRepository(exec),
   categories: new CategoriesRepository(exec),
+  assets: new AssetsRepository(exec),
   activity: new ActivityRepository(exec),
 })
 

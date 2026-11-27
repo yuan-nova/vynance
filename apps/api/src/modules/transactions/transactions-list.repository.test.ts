@@ -7,6 +7,7 @@ import { newId } from "../../lib/id"
 import { testApp } from "../../testing/test-app"
 import { ActivityRepository } from "../activity/activity.repository"
 import { CategoriesRepository } from "../categories/categories.repository"
+import { AssetsRepository } from "../investments/assets.repository"
 import { WalletsRepository } from "../wallets/wallets.repository"
 import { TransactionsRepository } from "./transactions.repository"
 import { TransactionsService } from "./transactions.service"
@@ -19,6 +20,7 @@ const svc = new TransactionsService({
     transactions: new TransactionsRepository(exec),
     wallets: new WalletsRepository(exec),
     categories: new CategoriesRepository(exec),
+    assets: new AssetsRepository(exec),
     activity: new ActivityRepository(exec),
   })),
   newId: () => newId(),

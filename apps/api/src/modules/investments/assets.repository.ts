@@ -1,5 +1,5 @@
 import { assets, type Executor, investmentTypes, transactions } from "@vynance/db"
-import { and, asc, eq, isNull, sum } from "drizzle-orm"
+import { and, asc, eq, isNull, sql, sum } from "drizzle-orm"
 
 type AssetRow = {
   id: string
@@ -116,5 +116,17 @@ export class AssetsRepository {
       .from(assets)
       .where(and(eq(assets.bookId, bookId), eq(assets.investmentTypeId, typeId), isNull(assets.deletedAt)))
     return rows.length
+  }
+
+  /** Terapkan dampak beli/jual ke aset secara atomik; tidak pernah di bawah 0 (BR-34). */
+  async applyDelta(bookId: string, id: string, cost: bigint, value: bigint): Promise<void> {
+    if (cost === 0n && value === 0n) return
+    await this.db
+      .update(assets)
+      .set({
+        costBasis: sql`greatest(${assets.costBasis} + ${cost}, 0)`,
+        currentValue: sql`greatest(${assets.currentValue} + ${value}, 0)`,
+      })
+      .where(and(eq(assets.bookId, bookId), eq(assets.id, id), isNull(assets.deletedAt)))
   }
 }
