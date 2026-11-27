@@ -12,6 +12,7 @@ import { BooksRepository } from "./modules/books/books.repository"
 import { BooksService } from "./modules/books/books.service"
 import { CategoriesRepository } from "./modules/categories/categories.repository"
 import { CategoriesService } from "./modules/categories/categories.service"
+import { DashboardService } from "./modules/dashboard/dashboard.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
@@ -57,7 +58,7 @@ const txRepos = (exec: Parameters<typeof makeBookRepos>[0]) => ({
   activity: new ActivityRepository(exec),
 })
 
-export const container = {
+const services = {
   healthService: new HealthService(new HealthRepository(db)),
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
   meService: new MeService(new MeRepository(db), booksService),
@@ -107,5 +108,15 @@ export const container = {
     })),
     newId: () => newId(),
     now: () => new Date(),
+  }),
+}
+
+export const container = {
+  ...services,
+  dashboardService: new DashboardService({
+    wallets: services.walletsService,
+    plans: services.plansService,
+    transactions: services.transactionsService,
+    categories: services.categoriesService,
   }),
 }
