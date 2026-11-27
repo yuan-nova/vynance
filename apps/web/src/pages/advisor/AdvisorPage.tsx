@@ -61,8 +61,9 @@ export function AdvisorPage() {
         <section className="card advisor-consent">
           <h2 className="h2">Izinkan kirim ringkasan ke penyedia AI?</h2>
           <p className="body">
-            Untuk menjawab, Vynance mengirim ringkasan angka berikut ke penyedia AI (Anthropic Claude). Tanpa nama
-            rekening, email, atau nomor apa pun. Kamu bisa mencabut izin kapan saja.
+            Untuk menjawab, Vynance mengirim ringkasan angka berikut ke penyedia AI (OpenRouter, yang meneruskannya ke
+            model AI pilihan Vynance). Tanpa nama rekening, email, atau nomor apa pun. Kamu bisa mencabut izin kapan
+            saja.
           </p>
           {context.data ? <pre className="advisor-context">{context.data}</pre> : <Skeleton rows={3} />}
           <Button

@@ -109,7 +109,8 @@ Catatan teknis:
 | `APP_URL` | api (tautan undangan, callback OAuth) | `http://localhost:12080` |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | api | dari Google Cloud Console |
 | `EMAIL_FROM`, `EMAIL_API_KEY` | api (OTP) | penyedia email transaksional |
-| `OCR_API_KEY`, `LLM_API_KEY` | api (Fase 2–3) | kunci layanan Vynance, bukan milik pengguna |
+| `LLM_API_KEY`, `LLM_MODEL` | api (AI advisor) | kunci OpenRouter milik layanan Vynance; slug model, mis. `anthropic/claude-opus-5.5` |
+| `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, `LANGFUSE_CAPTURE_CONTENT` | api | observabilitas LLM; isi prompt bawaannya tidak direkam |
 | `API_PROXY_TARGET`, `VITE_POLL` | web dev | `http://api:12081`, `1` |
 
 Semua variabel dibaca hanya di `apps/api/src/config/env.ts` dan divalidasi Zod saat start (CODING-GUIDELINES §11).
@@ -596,6 +597,6 @@ Mengikuti CODING-GUIDELINES §10. Tambahan:
 | # | Pertanyaan | Usulan |
 |---|---|---|
 | 1 | Penyedia email OTP | **Diputuskan (#6): Resend** lewat `EMAIL_API_KEY`. Tanpa kunci di development, kode OTP dicetak ke log api. |
-| 2 | Penyedia OCR dan LLM | Dipilih di tiket scan dan AI; kunci milik layanan Vynance |
-| 3 | Hosting produksi | Ditentukan sebelum rilis MVP |
-| 4 | Batas jumlah buku per akun dan anggota per buku | Usul 20 buku per akun, 10 anggota per buku, untuk mencegah penyalahgunaan |
+| 2 | Penyedia OCR dan LLM | **Diputuskan: OpenRouter** untuk LLM (ADR 0006), dipantau dengan Langfuse |
+| 3 | Hosting produksi dan domain | Ditentukan nanti, sebelum rilis MVP |
+| 4 | Batas jumlah buku per akun dan anggota per buku | **Diputuskan: tanpa batas** |
