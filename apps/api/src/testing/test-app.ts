@@ -18,6 +18,7 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
   const full = {
     healthService: empty,
     meService: empty,
+    accountService: empty,
     booksService: empty,
     walletsService: empty,
     categoriesService: empty,

@@ -1583,3 +1583,22 @@ p {
     animation: none;
   }
 }
+
+/* ---------- Hapus akun ---------- */
+
+.danger-box {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--exp-s);
+  color: var(--exp-d);
+}
+
+.danger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+}
