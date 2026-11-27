@@ -51,7 +51,12 @@ export class TransactionsService {
    * Catat transaksi (PB-02, FR-20). Idempotency-Key sama → transaksi yang sudah ada dikembalikan (TSD §7.1).
    * Rekening dan kategori wajib milik buku yang sama (BR-45, TSD §6.3).
    */
-  async create(ctx: ServiceCtx, input: CreateTransactionInput, idempotencyKey?: string): Promise<Transaction> {
+  async create(
+    ctx: ServiceCtx,
+    input: CreateTransactionInput,
+    idempotencyKey?: string,
+    source: "manual" | "scan" = "manual",
+  ): Promise<Transaction> {
     if (idempotencyKey) {
       const existing = await this.d.transactions.findByIdempotencyKey(ctx.bookId, idempotencyKey)
       if (existing) return existing
@@ -70,7 +75,7 @@ export class TransactionsService {
         categoryId,
         assetId,
         note: input.note || null,
-        source: "manual",
+        source,
         idempotencyKey: idempotencyKey ?? null,
         createdBy: ctx.userId,
       })
@@ -96,6 +101,22 @@ export class TransactionsService {
     if (!tx) throw new NotFound("TRANSACTION_NOT_FOUND")
     await this.notifyExpense(ctx, tx)
     return tx
+  }
+
+  /**
+   * Simpan baris hasil scan (PB-03 langkah 5) dengan source=scan. Kunci per baris `${key}-${i}` membuat
+   * kirim ulang aman: baris yang sudah tersimpan dikembalikan, bukan dibuat dua kali.
+   */
+  async createFromScan(
+    ctx: ServiceCtx,
+    items: CreateTransactionInput[],
+    idempotencyKey?: string,
+  ): Promise<Transaction[]> {
+    const out: Transaction[] = []
+    for (const [i, item] of items.entries()) {
+      out.push(await this.create(ctx, item, idempotencyKey ? `${idempotencyKey}-${i}` : undefined, "scan"))
+    }
+    return out
   }
 
   private async notifyExpense(ctx: ServiceCtx, tx: { type: string; categoryId: string | null; txDate: string }) {

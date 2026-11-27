@@ -1831,3 +1831,45 @@ p {
   gap: 12px;
   margin-bottom: 12px;
 }
+
+/* ---------- Scan struk (#36) ---------- */
+
+.scan-flow,
+.scan-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scan-pick {
+  cursor: pointer;
+}
+
+.scan-text {
+  min-height: 112px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.scan-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scan-row-head {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.scan-row-head .row-title {
+  overflow-wrap: anywhere;
+}
+
+.scan-row-fields {
+  display: grid;
+  gap: 8px;
+}

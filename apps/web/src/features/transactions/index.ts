@@ -1,10 +1,12 @@
 export { AddTransactionForm } from "./components/AddTransactionForm"
+export { ScanFlow } from "./components/ScanFlow"
 export { TransactionList } from "./components/TransactionList"
 export { TransactionRow } from "./components/TransactionRow"
 export {
   categoryUsageQueryOptions,
   transactionQueryOptions,
   useCategoryUsage,
+  useCommitScan,
   useCreateTransaction,
   useDeleteTransaction,
   useRestoreTransaction,

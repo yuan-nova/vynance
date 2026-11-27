@@ -9,14 +9,14 @@ import { Sheet } from "@/components/Sheet"
 import { OfflineBanner } from "@/components/States"
 import { useActiveBook } from "@/features/books"
 import { useNotifications } from "@/features/notifications"
-import { AddTransactionForm } from "@/features/transactions"
+import { AddTransactionForm, ScanFlow } from "@/features/transactions"
 import { useBookRealtime } from "@/lib/hooks/useBookRealtime"
 import { useDeviceNotifications } from "@/lib/hooks/useDeviceNotifications"
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh"
 import { qk } from "@/lib/query-keys"
 import { showSnackbar } from "@/lib/snackbar"
 
-/** Shell layar tab: konten + bottom nav + sheet Catat transaksi (ADR 0001). Scan struk di #36. */
+/** Shell layar tab: konten + bottom nav + sheet Catat transaksi dan Scan struk (ADR 0001, PB-03). */
 export function TabsLayout() {
   const book = useActiveBook()
   const qc = useQueryClient()
@@ -79,7 +79,16 @@ export function TabsLayout() {
           </Button>
         }
       >
-        <p className="body">Segera hadir.</p>
+        {book ? (
+          <ScanFlow
+            key={openCount}
+            bookId={book.id}
+            onSaved={(n) => {
+              close()
+              showSnackbar(`${n} transaksi dicatat`)
+            }}
+          />
+        ) : null}
       </Sheet>
     </div>
   )
