@@ -8,6 +8,7 @@ import { Sheet } from "@/components/Sheet"
 import { OfflineBanner } from "@/components/States"
 import { useActiveBook } from "@/features/books"
 import { AddTransactionForm } from "@/features/transactions"
+import { useBookRealtime } from "@/lib/hooks/useBookRealtime"
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh"
 import { qk } from "@/lib/query-keys"
 import { showSnackbar } from "@/lib/snackbar"
@@ -16,6 +17,15 @@ import { showSnackbar } from "@/lib/snackbar"
 export function TabsLayout() {
   const book = useActiveBook()
   const qc = useQueryClient()
+  // Realtime antar anggota (NFR-03): perubahan dari perangkat lain meng-invalidate data buku.
+  useBookRealtime(book?.id ?? null, (keys) => {
+    if (!book) return
+    void qc.invalidateQueries({ queryKey: qk.book(book.id) })
+    // Nama buku, anggota, atau buku dihapus memengaruhi daftar buku dan guard.
+    if (keys.includes("book") || keys.includes("members") || keys.includes("leave")) {
+      void qc.invalidateQueries({ queryKey: qk.books() })
+    }
+  })
   // Tarik untuk muat ulang: ambil ulang semua data buku aktif + profil (FR-150).
   const pull = usePullToRefresh(() =>
     Promise.all([
