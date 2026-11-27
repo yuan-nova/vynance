@@ -21,6 +21,7 @@ import { Route as TabsLainnyaIndexRouteImport } from './routes/_tabs/lainnya/ind
 import { Route as TabsLainnyaBukuRouteImport } from './routes/_tabs/lainnya/buku'
 import { Route as TabsLainnyaKategoriRouteImport } from './routes/_tabs/lainnya/kategori'
 import { Route as TabsLainnyaRekeningRouteImport } from './routes/_tabs/lainnya/rekening'
+import { Route as TabsLainnyaTargetRouteImport } from './routes/_tabs/lainnya/target'
 import { Route as TabsTransaksiIdRouteImport } from './routes/_tabs/transaksi_.$id'
 
 const TabsRoute = TabsRouteImport.update({
@@ -82,6 +83,11 @@ const TabsLainnyaRekeningRoute = TabsLainnyaRekeningRouteImport.update({
   path: '/lainnya/rekening',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsLainnyaTargetRoute = TabsLainnyaTargetRouteImport.update({
+  id: '/lainnya/target',
+  path: '/lainnya/target',
+  getParentRoute: () => TabsRoute,
+} as any)
 const TabsTransaksiIdRoute = TabsTransaksiIdRouteImport.update({
   id: '/transaksi_/$id',
   path: '/transaksi/$id',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
   '/lainnya/rekening': typeof TabsLainnyaRekeningRoute
+  '/lainnya/target': typeof TabsLainnyaTargetRoute
   '/transaksi/$id': typeof TabsTransaksiIdRoute
   '/lainnya/': typeof TabsLainnyaIndexRoute
 }
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
   '/lainnya/rekening': typeof TabsLainnyaRekeningRoute
+  '/lainnya/target': typeof TabsLainnyaTargetRoute
   '/transaksi/$id': typeof TabsTransaksiIdRoute
   '/lainnya': typeof TabsLainnyaIndexRoute
 }
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/_tabs/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/_tabs/lainnya/kategori': typeof TabsLainnyaKategoriRoute
   '/_tabs/lainnya/rekening': typeof TabsLainnyaRekeningRoute
+  '/_tabs/lainnya/target': typeof TabsLainnyaTargetRoute
   '/_tabs/transaksi_/$id': typeof TabsTransaksiIdRoute
   '/_tabs/lainnya/': typeof TabsLainnyaIndexRoute
 }
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/lainnya/buku'
     | '/lainnya/kategori'
     | '/lainnya/rekening'
+    | '/lainnya/target'
     | '/transaksi/$id'
     | '/lainnya/'
   fileRoutesByTo: FileRoutesByTo
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/lainnya/buku'
     | '/lainnya/kategori'
     | '/lainnya/rekening'
+    | '/lainnya/target'
     | '/transaksi/$id'
     | '/lainnya'
   id:
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_tabs/lainnya/buku'
     | '/_tabs/lainnya/kategori'
     | '/_tabs/lainnya/rekening'
+    | '/_tabs/lainnya/target'
     | '/_tabs/transaksi_/$id'
     | '/_tabs/lainnya/'
   fileRoutesById: FileRoutesById
@@ -271,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsLainnyaRekeningRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/lainnya/target': {
+      id: '/_tabs/lainnya/target'
+      path: '/lainnya/target'
+      fullPath: '/lainnya/target'
+      preLoaderRoute: typeof TabsLainnyaTargetRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/transaksi_/$id': {
       id: '/_tabs/transaksi_/$id'
       path: '/transaksi/$id'
@@ -289,6 +308,7 @@ interface TabsRouteChildren {
   TabsLainnyaBukuRoute: typeof TabsLainnyaBukuRoute
   TabsLainnyaKategoriRoute: typeof TabsLainnyaKategoriRoute
   TabsLainnyaRekeningRoute: typeof TabsLainnyaRekeningRoute
+  TabsLainnyaTargetRoute: typeof TabsLainnyaTargetRoute
   TabsTransaksiIdRoute: typeof TabsTransaksiIdRoute
   TabsLainnyaIndexRoute: typeof TabsLainnyaIndexRoute
 }
@@ -301,6 +321,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsLainnyaBukuRoute: TabsLainnyaBukuRoute,
   TabsLainnyaKategoriRoute: TabsLainnyaKategoriRoute,
   TabsLainnyaRekeningRoute: TabsLainnyaRekeningRoute,
+  TabsLainnyaTargetRoute: TabsLainnyaTargetRoute,
   TabsTransaksiIdRoute: TabsTransaksiIdRoute,
   TabsLainnyaIndexRoute: TabsLainnyaIndexRoute,
 }

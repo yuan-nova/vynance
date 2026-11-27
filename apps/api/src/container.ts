@@ -13,6 +13,8 @@ import { BooksService } from "./modules/books/books.service"
 import { CategoriesRepository } from "./modules/categories/categories.repository"
 import { CategoriesService } from "./modules/categories/categories.service"
 import { DashboardService } from "./modules/dashboard/dashboard.service"
+import { GoalsRepository } from "./modules/goals/goals.repository"
+import { GoalsService } from "./modules/goals/goals.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { HealthScoreService } from "./modules/health-score/health-score.service"
@@ -105,6 +107,15 @@ const services = {
     wallets: new WalletsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       wallets: new WalletsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
+  goalsService: new GoalsService({
+    goals: new GoalsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      goals: new GoalsRepository(exec),
       activity: new ActivityRepository(exec),
     })),
     newId: () => newId(),

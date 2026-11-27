@@ -1413,3 +1413,64 @@ p {
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
+
+/* ---------- Target tabungan (design/09-savings-goals.svg) ---------- */
+
+.goal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.goal-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.goal-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 4px;
+  margin: 12px 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-collected {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.goal-pct {
+  margin-left: auto;
+  font-weight: 800;
+}
+
+.goal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hero .bar {
+  margin-top: 12px;
+}

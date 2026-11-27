@@ -8,6 +8,7 @@ export const qk = {
   book: (bookId: string) => ["book", bookId] as const,
   bookDetail: (bookId: string) => ["book", bookId, "detail"] as const,
   wallets: (bookId: string) => ["book", bookId, "wallets"] as const,
+  goals: (bookId: string) => ["book", bookId, "goals"] as const,
   plan: (bookId: string, month: string) => ["book", bookId, "plans", month] as const,
   dashboard: (bookId: string, month: string) => ["book", bookId, "dashboard", month] as const,
   healthScore: (bookId: string, month: string) => ["book", bookId, "health-score", month] as const,
