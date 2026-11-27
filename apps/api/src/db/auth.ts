@@ -2,7 +2,9 @@ import { accounts, type Db, rateLimits, sessions, users, verifications } from "@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { emailOTP } from "better-auth/plugins"
+import { createEmailThrottle } from "../lib/email-throttle"
 import { newId } from "../lib/id"
+import { logger } from "../lib/logger"
 
 // Konfigurasi Better Auth (TSD §5.1). Dirakit di container.ts.
 
@@ -15,6 +17,8 @@ type AuthConfig = {
 }
 
 export function createAuth(db: Db, cfg: AuthConfig) {
+  // 5 kode per email per 15 menit, dari IP mana pun.
+  const perEmail = createEmailThrottle(5, 15 * 60 * 1000)
   return betterAuth({
     appName: "Vynance",
     baseURL: cfg.appUrl,
@@ -42,7 +46,14 @@ export function createAuth(db: Db, cfg: AuthConfig) {
         expiresIn: 300,
         allowedAttempts: 5,
         storeOTP: "hashed",
-        sendVerificationOTP: async ({ email, otp }) => cfg.sendOtp(email, otp),
+        sendVerificationOTP: async ({ email, otp }) => {
+          // Respons tetap sukses supaya tidak membocorkan batas; email hanya tidak dikirim.
+          if (!perEmail.allow(email)) {
+            logger.warn("otp dibatasi per email")
+            return
+          }
+          await cfg.sendOtp(email, otp)
+        },
       }),
     ],
     rateLimit: {
