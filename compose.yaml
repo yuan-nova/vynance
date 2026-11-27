@@ -67,6 +67,25 @@ services:
       install:
         condition: service_completed_successfully
 
+  # Job terjadwal (TSD §9): hapus permanen buku, bersihkan undangan. Memakai service apps/api.
+  worker:
+    <<: *bun
+    container_name: vynance-worker
+    command: ["bun", "run", "--cwd", "apps/worker", "dev"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://vynance:${DB_PASSWORD:-vynance_dev}@db:3306/vynance
+      AUTH_SECRET: ${AUTH_SECRET:-dev-only-secret-change-me-0123456789abcdef}
+      APP_URL: ${APP_URL:-http://localhost:12080}
+      EMAIL_API_KEY: ${EMAIL_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Vynance <noreply@vynance.local>}
+      WORKER_INTERVAL_MS: ${WORKER_INTERVAL_MS:-3600000}
+    depends_on:
+      db:
+        condition: service_healthy
+      install:
+        condition: service_completed_successfully
+
   # Opsional, dijalankan manual: docker compose run --rm migrate
   migrate:
     <<: *bun

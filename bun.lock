@@ -50,6 +50,16 @@
         "vite": "^8.4.0",
       },
     },
+    "apps/worker": {
+      "name": "@vynance/worker",
+      "dependencies": {
+        "@vynance/api": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.4.5",
+        "@vynance/config": "workspace:*",
+      },
+    },
     "packages/config": {
       "name": "@vynance/config",
     },
@@ -308,6 +318,8 @@
     "@vynance/ui": ["@vynance/ui@workspace:packages/ui"],
 
     "@vynance/web": ["@vynance/web@workspace:apps/web"],
+
+    "@vynance/worker": ["@vynance/worker@workspace:apps/worker"],
 
     "acorn": ["acorn@8.19.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw=="],
 
