@@ -18,6 +18,8 @@ import { BooksService } from "./modules/books/books.service"
 import { CategoriesRepository } from "./modules/categories/categories.repository"
 import { CategoriesService } from "./modules/categories/categories.service"
 import { DashboardService } from "./modules/dashboard/dashboard.service"
+import { EducationRepository } from "./modules/education/education.repository"
+import { EducationService } from "./modules/education/education.service"
 import { GoalsRepository } from "./modules/goals/goals.repository"
 import { GoalsService } from "./modules/goals/goals.service"
 import { HealthRepository } from "./modules/health/health.repository"
@@ -191,6 +193,15 @@ const services = {
     goals: new GoalsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       goals: new GoalsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
+  educationService: new EducationService({
+    education: new EducationRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      education: new EducationRepository(exec),
       activity: new ActivityRepository(exec),
     })),
     newId: () => newId(),

@@ -7,6 +7,7 @@ import {
   books,
   budgetAlerts,
   categories,
+  children,
   type Executor,
   goalContributions,
   investmentTypes,
@@ -27,6 +28,7 @@ import { and, asc, eq, isNotNull, lt, sql } from "drizzle-orm"
  * test `maintenance.repository.test.ts` gagal bila ada tabel ber-book_id yang belum tercantum.
  */
 export const BOOK_TABLES = [
+  children,
   goalContributions,
   savingsGoals,
   planAllocations,
