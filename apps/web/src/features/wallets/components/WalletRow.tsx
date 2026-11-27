@@ -17,7 +17,7 @@ export function WalletRow({ wallet, onOpen }: WalletRowProps) {
       subtitle={WALLET_TYPE_LABEL[wallet.type]}
       trailing={<Money value={balance} tone={debt && balance < 0n ? "exp" : "ink"} />}
       onClick={onOpen}
-      ariaLabel={`Ubah rekening ${wallet.name}`}
+      ariaLabel={`Buka rekening ${wallet.name}`}
     />
   )
   if (!debt || wallet.creditLimit === null || wallet.limitUsageBp === null) return row
