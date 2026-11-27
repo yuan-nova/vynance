@@ -1,8 +1,10 @@
 import { Hono } from "hono"
 import type { AppEnv } from "./lib/app-env"
+import type { BookEvents } from "./lib/book-events"
 import { requireAuth } from "./middleware/auth"
 import { bookAccess } from "./middleware/book-access"
 import { errorHandler, notFoundHandler } from "./middleware/error-handler"
+import { publishChanges } from "./middleware/publish-changes"
 import { authRoutes } from "./modules/auth/auth.route"
 import type { AuthService } from "./modules/auth/auth.service"
 import { bookRoutes, booksRoutes } from "./modules/books/books.route"
@@ -11,6 +13,7 @@ import { categoryRoutes } from "./modules/categories/categories.route"
 import type { CategoriesService } from "./modules/categories/categories.service"
 import { dashboardRoutes } from "./modules/dashboard/dashboard.route"
 import type { DashboardService } from "./modules/dashboard/dashboard.service"
+import { eventRoutes } from "./modules/events/events.route"
 import { goalRoutes } from "./modules/goals/goals.route"
 import type { GoalsService } from "./modules/goals/goals.service"
 import { healthRoutes } from "./modules/health/health.route"
@@ -52,6 +55,7 @@ type Deps = {
   goalsService: GoalsService
   invitationsService: InvitationsService
   membersService: MembersService
+  bookEvents: BookEvents
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -71,7 +75,8 @@ export const createApp = (deps: Deps) => {
     .route(
       "/books/:bookId",
       new Hono<AppEnv>()
-        .use(authed, bookBound)
+        .use(authed, bookBound, publishChanges(deps.bookEvents))
+        .route("/events", eventRoutes(deps.bookEvents))
         .route("/", bookRoutes(deps.booksService))
         .route("/", memberRoutes(deps.membersService))
         .route("/wallets", walletRoutes(deps.walletsService))

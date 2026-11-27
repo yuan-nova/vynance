@@ -1,4 +1,5 @@
 import { createApp } from "../app"
+import { BookEvents } from "../lib/book-events"
 import { AuthService } from "../modules/auth/auth.service"
 
 type Deps = Parameters<typeof createApp>[0]
@@ -30,6 +31,7 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
     goalsService: empty,
     invitationsService: empty,
     membersService: empty,
+    bookEvents: new BookEvents(),
     ...deps,
     authService: deps.authService ?? fakeAuth(userId),
   } as Deps

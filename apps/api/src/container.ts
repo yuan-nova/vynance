@@ -4,6 +4,7 @@ import { makeBookRepos } from "./db/book-repos"
 import { db } from "./db/client"
 import { UnitOfWork } from "./db/unit-of-work"
 import { generateBookCode } from "./lib/book-code"
+import { bookEvents } from "./lib/book-events"
 import { newId } from "./lib/id"
 import { createMailer } from "./lib/mailer"
 import { ActivityRepository } from "./modules/activity/activity.repository"
@@ -163,6 +164,7 @@ const healthScoreService = new HealthScoreService({
 
 export const container = {
   ...services,
+  bookEvents,
   healthScoreService,
   dashboardService: new DashboardService({
     wallets: services.walletsService,
