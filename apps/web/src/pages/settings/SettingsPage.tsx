@@ -3,10 +3,13 @@ import { LOCALE_LABEL, LOCALES, type Locale, THEME_PREFS, type ThemePref, type U
 import { type FormEvent, useState } from "react"
 import { Button } from "@/components/Button"
 import { ChipGroup } from "@/components/ChipGroup"
-import { Skeleton } from "@/components/States"
+import { Icon } from "@/components/Icon"
+import { Sheet } from "@/components/Sheet"
+import { ErrorState, Skeleton } from "@/components/States"
 import { Switch } from "@/components/Switch"
 import { TextField } from "@/components/TextField"
 import { TopBar } from "@/components/TopBar"
+import { DeleteAccountForm, exportUrl, useDeleteAccount, useDeletionPreview } from "@/features/account"
 import { useMe, useUpdateMe } from "@/features/auth"
 import { useT } from "@/lib/hooks/useT"
 import { showSnackbar } from "@/lib/snackbar"
@@ -18,6 +21,9 @@ export function SettingsPage() {
   const me = useMe().data
   const update = useUpdateMe()
   const [name, setName] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const preview = useDeletionPreview(deleting)
+  const remove = useDeleteAccount()
 
   const save = (input: UpdateMeInput, done?: string) =>
     update.mutate(input, {
@@ -95,6 +101,63 @@ export function SettingsPage() {
               ) : null}
             </form>
           </section>
+
+          <section className="section" aria-labelledby="set-data">
+            <h2 id="set-data" className="h2">
+              {t("settings.data")}
+            </h2>
+            <div className="card plain-list">
+              <a className="row row-btn" href={exportUrl("json")} download>
+                <span className="tile tile-pri" aria-hidden="true">
+                  <Icon name="download" />
+                </span>
+                <span className="row-main">
+                  <span className="row-title">{t("settings.exportJson")}</span>
+                  <span className="row-sub">{t("settings.exportJsonHint")}</span>
+                </span>
+              </a>
+              <a className="row row-btn" href={exportUrl("csv")} download>
+                <span className="tile tile-pri" aria-hidden="true">
+                  <Icon name="doc" />
+                </span>
+                <span className="row-main">
+                  <span className="row-title">{t("settings.exportCsv")}</span>
+                  <span className="row-sub">{t("settings.exportCsvHint")}</span>
+                </span>
+              </a>
+            </div>
+            <Button variant="ghost" full icon="trash" onClick={() => setDeleting(true)}>
+              {t("settings.deleteAccount")}
+            </Button>
+          </section>
+
+          <Sheet open={deleting} title={t("settings.deleteAccount")} onClose={() => setDeleting(false)}>
+            {preview.isPending ? <Skeleton rows={2} /> : null}
+            {preview.isError ? (
+              <ErrorState
+                message="Data akun gagal dimuat."
+                onRetry={() => void preview.refetch()}
+                retrying={preview.isFetching}
+              />
+            ) : null}
+            {preview.data ? (
+              <DeleteAccountForm
+                email={me.email}
+                preview={preview.data}
+                pending={remove.isPending}
+                onCancel={() => setDeleting(false)}
+                onSubmit={(confirmEmail, onError) =>
+                  remove.mutate(confirmEmail, {
+                    onSuccess: () => {
+                      showSnackbar(t("settings.deleted"))
+                      void navigate({ to: "/masuk" })
+                    },
+                    onError,
+                  })
+                }
+              />
+            ) : null}
+          </Sheet>
         </>
       ) : null}
     </>

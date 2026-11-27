@@ -2,6 +2,7 @@
 export const qk = {
   health: () => ["health"] as const,
   me: () => ["me"] as const,
+  deletionPreview: () => ["me", "deletion-preview"] as const,
   authProviders: () => ["auth", "providers"] as const,
   books: () => ["books"] as const,
   /** Awalan semua data milik satu buku. Dibuang saat ganti buku (DS-NAV-04). */

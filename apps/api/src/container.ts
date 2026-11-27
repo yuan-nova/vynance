@@ -20,6 +20,8 @@ import { HealthService } from "./modules/health/health.service"
 import { HealthScoreService } from "./modules/health-score/health-score.service"
 import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
 import { InvestmentsService } from "./modules/investments/investments.service"
+import { AccountRepository } from "./modules/me/account.repository"
+import { AccountService } from "./modules/me/account.service"
 import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
@@ -65,6 +67,12 @@ const services = {
   healthService: new HealthService(new HealthRepository(db)),
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
   meService: new MeService(new MeRepository(db), booksService),
+  accountService: new AccountService({
+    account: new AccountRepository(db),
+    me: new MeRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({ account: new AccountRepository(exec), me: new MeRepository(exec) })),
+    now: () => new Date(),
+  }),
   booksService,
   transactionsService: new TransactionsService({
     transactions: new TransactionsRepository(db),
