@@ -64,3 +64,12 @@ export async function saveOpeningBalances(
   })
   await ensureOk(res)
 }
+
+/** BR-35: arsipkan (true) atau aktifkan lagi (false). */
+export async function setWalletArchived(bookId: string, id: string, archived: boolean): Promise<Wallet> {
+  const res = archived
+    ? await w[":id"].archive.$post({ param: { bookId, id } })
+    : await w[":id"].unarchive.$post({ param: { bookId, id } })
+  await ensureOk(res)
+  return walletSchema.parse((await res.json()).data)
+}

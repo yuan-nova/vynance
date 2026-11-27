@@ -6,6 +6,7 @@ import {
   deleteWallet,
   fetchWallets,
   saveOpeningBalances,
+  setWalletArchived,
   updateWallet,
 } from "../services/wallets.service"
 
@@ -49,5 +50,13 @@ export function useSaveOpeningBalances(bookId: string) {
       await qc.invalidateQueries({ queryKey: qk.me() })
       await qc.invalidateQueries({ queryKey: qk.book(bookId) })
     },
+  })
+}
+
+export function useArchiveWallet(bookId: string) {
+  const invalidate = useInvalidateBook(bookId)
+  return useMutation({
+    mutationFn: (v: { id: string; archived: boolean }) => setWalletArchived(bookId, v.id, v.archived),
+    onSuccess: invalidate,
   })
 }

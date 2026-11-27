@@ -25,6 +25,12 @@ export const walletRoutes = (svc: WalletsService) =>
       zValidator("json", updateWalletSchema, validationHook),
       async (c) => ok(c, await svc.update(c.var.ctx, c.req.valid("param").id, c.req.valid("json"))),
     )
+    .post("/:id/archive", zValidator("param", idParam, validationHook), async (c) =>
+      ok(c, await svc.setArchived(c.var.ctx, c.req.valid("param").id, true)),
+    )
+    .post("/:id/unarchive", zValidator("param", idParam, validationHook), async (c) =>
+      ok(c, await svc.setArchived(c.var.ctx, c.req.valid("param").id, false)),
+    )
     .delete("/:id", zValidator("param", idParam, validationHook), async (c) => {
       await svc.remove(c.var.ctx, c.req.valid("param").id)
       return noContent(c)

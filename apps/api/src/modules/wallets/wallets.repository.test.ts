@@ -147,4 +147,21 @@ describe("rekening", () => {
     expect(w.creditLimit).toBeNull()
     expect(w.icon).toBe("wallet")
   })
+
+  test("arsip: total kekayaan tetap, bisa diaktifkan lagi (BR-35)", async () => {
+    const before = await json<WalletList>(await app(U).request(`/api/v1/books/${bookId}/wallets`))
+    const target = before.wallets.find((w) => w.archivedAt === null && BigInt(w.balance) !== 0n)
+    expect(target).toBeDefined()
+    const res = await post(U, `/api/v1/books/${bookId}/wallets/${target?.id}/archive`, {})
+    expect(res.status).toBe(200)
+    expect((await json<Wallet>(res)).archivedAt).not.toBeNull()
+    const after = await json<WalletList>(await app(U).request(`/api/v1/books/${bookId}/wallets`))
+    expect(after.summary.cash).toBe(before.summary.cash)
+    expect(after.summary.debt).toBe(before.summary.debt)
+    expect(after.wallets.find((w) => w.id === target?.id)?.balance).toBe(target?.balance)
+
+    const back = await post(U, `/api/v1/books/${bookId}/wallets/${target?.id}/unarchive`, {})
+    expect((await json<Wallet>(back)).archivedAt).toBeNull()
+    expect((await post(V, `/api/v1/books/${otherBookId}/wallets/${target?.id}/archive`, {})).status).toBe(404)
+  })
 })
