@@ -24,6 +24,8 @@ export const ERROR_MESSAGES = {
   TRANSACTION_NOT_FOUND: "Transaksi tidak ditemukan.",
   IDEMPOTENCY_KEY_INVALID: "Permintaan tidak valid. Muat ulang lalu coba lagi.",
   TRANSACTION_ASSET_EDIT: "Transaksi beli/jual aset diubah dari layar Investasi.",
+  PLAN_CONFLICT: "Rencana bulan ini baru diubah anggota lain. Data terbaru sudah dimuat.",
+  INVESTMENT_TYPE_NOT_FOUND: "Jenis investasi tidak ditemukan.",
   AUTH_FAILED: "Gagal masuk. Coba lagi sebentar lagi.",
   OTP_INVALID: "Kode salah. Periksa lagi email kamu.",
   OTP_EXPIRED: "Kode sudah kedaluwarsa. Minta kode baru.",

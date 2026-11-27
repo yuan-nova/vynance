@@ -23,6 +23,8 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
     categoriesService: empty,
     onboardingService: empty,
     transactionsService: empty,
+    plansService: empty,
+    investmentsService: empty,
     ...deps,
     authService: deps.authService ?? fakeAuth(userId),
   } as Deps

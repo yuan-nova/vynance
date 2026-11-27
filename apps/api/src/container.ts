@@ -14,9 +14,13 @@ import { CategoriesRepository } from "./modules/categories/categories.repository
 import { CategoriesService } from "./modules/categories/categories.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
+import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
+import { InvestmentsService } from "./modules/investments/investments.service"
 import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
+import { PlansRepository } from "./modules/plans/plans.repository"
+import { PlansService } from "./modules/plans/plans.service"
 import { TransactionsRepository } from "./modules/transactions/transactions.repository"
 import { TransactionsService } from "./modules/transactions/transactions.service"
 import { WalletsRepository } from "./modules/wallets/wallets.repository"
@@ -64,6 +68,19 @@ export const container = {
     newId: () => newId(),
     now: () => new Date(),
   }),
+  plansService: new PlansService({
+    plans: new PlansRepository(db),
+    transactions: new TransactionsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      plans: new PlansRepository(exec),
+      categories: new CategoriesRepository(exec),
+      investmentTypes: new InvestmentTypesRepository(exec),
+      wallets: new WalletsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+  }),
+  investmentsService: new InvestmentsService(new InvestmentTypesRepository(db)),
   onboardingService: new OnboardingService({
     uow: new UnitOfWork(db, (exec) => ({
       wallets: new WalletsRepository(exec),

@@ -1148,3 +1148,40 @@ p {
   text-align: right;
   overflow-wrap: anywhere;
 }
+
+/* ---------- Rencana bulanan ---------- */
+
+.summary-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.alloc-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.alloc-row:last-child {
+  border-bottom: 0;
+}
+
+.alloc-inputs .field {
+  margin-bottom: 8px;
+}
+
+.income-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  column-gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+
+.income-row > .field:first-child {
+  grid-column: 1 / -1;
+}
+
+.income-row .icon-btn {
+  margin-bottom: 16px;
+}
