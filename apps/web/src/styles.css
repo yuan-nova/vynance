@@ -1649,3 +1649,12 @@ p {
   font-size: 15px;
   font-weight: 800;
 }
+
+.activity-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.activity-row:last-child {
+  border-bottom: 0;
+}

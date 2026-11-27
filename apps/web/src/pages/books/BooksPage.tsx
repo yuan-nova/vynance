@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
+import type { Member } from "@vynance/shared"
 import { useState } from "react"
 import { Button } from "@/components/Button"
 import { Icon } from "@/components/Icon"
@@ -20,6 +21,7 @@ import {
   useSwitchBook,
 } from "@/features/books"
 import { InvitePanel } from "@/features/invitations"
+import { ActivityList, MemberList, useActivities, useLeaveBook, useMembers, useRemoveMember } from "@/features/members"
 import { showSnackbar } from "@/lib/snackbar"
 
 /** Layar Buku (design/17-books.svg): buku aktif, buku lain, buat buku baru. Anggota & undangan di #25–#26. */
@@ -30,7 +32,13 @@ export function BooksPage() {
   const switchBook = useSwitchBook()
   const create = useCreateBook()
   const rename = useRenameBook(active?.id ?? "")
-  const [sheet, setSheet] = useState<"create" | "rename" | "delete" | "invite" | null>(null)
+  const [sheet, setSheet] = useState<"create" | "rename" | "delete" | "invite" | "leave" | null>(null)
+  const [removing, setRemoving] = useState<Member | null>(null)
+  const members = useMembers(active?.id ?? "")
+  const activities = useActivities(active?.id ?? "")
+  const removeMember = useRemoveMember(active?.id ?? "")
+  const leave = useLeaveBook(active?.id ?? "")
+  const lastMember = (members.data?.length ?? 0) <= 1
   const remove = useDeleteBook()
   const deletionInfo = useBookDeletionInfo(active?.id ?? "", sheet === "delete")
 
@@ -69,6 +77,18 @@ export function BooksPage() {
               Hapus buku
             </Button>
           </div>
+        </section>
+      ) : null}
+
+      {members.data ? (
+        <section className="section" aria-labelledby="book-members">
+          <div className="section-head">
+            <h2 id="book-members" className="h2">
+              Anggota
+            </h2>
+            <span className="row-sub">Akses sama</span>
+          </div>
+          <MemberList members={members.data} onRemove={setRemoving} onLeave={() => setSheet("leave")} />
         </section>
       ) : null}
 
@@ -119,7 +139,104 @@ export function BooksPage() {
         </Button>
       </section>
 
+      {activities.data && activities.data.length > 0 ? (
+        <section className="section" aria-labelledby="book-activity">
+          <h2 id="book-activity" className="h2">
+            Aktivitas terbaru
+          </h2>
+          <ActivityList items={activities.data} />
+        </section>
+      ) : null}
+
       <DeletedBooks onRestored={() => void navigate({ to: "/" })} />
+
+      <Sheet
+        open={removing !== null}
+        title={removing ? `Keluarkan ${removing.name || removing.email}?` : ""}
+        onClose={() => setRemoving(null)}
+        footer={
+          removing ? (
+            <>
+              <Button
+                variant="destructive"
+                full
+                loading={removeMember.isPending}
+                onClick={() =>
+                  removeMember.mutate(removing.userId, {
+                    onSuccess: () => {
+                      showSnackbar(`${removing.name || removing.email} dikeluarkan`)
+                      setRemoving(null)
+                    },
+                    onError: (e) => {
+                      setRemoving(null)
+                      showSnackbar(e.message, { tone: "error" })
+                    },
+                  })
+                }
+              >
+                Keluarkan
+              </Button>
+              <Button variant="ghost" full onClick={() => setRemoving(null)}>
+                Batal
+              </Button>
+            </>
+          ) : null
+        }
+      >
+        <p className="body">
+          Ia langsung kehilangan akses ke buku ini. Transaksi yang pernah ia catat tetap ada dan tetap menyebut namanya.
+        </p>
+      </Sheet>
+
+      <Sheet
+        open={sheet === "leave"}
+        title={lastMember ? "Kamu anggota terakhir" : `Keluar dari ${active?.name ?? "buku"}?`}
+        onClose={() => setSheet(null)}
+        footer={
+          lastMember ? (
+            <>
+              <Button variant="destructive" full icon="trash" onClick={() => setSheet("delete")}>
+                Hapus buku
+              </Button>
+              <Button variant="ghost" full onClick={() => setSheet(null)}>
+                Batal
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="destructive"
+                full
+                loading={leave.isPending}
+                onClick={() =>
+                  leave.mutate(undefined, {
+                    onSuccess: () => {
+                      setSheet(null)
+                      showSnackbar(`Kamu keluar dari ${active?.name ?? "buku"}`)
+                      void navigate({ to: "/" })
+                    },
+                    onError: (e) => {
+                      setSheet(null)
+                      showSnackbar(e.message, { tone: "error" })
+                    },
+                  })
+                }
+              >
+                Keluar dari buku
+              </Button>
+              <Button variant="ghost" full onClick={() => setSheet(null)}>
+                Batal
+              </Button>
+            </>
+          )
+        }
+      >
+        <p className="body">
+          {lastMember
+            ? "Buku harus punya minimal satu anggota, jadi kamu tidak bisa keluar. Hapus bukunya bila tidak dipakai lagi."
+            : "Kamu langsung kehilangan akses ke buku ini. Transaksi yang kamu catat tetap ada untuk anggota lain."}
+        </p>
+      </Sheet>
 
       <Sheet
         open={sheet === "delete"}

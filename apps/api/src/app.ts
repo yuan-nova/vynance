@@ -24,6 +24,8 @@ import type { InvitationsService } from "./modules/invitations/invitations.servi
 import type { AccountService } from "./modules/me/account.service"
 import { meRoutes } from "./modules/me/me.route"
 import type { MeService } from "./modules/me/me.service"
+import { memberRoutes } from "./modules/members/members.route"
+import type { MembersService } from "./modules/members/members.service"
 import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
 import type { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { planRoutes } from "./modules/plans/plans.route"
@@ -49,6 +51,7 @@ type Deps = {
   healthScoreService: HealthScoreService
   goalsService: GoalsService
   invitationsService: InvitationsService
+  membersService: MembersService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -70,6 +73,7 @@ export const createApp = (deps: Deps) => {
       new Hono<AppEnv>()
         .use(authed, bookBound)
         .route("/", bookRoutes(deps.booksService))
+        .route("/", memberRoutes(deps.membersService))
         .route("/wallets", walletRoutes(deps.walletsService))
         .route("/categories", categoryRoutes(deps.categoriesService))
         .route("/onboarding", onboardingRoutes(deps.onboardingService))

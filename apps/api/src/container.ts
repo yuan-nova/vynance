@@ -26,6 +26,8 @@ import { AccountRepository } from "./modules/me/account.repository"
 import { AccountService } from "./modules/me/account.service"
 import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
+import { MembersRepository } from "./modules/members/members.repository"
+import { MembersService } from "./modules/members/members.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { PlansRepository } from "./modules/plans/plans.repository"
 import { PlansService } from "./modules/plans/plans.service"
@@ -117,6 +119,15 @@ const services = {
     wallets: new WalletsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       wallets: new WalletsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
+  membersService: new MembersService({
+    members: new MembersRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      members: new MembersRepository(exec),
       activity: new ActivityRepository(exec),
     })),
     newId: () => newId(),
