@@ -14,6 +14,7 @@ import {
   investmentTypes,
   monthlyPlans,
   notifications,
+  payslips,
   planAllocations,
   planIncomes,
   savingsGoals,
@@ -31,6 +32,7 @@ import { and, asc, eq, isNotNull, lt, sql } from "drizzle-orm"
 export const BOOK_TABLES = [
   children,
   incomeSources,
+  payslips,
   goalContributions,
   savingsGoals,
   planAllocations,

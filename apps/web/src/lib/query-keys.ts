@@ -15,6 +15,7 @@ export const qk = {
   goals: (bookId: string) => ["book", bookId, "goals"] as const,
   educationPlan: (bookId: string) => ["book", bookId, "education-plan"] as const,
   incomes: (bookId: string) => ["book", bookId, "income-sources"] as const,
+  payslips: (bookId: string) => ["book", bookId, "payslips"] as const,
   zakat: (bookId: string) => ["book", bookId, "zakat"] as const,
   advisorConsent: (bookId: string) => ["book", bookId, "advisor-consent"] as const,
   advisorContext: (bookId: string) => ["book", bookId, "advisor-context"] as const,

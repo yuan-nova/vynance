@@ -43,6 +43,8 @@ import { MembersService } from "./modules/members/members.service"
 import { NotificationsRepository } from "./modules/notifications/notifications.repository"
 import { NotificationsService } from "./modules/notifications/notifications.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
+import { PayslipsRepository } from "./modules/payslips/payslips.repository"
+import { PayslipsService } from "./modules/payslips/payslips.service"
 import { PlansRepository } from "./modules/plans/plans.repository"
 import { PlansService } from "./modules/plans/plans.service"
 import { BillingRepository } from "./modules/subscriptions/billing.repository"
@@ -195,6 +197,15 @@ const services = {
     goals: new GoalsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       goals: new GoalsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
+  payslipsService: new PayslipsService({
+    payslips: new PayslipsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      payslips: new PayslipsRepository(exec),
       activity: new ActivityRepository(exec),
     })),
     newId: () => newId(),
