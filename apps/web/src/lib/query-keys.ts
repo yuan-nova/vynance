@@ -5,6 +5,8 @@ export const qk = {
   deletionPreview: () => ["me", "deletion-preview"] as const,
   authProviders: () => ["auth", "providers"] as const,
   books: () => ["books"] as const,
+  deletedBooks: () => ["books", "deleted"] as const,
+  bookDeletionInfo: (bookId: string) => ["books", "deletion-info", bookId] as const,
   /** Awalan semua data milik satu buku. Dibuang saat ganti buku (DS-NAV-04). */
   book: (bookId: string) => ["book", bookId] as const,
   bookDetail: (bookId: string) => ["book", bookId, "detail"] as const,

@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { Icon } from "@/components/Icon"
-import { BookNameForm, useCreateBook } from "@/features/books"
+import { BookNameForm, DeletedBooks, useCreateBook } from "@/features/books"
 
 /** BR-54: belum punya buku → buat buku sebelum masuk Beranda. */
 export function NewBookPage() {
@@ -26,6 +26,7 @@ export function NewBookPage() {
           create.mutate({ name }, { onSuccess: () => void navigate({ to: "/mulai" }), onError })
         }
       />
+      <DeletedBooks onRestored={() => void navigate({ to: "/" })} />
     </main>
   )
 }

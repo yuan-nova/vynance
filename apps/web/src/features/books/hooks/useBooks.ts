@@ -1,8 +1,25 @@
 import { queryOptions, type UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { type Book, type CreateBookInput, type Me, pickActiveBook, type UpdateBookInput } from "@vynance/shared"
+import {
+  type Book,
+  type BookDeletionInfo,
+  type CreateBookInput,
+  type DeletedBook,
+  type Me,
+  pickActiveBook,
+  type UpdateBookInput,
+} from "@vynance/shared"
 import { useMe } from "@/features/auth"
 import { qk } from "@/lib/query-keys"
-import { createBook, fetchBooks, renameBook, saveActiveBook } from "../services/books.service"
+import {
+  createBook,
+  deleteBook,
+  fetchBooks,
+  fetchDeletedBooks,
+  fetchDeletionInfo,
+  renameBook,
+  restoreBook,
+  saveActiveBook,
+} from "../services/books.service"
 
 export const booksQueryOptions = () => queryOptions({ queryKey: qk.books(), queryFn: fetchBooks })
 
@@ -56,6 +73,51 @@ export function useRenameBook(bookId: string) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: qk.books() })
       void qc.invalidateQueries({ queryKey: qk.bookDetail(bookId) })
+    },
+  })
+}
+
+export function useBookDeletionInfo(bookId: string, enabled: boolean): UseQueryResult<BookDeletionInfo> {
+  return useQuery({
+    queryKey: qk.bookDeletionInfo(bookId),
+    queryFn: () => fetchDeletionInfo(bookId),
+    enabled: enabled && Boolean(bookId),
+    staleTime: 0,
+  })
+}
+
+export function useDeletedBooks(): UseQueryResult<DeletedBook[]> {
+  return useQuery({ queryKey: qk.deletedBooks(), queryFn: fetchDeletedBooks })
+}
+
+/** Hapus buku (BR-52): cache buku dibuang; guard memilih buku lain atau ke Buat buku baru. */
+export function useDeleteBook() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { bookId: string; confirmName: string }) => deleteBook(v.bookId, v.confirmName),
+    onSuccess: (_r, v) => {
+      qc.removeQueries({ queryKey: qk.book(v.bookId) })
+      qc.setQueryData<Book[]>(qk.books(), (list) => (list ?? []).filter((b) => b.id !== v.bookId))
+      void qc.invalidateQueries({ queryKey: qk.books() })
+      void qc.invalidateQueries({ queryKey: qk.deletedBooks() })
+    },
+  })
+}
+
+/** Pulihkan buku terhapus dan jadikan aktif. */
+export function useRestoreBook() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (bookId: string) => {
+      const book = await restoreBook(bookId)
+      await saveActiveBook(book.id)
+      return book
+    },
+    onSuccess: (book) => {
+      qc.setQueryData<Me | null>(qk.me(), (me) => (me ? { ...me, lastBookId: book.id } : me))
+      qc.setQueryData<Book[]>(qk.books(), (list) => [...(list ?? []).filter((b) => b.id !== book.id), book])
+      void qc.invalidateQueries({ queryKey: qk.books() })
+      void qc.invalidateQueries({ queryKey: qk.deletedBooks() })
     },
   })
 }

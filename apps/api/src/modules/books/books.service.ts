@@ -1,7 +1,11 @@
 import {
+  BOOK_RESTORE_DAYS,
   type Book,
+  type BookDeletionInfo,
   type CreateBookInput,
   DEFAULT_BOOK_NAME,
+  type DeleteBookInput,
+  type DeletedBook,
   SEED_EXPENSE_CATEGORIES,
   SEED_INCOME_CATEGORIES,
   SEED_INVESTMENT_TYPES,
@@ -11,7 +15,7 @@ import {
   type UserCtx,
 } from "@vynance/shared"
 import type { UnitOfWork } from "../../db/unit-of-work"
-import { AppError, NotFound } from "../../lib/errors"
+import { AppError, BusinessError, NotFound } from "../../lib/errors"
 import { logger } from "../../lib/logger"
 import type { ActivityRepository } from "../activity/activity.repository"
 import type { CategoriesRepository } from "../categories/categories.repository"
@@ -27,11 +31,17 @@ type Repos = {
   investmentTypes: InvestmentTypesRepository
 }
 type Deps = {
-  books: Pick<BooksRepository, "listForUser" | "findForMember" | "isActiveMember">
+  books: Pick<
+    BooksRepository,
+    "listForUser" | "findForMember" | "isActiveMember" | "listDeletedForUser" | "transactionCount"
+  >
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
   newCode: () => string
+  now?: () => Date
 }
+
+const DAY_MS = 86_400_000
 
 const MAX_CODE_ATTEMPTS = 5
 
@@ -146,5 +156,55 @@ export class BooksService {
       })
     })
     return this.get(ctx)
+  }
+
+  /** Jumlah data yang ikut terhapus, untuk sheet konfirmasi (DS-ACTION-03). */
+  async deletionInfo(ctx: ServiceCtx): Promise<BookDeletionInfo> {
+    const book = await this.get(ctx)
+    return { transactionCount: await this.d.books.transactionCount(ctx.bookId), memberCount: book.memberCount }
+  }
+
+  /** BR-52: konfirmasi nama buku, lalu sembunyikan dari semua anggota 30 hari sebelum dihapus permanen. */
+  async remove(ctx: ServiceCtx, input: DeleteBookInput): Promise<void> {
+    const book = await this.get(ctx)
+    if (input.confirmName.trim() !== book.name.trim()) throw new BusinessError("BOOK_NAME_MISMATCH", "confirmName")
+    const now = this.now()
+    await this.d.uow.withTransaction(async (r) => {
+      await r.books.softDelete(ctx.bookId, now, new Date(now.getTime() + BOOK_RESTORE_DAYS * DAY_MS))
+      await r.activity.record({
+        id: this.d.newId(),
+        bookId: ctx.bookId,
+        actorId: ctx.userId,
+        action: "book.deleted",
+        entityType: "book",
+        entityId: ctx.bookId,
+        summary: { name: book.name },
+      })
+    })
+  }
+
+  listDeleted(ctx: UserCtx): Promise<DeletedBook[]> {
+    return this.d.books.listDeletedForUser(ctx.userId, this.now())
+  }
+
+  /** Pulihkan buku terhapus (TSD §5.5). Bukan anggota atau masa pulih lewat → 404. */
+  async restore(ctx: UserCtx, bookId: string): Promise<Book> {
+    await this.d.uow.withTransaction(async (r) => {
+      if (!(await r.books.restore(bookId, ctx.userId, this.now()))) throw new NotFound("BOOK_NOT_FOUND")
+      await r.activity.record({
+        id: this.d.newId(),
+        bookId,
+        actorId: ctx.userId,
+        action: "book.restored",
+        entityType: "book",
+        entityId: bookId,
+        summary: {},
+      })
+    })
+    return this.get({ ...ctx, bookId })
+  }
+
+  private now(): Date {
+    return this.d.now?.() ?? new Date()
   }
 }
