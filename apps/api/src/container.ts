@@ -17,6 +17,8 @@ import { HealthService } from "./modules/health/health.service"
 import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
+import { TransactionsRepository } from "./modules/transactions/transactions.repository"
+import { TransactionsService } from "./modules/transactions/transactions.service"
 import { WalletsRepository } from "./modules/wallets/wallets.repository"
 import { WalletsService } from "./modules/wallets/wallets.service"
 
@@ -44,11 +46,24 @@ const auth = createAuth(db, {
   },
 })
 
+const txRepos = (exec: Parameters<typeof makeBookRepos>[0]) => ({
+  transactions: new TransactionsRepository(exec),
+  wallets: new WalletsRepository(exec),
+  categories: new CategoriesRepository(exec),
+  activity: new ActivityRepository(exec),
+})
+
 export const container = {
   healthService: new HealthService(new HealthRepository(db)),
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
   meService: new MeService(new MeRepository(db), booksService),
   booksService,
+  transactionsService: new TransactionsService({
+    transactions: new TransactionsRepository(db),
+    uow: new UnitOfWork(db, txRepos),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
   onboardingService: new OnboardingService({
     uow: new UnitOfWork(db, (exec) => ({
       wallets: new WalletsRepository(exec),

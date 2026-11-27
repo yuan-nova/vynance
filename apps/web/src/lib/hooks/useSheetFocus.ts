@@ -12,7 +12,8 @@ export function useSheetFocus(ref: RefObject<HTMLElement | null>, open: boolean,
     const el = ref.current
     if (!el) return
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const first = el.querySelector<HTMLElement>(FOCUSABLE)
+    // Kolom bertanda data-autofocus (mis. Jumlah, DS-FORM-02) didahulukan; selain itu elemen pertama.
+    const first = el.querySelector<HTMLElement>("[data-autofocus]") ?? el.querySelector<HTMLElement>(FOCUSABLE)
     ;(first ?? el).focus()
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === "Escape") {

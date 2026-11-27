@@ -7,7 +7,7 @@ type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "className" | 
 }
 
 /** Kolom isian 48 px, label di atas, font 16 px, error lewat aria-describedby (DS-FORM-01). */
-export function TextField({ label, error, hint, ...rest }: TextFieldProps) {
+export function TextField({ label, error, hint, autoFocus, ...rest }: TextFieldProps) {
   const id = useId()
   const describedBy = [error ? `${id}-err` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined
   return (
@@ -18,6 +18,7 @@ export function TextField({ label, error, hint, ...rest }: TextFieldProps) {
       <input
         {...rest}
         id={id}
+        data-autofocus={autoFocus || undefined}
         className="field-input"
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}

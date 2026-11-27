@@ -70,8 +70,8 @@ export function MoneyInput({
           onBlur={() => setDraft(null)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          // biome-ignore lint/a11y/noAutofocus: fokus awal di sheet nominal (DS-FORM-02)
-          autoFocus={autoFocus}
+          // Fokus awal diatur useSheetFocus lewat data-autofocus supaya pemicu sheet tetap tercatat.
+          data-autofocus={autoFocus || undefined}
         />
       </div>
       {hint && !error ? (
