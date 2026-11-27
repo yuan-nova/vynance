@@ -44,7 +44,10 @@ export const container = {
   booksService,
   walletsService: new WalletsService({
     wallets: new WalletsRepository(db),
-    activity: new ActivityRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      wallets: new WalletsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
     newId: () => newId(),
     now: () => new Date(),
   }),

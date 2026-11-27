@@ -11,17 +11,16 @@ import {
   walletBalances,
   wealthSummary,
 } from "@vynance/shared"
+import type { UnitOfWork } from "../../db/unit-of-work"
 import { BusinessError, NotFound } from "../../lib/errors"
 import type { ActivityRepository } from "../activity/activity.repository"
 import type { WalletsRepository } from "./wallets.repository"
 
 type Row = NonNullable<Awaited<ReturnType<WalletsRepository["findById"]>>>
+type Repos = { wallets: WalletsRepository; activity: ActivityRepository }
 type Deps = {
-  wallets: Pick<
-    WalletsRepository,
-    "list" | "findById" | "txSums" | "hasTransactions" | "insert" | "update" | "softDelete"
-  >
-  activity: Pick<ActivityRepository, "record">
+  wallets: Pick<WalletsRepository, "list" | "findById" | "txSums">
+  uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
   now: () => Date
 }
@@ -70,17 +69,19 @@ export class WalletsService {
 
   async create(ctx: ServiceCtx, input: CreateWalletInput): Promise<Wallet> {
     const id = this.d.newId()
-    await this.d.wallets.insert({
-      id,
-      bookId: ctx.bookId,
-      name: input.name,
-      type: input.type,
-      icon: WALLET_TYPE_ICON[input.type],
-      openingBalance: input.openingBalance,
-      creditLimit: isDebtWallet(input.type) ? (input.creditLimit ?? null) : null,
-      createdBy: ctx.userId,
+    await this.d.uow.withTransaction(async (r) => {
+      await r.wallets.insert({
+        id,
+        bookId: ctx.bookId,
+        name: input.name,
+        type: input.type,
+        icon: WALLET_TYPE_ICON[input.type],
+        openingBalance: input.openingBalance,
+        creditLimit: isDebtWallet(input.type) ? (input.creditLimit ?? null) : null,
+        createdBy: ctx.userId,
+      })
+      await this.log(r, ctx, "wallet.created", id, input.name)
     })
-    await this.log(ctx, "wallet.created", id, input.name)
     return this.get(ctx, id)
   }
 
@@ -90,33 +91,38 @@ export class WalletsService {
     const type = input.type ?? current.type
     if (!isDebtWallet(type) && input.creditLimit != null)
       throw new BusinessError("WALLET_LIMIT_NOT_ALLOWED", "creditLimit")
-    await this.d.wallets.update(ctx.bookId, id, {
-      ...(input.name !== undefined ? { name: input.name } : {}),
-      ...(input.type !== undefined ? { type: input.type, icon: WALLET_TYPE_ICON[input.type] } : {}),
-      ...(input.openingBalance !== undefined ? { openingBalance: input.openingBalance } : {}),
-      // Pindah ke tipe non-utang menghapus limit.
-      ...(!isDebtWallet(type)
-        ? { creditLimit: null }
-        : input.creditLimit !== undefined
-          ? { creditLimit: input.creditLimit }
-          : {}),
+    await this.d.uow.withTransaction(async (r) => {
+      await r.wallets.update(ctx.bookId, id, {
+        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(input.type !== undefined ? { type: input.type, icon: WALLET_TYPE_ICON[input.type] } : {}),
+        ...(input.openingBalance !== undefined ? { openingBalance: input.openingBalance } : {}),
+        // Pindah ke tipe non-utang menghapus limit.
+        ...(!isDebtWallet(type)
+          ? { creditLimit: null }
+          : input.creditLimit !== undefined
+            ? { creditLimit: input.creditLimit }
+            : {}),
+      })
+      await this.log(r, ctx, "wallet.updated", id, input.name ?? current.name)
     })
-    await this.log(ctx, "wallet.updated", id, input.name ?? current.name)
     return this.get(ctx, id)
   }
 
   /** Hapus hanya bila belum ada transaksi; selain itu arsipkan (BR-35, #24). */
   async remove(ctx: ServiceCtx, id: string): Promise<void> {
-    const current = await this.d.wallets.findById(ctx.bookId, id)
-    if (!current) throw new NotFound("WALLET_NOT_FOUND")
-    if (await this.d.wallets.hasTransactions(ctx.bookId, id))
-      throw new BusinessError("WALLET_HAS_TRANSACTIONS", undefined, 409)
-    await this.d.wallets.softDelete(ctx.bookId, id, this.d.now())
-    await this.log(ctx, "wallet.deleted", id, current.name)
+    await this.d.uow.withTransaction(async (r) => {
+      const current = await r.wallets.findById(ctx.bookId, id)
+      if (!current) throw new NotFound("WALLET_NOT_FOUND")
+      if (await r.wallets.hasTransactions(ctx.bookId, id)) {
+        throw new BusinessError("WALLET_HAS_TRANSACTIONS", undefined, 409)
+      }
+      await r.wallets.softDelete(ctx.bookId, id, this.d.now())
+      await this.log(r, ctx, "wallet.deleted", id, current.name)
+    })
   }
 
-  private log(ctx: ServiceCtx, action: string, id: string, name: string): Promise<void> {
-    return this.d.activity.record({
+  private log(r: Repos, ctx: ServiceCtx, action: string, id: string, name: string): Promise<void> {
+    return r.activity.record({
       id: this.d.newId(),
       bookId: ctx.bookId,
       actorId: ctx.userId,

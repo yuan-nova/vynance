@@ -79,7 +79,7 @@ export function WalletForm({ initial, pending, submitLabel, onSubmit, onDelete }
         value={opening}
         onChange={setOpening}
         error={errors.openingBalance}
-        allowNegative
+        allowNegative={debt}
         hint={debt ? "Untuk utang, isi minus. Contoh: -2.250.000" : undefined}
       />
       {debt ? <MoneyInput label="Limit" value={limit} onChange={setLimit} error={errors.creditLimit} /> : null}
