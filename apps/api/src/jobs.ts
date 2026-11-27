@@ -1,12 +1,16 @@
 import { logger } from "./lib/logger"
 import type { MaintenanceService } from "./modules/maintenance/maintenance.service"
+import type { BillingService } from "./modules/subscriptions/billing.service"
 
 // Daftar job worker (TSD §9). Dirakit dari service di container; worker tidak menyentuh db langsung.
 
 type Job = { name: string; run: (now: Date) => Promise<number> }
 
-export function createJobs(s: { maintenanceService: MaintenanceService }): Job[] {
+export function createJobs(s: { maintenanceService: MaintenanceService; billingService: BillingService }): Job[] {
   return [
+    // Tiap jam (PB-05, BR-41); idempoten lewat UNIQUE(subscription_id, subscription_period).
+    { name: "subscription-billing", run: (now) => s.billingService.chargeDue(now) },
+    { name: "subscription-reminders", run: (now) => s.billingService.remindUpcoming(now) },
     { name: "purge-deleted-books", run: (now) => s.maintenanceService.purgeDeletedBooks(now) },
     { name: "clean-invitations", run: (now) => s.maintenanceService.cleanInvitations(now) },
   ]

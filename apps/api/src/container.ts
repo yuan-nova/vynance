@@ -34,6 +34,8 @@ import { MembersService } from "./modules/members/members.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { PlansRepository } from "./modules/plans/plans.repository"
 import { PlansService } from "./modules/plans/plans.service"
+import { BillingRepository } from "./modules/subscriptions/billing.repository"
+import { BillingService } from "./modules/subscriptions/billing.service"
 import { SubscriptionsRepository } from "./modules/subscriptions/subscriptions.repository"
 import { SubscriptionsService } from "./modules/subscriptions/subscriptions.service"
 import { TransactionsRepository } from "./modules/transactions/transactions.repository"
@@ -179,6 +181,11 @@ const healthScoreService = new HealthScoreService({
 
 export const container = {
   ...services,
+  billingService: new BillingService({
+    billing: new BillingRepository(db),
+    newId: () => newId(),
+    sendMail: mailer.send,
+  }),
   maintenanceService: new MaintenanceService({
     maintenance: new MaintenanceRepository(db),
     uow: new UnitOfWork(db, (exec) => ({ maintenance: new MaintenanceRepository(exec) })),

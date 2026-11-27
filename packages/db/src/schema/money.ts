@@ -201,6 +201,8 @@ export const subscriptions = mysqlTable(
     categoryId: ref("category_id").references(() => categories.id),
     startDate: date("start_date", { mode: "string" }).notNull(),
     pausedAt: timestamp("paused_at"),
+    /** Bulan terakhir pengingat H-3 terkirim; mencegah pengingat ganda (#30). */
+    remindedPeriod: month("reminded_period"),
     ...audit,
   },
   (t) => [
