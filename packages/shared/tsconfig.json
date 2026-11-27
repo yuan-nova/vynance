@@ -1,1 +1,1 @@
-{ "extends": "@vynance/config/tsconfig.base.json", "include": ["src"] }
+{ "extends": "@vynance/config/tsconfig.base.json", "compilerOptions": { "types": ["bun"] }, "include": ["src"] }

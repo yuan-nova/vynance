@@ -117,7 +117,7 @@
       "linter": { "rules": { "style": { "noProcessEnv": "off" } } }
     },
     {
-      "includes": ["packages/shared/**"],
+      "includes": ["packages/shared/**", "!**/*.test.ts"],
       "linter": {
         "rules": {
           "style": {
