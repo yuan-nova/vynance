@@ -114,4 +114,18 @@ describe("daftar transaksi (FR-21)", () => {
     const mine = await get<TransactionPage>(U, `/api/v1/books/${bookId}/transactions?q=milik`)
     expect(mine.data).toHaveLength(0)
   })
+
+  test("ekspor CSV: filter sama dengan daftar, BOM, pemisah ;, nominal bulat (FR-22)", async () => {
+    const started = performance.now()
+    const res = await app(U).request(`/api/v1/books/${bookId}/exports/transactions.csv?type=income`)
+    expect(res.headers.get("content-type")).toContain("text/csv")
+    expect(res.headers.get("content-disposition")).toContain("attachment")
+    const text = await res.text()
+    expect(text.charCodeAt(0)).toBe(0xfeff)
+    const lines = text.slice(1).trimEnd().split(/\r?\n/)
+    expect(lines[0]).toBe("tanggal;jenis;jumlah;rekening;rekening_tujuan;kategori;catatan;dicatat_oleh")
+    expect(lines).toHaveLength(13)
+    expect(lines[1]).toMatch(/^2026-\d{2}-\d{2};Uang masuk;\d+;/)
+    expect(performance.now() - started).toBeLessThan(5000)
+  })
 })

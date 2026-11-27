@@ -2,6 +2,7 @@ import { zValidator } from "@hono/zod-validator"
 import {
   categoryKindSchema,
   createTransactionSchema,
+  dateOnlyOf,
   idempotencyKeySchema,
   idSchema,
   scanCommitSchema,
@@ -66,3 +67,18 @@ export const transactionRoutes = (svc: TransactionsService) =>
     .post("/:id/restore", zValidator("param", idParam, validationHook), async (c) =>
       ok(c, await svc.restore(c.var.ctx, c.req.valid("param").id)),
     )
+
+/** `/books/:bookId/exports` (FR-22, TSD §8): berkas, bukan amplop { data }. */
+export const exportRoutes = (svc: TransactionsService) =>
+  new Hono<AppEnv>().get(
+    "/transactions.csv",
+    zValidator("query", transactionListQuerySchema.omit({ cursor: true, limit: true }), validationHook),
+    async (c) => {
+      const csv = await svc.exportCsv(c.var.ctx, c.req.valid("query"))
+      return c.body(csv, 200, {
+        "content-type": "text/csv; charset=utf-8",
+        "content-disposition": `attachment; filename="vynance-transaksi-${dateOnlyOf(new Date())}.csv"`,
+        "cache-control": "no-store",
+      })
+    },
+  )

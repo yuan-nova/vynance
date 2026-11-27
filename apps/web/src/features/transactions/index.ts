@@ -15,3 +15,4 @@ export {
   useTransactionSummary,
   useUpdateTransaction,
 } from "./hooks/useTransactions"
+export { transactionsCsvUrl } from "./services/transactions.service"
