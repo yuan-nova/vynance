@@ -9,6 +9,8 @@ import { bookRoutes, booksRoutes } from "./modules/books/books.route"
 import type { BooksService } from "./modules/books/books.service"
 import { categoryRoutes } from "./modules/categories/categories.route"
 import type { CategoriesService } from "./modules/categories/categories.service"
+import { dashboardRoutes } from "./modules/dashboard/dashboard.route"
+import type { DashboardService } from "./modules/dashboard/dashboard.service"
 import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
 import { investmentTypeRoutes } from "./modules/investments/investments.route"
@@ -35,6 +37,7 @@ type Deps = {
   transactionsService: TransactionsService
   plansService: PlansService
   investmentsService: InvestmentsService
+  dashboardService: DashboardService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -60,7 +63,8 @@ export const createApp = (deps: Deps) => {
         .route("/onboarding", onboardingRoutes(deps.onboardingService))
         .route("/transactions", transactionRoutes(deps.transactionsService))
         .route("/plans", planRoutes(deps.plansService))
-        .route("/investment-types", investmentTypeRoutes(deps.investmentsService)),
+        .route("/investment-types", investmentTypeRoutes(deps.investmentsService))
+        .route("/dashboard", dashboardRoutes(deps.dashboardService)),
     )
 }
 

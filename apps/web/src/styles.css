@@ -1204,3 +1204,47 @@ p {
 .income-row .icon-btn {
   margin-bottom: 16px;
 }
+
+/* ---------- Beranda (design/03-dashboard.svg) ---------- */
+
+.home-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 12px;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.month-card .month-nav {
+  margin: -4px 0 4px;
+}
+
+.month-card .summary-strip {
+  margin-top: 12px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--pri);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}

@@ -44,3 +44,11 @@ export const BUDGET_STATUS_TONE: Record<BudgetStatus, PillTone> = {
   exact: "warn",
   safe: "inc",
 }
+
+/** Anggaran teratas Beranda: yang sudah diatur, urut pemakaian tertinggi lalu realisasi terbesar. */
+export function topBudgets<T extends { allocated: bigint; spent: bigint }>(items: readonly T[], n: number): T[] {
+  return items
+    .filter((i) => i.allocated > 0n)
+    .sort((a, b) => usageBp(b.allocated, b.spent) - usageBp(a.allocated, a.spent) || Number(b.spent - a.spent))
+    .slice(0, n)
+}
