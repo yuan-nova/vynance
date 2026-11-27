@@ -387,7 +387,7 @@ Semua aturan tampilan dan perilaku UI ada di **[DESIGN-SYSTEM.md](DESIGN-SYSTEM.
 | Kode error | UPPER_SNAKE | `WALLET_NOT_FOUND` |
 | Tabel & kolom DB | snake_case, tabel jamak | `transactions.book_id` |
 
-Nama variabel, fungsi, kelas, dan tipe diperiksa Biome `useNamingConvention` (camelCase, PascalCase, UPPER_SNAKE untuk konstanta). Key objek yang ditulis dalam tanda kutip, misalnya header `"Idempotency-Key"`, tidak diperiksa.
+Nama variabel, fungsi, kelas, dan tipe diperiksa Biome `useNamingConvention` (camelCase, PascalCase, UPPER_SNAKE untuk konstanta). Key objek boleh camelCase atau UPPER_SNAKE (misalnya nama variabel env). Key dari sistem luar yang memakai format lain, misalnya `snake_case` dari API pihak ketiga, ditulis dengan `biome-ignore` beralasan, atau dipetakan di satu adapter.
 
 Nama di kode memakai **bahasa Inggris**. Teks yang tampil ke pengguna memakai Bahasa Indonesia dan disimpan di `shared/errors` atau di komponen.
 

@@ -1,0 +1,4 @@
+[install]
+registry = "https://registry.npmjs.org"
+# Satu node_modules di root, supaya volume node_modules di container cukup satu.
+linker = "hoisted"

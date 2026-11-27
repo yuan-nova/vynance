@@ -1,0 +1,47 @@
+/* Token tema dari design/_source/themes.py (Hutan terang, Malam gelap). DS-THEME-01. */
+:root {
+  color-scheme: light;
+  --bg: #f5f4ef;
+  --surf: #ffffff;
+  --surf2: #edebe4;
+  --ink: #15201c;
+  --muted: #5c6863;
+  --faint: #6d7672;
+  --line: #e3e0d7;
+  --field-line: #828b87;
+  --pri: #1c5d4c;
+  --pri-s: #ddebe4;
+  --onp: #ffffff;
+  --inc: #1d7650;
+  --exp: #c0453a;
+  --exp-s: #f8e1de;
+  --radius-card: 20px;
+  --gutter: 20px;
+  --font: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0e1412;
+    --surf: #161e1b;
+    --surf2: #1f2925;
+    --ink: #e8f0ec;
+    --muted: #9daba5;
+    --faint: #7b8a83;
+    --line: #26322d;
+    --field-line: #616d68;
+    --pri: #4fd1a1;
+    --pri-s: #163a2f;
+    --onp: #05231a;
+    --inc: #5ad69a;
+    --exp: #ff7b6c;
+    --exp-s: #3a201d;
+  }
+}
+
+@media (max-width: 374px) {
+  :root {
+    --gutter: 16px;
+  }
+}

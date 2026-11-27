@@ -1,0 +1,95 @@
+# Lingkungan development Vynance. Jalankan: bun run dev  (= docker compose up -d --build)
+#   nginx (pintu masuk) http://localhost:12080
+#   api               http://localhost:12081/api/v1/health
+#   web (Vite)        http://localhost:12082
+#   mysql             localhost:12306
+name: vynance
+
+x-bun: &bun
+  image: oven/bun:1.3.13
+  working_dir: /app
+  restart: unless-stopped
+  volumes:
+    - .:/app
+    # node_modules Linux terpisah dari node_modules Windows di host.
+    - node-modules:/app/node_modules
+  networks: [vynance]
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: vynance-db
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci", "--default-time-zone=+00:00"]
+    environment:
+      MYSQL_DATABASE: vynance
+      MYSQL_USER: vynance
+      MYSQL_PASSWORD: ${DB_PASSWORD:-vynance_dev}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_dev}
+    ports:
+      - "12306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [vynance]
+
+  # Memasang dependensi Linux sekali ke volume node-modules, lalu selesai.
+  install:
+    <<: *bun
+    container_name: vynance-install
+    restart: "no"
+    command: ["bun", "install", "--frozen-lockfile", "--ignore-scripts"]
+
+  api:
+    <<: *bun
+    container_name: vynance-api
+    command: ["bun", "run", "--cwd", "apps/api", "dev"]
+    environment:
+      NODE_ENV: development
+      PORT: "12081"
+      DATABASE_URL: mysql://vynance:${DB_PASSWORD:-vynance_dev}@db:3306/vynance
+    ports:
+      - "12081:12081"
+    depends_on:
+      db:
+        condition: service_healthy
+      install:
+        condition: service_completed_successfully
+
+  web:
+    <<: *bun
+    container_name: vynance-web
+    command: ["bun", "run", "--cwd", "apps/web", "dev"]
+    environment:
+      API_PROXY_TARGET: http://api:12081
+      VITE_POLL: "1"
+    ports:
+      - "12082:12082"
+    depends_on:
+      install:
+        condition: service_completed_successfully
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: vynance-nginx
+    restart: unless-stopped
+    ports:
+      - "12080:12080"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - web
+    networks: [vynance]
+
+volumes:
+  db-data:
+  node-modules:
+
+networks:
+  vynance:
+    driver: bridge

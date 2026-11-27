@@ -3,7 +3,17 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!design", "!docs", "!.agents", "!.claude", "!**/dist", "!**/drizzle/meta", "!**/*.md"]
+    "includes": [
+      "**",
+      "!design",
+      "!docs",
+      "!.agents",
+      "!.claude",
+      "!**/dist",
+      "!**/drizzle/meta",
+      "!**/*.md",
+      "!**/routeTree.gen.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -72,7 +82,15 @@
         "useImportType": "error",
         "noParameterAssign": "error",
         "noProcessEnv": "error",
-        "useNamingConvention": { "level": "error", "options": { "strictCase": false } },
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "conventions": [
+              { "selector": { "kind": "objectLiteralProperty" }, "formats": ["camelCase", "CONSTANT_CASE"] }
+            ]
+          }
+        },
         "noRestrictedImports": {
           "level": "error",
           "options": {

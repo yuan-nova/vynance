@@ -416,7 +416,7 @@ Navigasi bawah 5 slot: **Beranda · Transaksi · [ + ] · Anggaran · Lainnya**
 - **Transaksi**: daftar per tanggal, filter chip, cari, ekspor.
 - **+**: bottom sheet tambah transaksi; tekan lama → Scan struk.
 - **Anggaran**: rencana bulanan, status per kategori, wizard, carry-over.
-- **Lainnya**: Rekening, Target Tabungan, Investasi, Langganan, Zakat, Dana Pendidikan, Sumber Penghasilan, Slip Gaji, Kategori, Keluarga, Pengaturan, AI Advisor.
+- **Lainnya**: Rekening, Target Tabungan, Investasi, Langganan, Zakat, Dana Pendidikan, Sumber Penghasilan, Slip Gaji, Kategori, Buku, Pengaturan, AI Advisor.
 
 ### 12.3 Daftar layar (SVG di folder `design/`)
 | File | Layar |

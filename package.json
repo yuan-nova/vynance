@@ -11,7 +11,14 @@
     "lint:fix": "biome check --write .",
     "lint:deps": "bun tooling/lint-deps.ts",
     "format": "biome format --write .",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "dev": "docker compose up -d --build",
+    "dev:down": "docker compose down",
+    "dev:logs": "docker compose logs -f --tail=100",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test",
+    "db:generate": "bun run --cwd packages/db db:generate",
+    "db:migrate": "bun run --cwd packages/db db:migrate"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.9",

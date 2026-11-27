@@ -1,12 +1,32 @@
 # Vynance
 
-Aplikasi keuangan keluarga, mobile-first. Proyek ini masih di tahap kebutuhan, desain, dan aturan. Kode aplikasi belum ada.
+Aplikasi keuangan keluarga, mobile-first. Satu akun bisa punya beberapa **buku** dan mengelolanya bersama anggota yang diundang.
+
+## Menjalankan (Docker)
+
+Butuh Docker dan Bun.
+
+```bash
+bun install        # dependensi host + hook pre-commit
+bun run dev        # docker compose up -d --build
+bun run db:migrate # migrasi DB (setelah ada tabel)
+```
+
+| Layanan | Alamat |
+|---|---|
+| Aplikasi (nginx) | http://localhost:12080 |
+| Backend | http://localhost:12081/api/v1/health |
+| Frontend (Vite) | http://localhost:12082 |
+| MySQL | `localhost:12306`, user `vynance`, DB `vynance`, sandi bawaan `vynance_dev` |
+
+Log: `bun run dev:logs`. Berhenti: `bun run dev:down`. Detail lingkungan ada di [TSD §3](docs/TSD-Vynance.md#3-lingkungan-dan-port).
 
 ## Dokumen
 
 | Dokumen | Isi |
 |---|---|
 | [docs/BRD-Vynance.md](docs/BRD-Vynance.md) | Kebutuhan bisnis: proses PB-xx, aturan BR-xx, kebutuhan fungsional FR-xx |
+| [docs/TSD-Vynance.md](docs/TSD-Vynance.md) | Spesifikasi teknis: arsitektur, lingkungan, ERD, API, keamanan, worker |
 | [docs/CODING-GUIDELINES.md](docs/CODING-GUIDELINES.md) | Aturan kode: lapisan, `packages/shared`, validasi, `any`, `useEffect` |
 | [docs/DESIGN-SYSTEM.md](docs/DESIGN-SYSTEM.md) | Kontrak UI/UX mobile-first (`DS-*`) |
 | [docs/design-system/quick-rules.md](docs/design-system/quick-rules.md) | Ringkasan tabel keputusan UI |
@@ -29,7 +49,7 @@ python -I compare.py                             # lembar perbandingan
 python -I contrast.py                            # tabel kontras token
 ```
 
-## Stack (rencana)
+## Stack
 
 Monorepo Bun · Hono · Vite + React + TanStack Router/Query/Form · MySQL + Drizzle · Zod. Alasannya ada di [ADR 0002](docs/adr/0002-monorepo-stack-and-layering.md).
 
