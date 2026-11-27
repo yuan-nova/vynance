@@ -90,7 +90,7 @@ DILARANG memakai `<select>`, checkbox, atau radio native tanpa komponen bersama,
 | Kasus | Bentuk |
 |---|---|
 | Bisa dipulihkan (transaksi, kategori, target) | Langsung hapus + snackbar **Urungkan** 6 detik |
-| Tak terpulihkan / berdampak luas (rekening + transaksinya, anggota, ruang) | Sheet konfirmasi: judul menyebut objek, isi menyebut akibat dalam angka, Batal + Hapus |
+| Tak terpulihkan / berdampak luas (rekening + transaksinya, anggota, buku) | Sheet konfirmasi: judul menyebut objek, isi menyebut akibat dalam angka, Batal + Hapus |
 
 ## 7. Nominal — DS-MONEY-01, DS-COLOR-01
 
@@ -126,7 +126,7 @@ Memuat (skeleton) · Kosong (ajakan + tombol) · Tidak cocok filter (+ Atur ulan
 
 ## 11. Istilah — DS-LANG-01
 
-Uang masuk / Uang keluar · Transfer · Rekening · Anggaran / Sisa anggaran · Target tabungan · Ruang keluarga · Catat transaksi · Simpan · Batal · Hapus · Ubah · Kembali · Urungkan. Menyapa pengguna dengan "kamu", sentence case.
+Uang masuk / Uang keluar · Transfer · Rekening · Anggaran / Sisa anggaran · Target tabungan · Buku · Kode buku · Anggota · Catat transaksi · Simpan · Batal · Hapus · Ubah · Kembali · Urungkan. Menyapa pengguna dengan "kamu", sentence case.
 
 ## 12. Sebelum PR — DS-QA-01
 

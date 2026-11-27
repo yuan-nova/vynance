@@ -13,7 +13,7 @@ Aplikasi lama memakai React + Firebase. Analisa kode (BRD §9) menemukan masalah
 - tidak ada transaksi DB atomik (saldo dan nilai aset tidak dibalik saat hapus)
 - kunci API tersimpan di Firestore
 
-Vynance butuh validasi dan aturan bisnis yang **sama** di frontend dan backend, isolasi data per ruang keluarga, dan uang yang disimpan tanpa float.
+Vynance butuh validasi dan aturan bisnis yang **sama** di frontend dan backend, isolasi data per buku, dan uang yang disimpan tanpa float.
 
 ## Keputusan
 
@@ -36,7 +36,7 @@ Vynance butuh validasi dan aturan bisnis yang **sama** di frontend dan backend, 
   - Tidak boleh ada dependensi melingkar.
 - **D-4. Lapisan frontend.** routes → pages → feature components → hooks → services → api-client.
 - **D-5. `packages/shared`** memuat semua tipe, fungsi yang dipakai berulang, dan validasi yang dipakai bersama frontend–backend. Isinya TypeScript murni, dengan `zod` sebagai satu-satunya dependensi.
-- **D-6. Uang** disimpan sebagai `BIGINT` rupiah utuh. Semua tabel data keluarga punya `space_id`. Relasi lewat FK, bukan nama.
+- **D-6. Uang** disimpan sebagai `BIGINT` rupiah utuh. Semua tabel data keuangan punya `book_id`. Relasi lewat FK, bukan nama.
 
 ## Alternatif yang ditolak
 

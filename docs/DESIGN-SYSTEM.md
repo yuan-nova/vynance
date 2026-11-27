@@ -136,7 +136,7 @@ DILARANG menaruh aksi utama (Simpan, Tambah, Bayar) **hanya** di pojok kanan ata
 ### DS-NAV-02 — Bilah atas
 
 **Ketentuan.**
-- **Layar tingkat 1** (tab): judul 22/800 di kiri, maksimal dua aksi ikon di kanan (misalnya cari, notifikasi). Pemilih ruang keluarga aktif ada di Beranda.
+- **Layar tingkat 1** (tab): judul 22/800 di kiri, maksimal dua aksi ikon di kanan (misalnya cari, notifikasi). Pemilih buku aktif ada di Beranda (DS-NAV-04).
 - **Layar tingkat 2+**: tombol kembali 44 px (`ArrowLeft`, `aria-label` "Kembali ke {induk}"), judul 17/800 satu baris dengan truncate, dan maksimal satu aksi kontekstual di kanan.
 - Tombol kembali menuju **induk informasi**, bukan sekadar riwayat browser, bila pengguna masuk lewat tautan langsung.
 
@@ -146,15 +146,19 @@ DILARANG menaruh aksi utama (Simpan, Tambah, Bayar) **hanya** di pojok kanan ata
 
 ### DS-NAV-03 — Menu Lainnya
 
-**Ketentuan.** Lainnya berisi kisi menu yang dikelompokkan (Uang, Rencana, Keluarga, Akun), maksimal 4 kolom pada 390 px dengan label di bawah ikon. Urutan grup tetap. Item yang tidak diizinkan untuk peran pengguna **disembunyikan**, tidak dinonaktifkan. Pengecualiannya: fitur yang belum rilis ditampilkan nonaktif dengan label "Segera hadir".
+**Ketentuan.** Lainnya berisi kisi menu yang dikelompokkan (Uang, Perencanaan, Data), maksimal 4 kolom pada 390 px dengan label di bawah ikon. Urutan grup tetap. Semua anggota buku melihat menu yang sama karena hak aksesnya sama (BR-49). Fitur yang belum rilis ditampilkan nonaktif dengan label "Segera hadir".
 
 **Penerimaan.** Setiap fitur di BRD §12.2 bisa dicapai dalam maksimal dua ketukan dari Lainnya.
 
-### DS-NAV-04 — Ruang keluarga aktif
+### DS-NAV-04 — Buku aktif
 
-**Ketentuan.** Ruang keluarga yang aktif selalu terlihat di Beranda (nama ruang + avatar) dan bisa diganti dari sana. Mengganti ruang mereset filter dan kembali ke Beranda. Semua layar menampilkan data **hanya** dari ruang aktif.
+**Ketentuan.**
+- Buku aktif selalu terlihat di header Beranda sebagai **nama buku + kode buku** (`Keluarga Pratama · K7QM-3XPA`), dan bisa diganti dengan mengetuknya. Pemilih buku berupa bottom sheet berisi daftar buku dengan nama, kode, dan jumlah anggota.
+- Nama buku boleh sama (BR-47), jadi **di mana pun buku disebut dalam daftar atau pilihan, kodenya ikut tampil**. Nama saja tidak cukup untuk membedakan buku.
+- Kode buku ditulis dengan angka tabular dan format `XXXX-XXXX`.
+- Mengganti buku mereset filter dan kembali ke Beranda. Semua layar menampilkan data **hanya** dari buku aktif.
 
-**Penerimaan.** Setelah mengganti ruang, tidak ada data ruang lama yang tersisa di cache layar mana pun.
+**Penerimaan.** Dengan dua buku bernama sama, pengguna bisa memilih buku yang benar hanya dari pemilih buku. Setelah mengganti buku, tidak ada data buku lama yang tersisa di cache layar mana pun.
 
 ---
 
@@ -218,7 +222,8 @@ DILARANG membuat varian ad hoc lewat class (misalnya `ghost` + warna merah).
 | Notifikasi | `bell` | | AI advisor | `spark` |
 | Rekening bank | `bank` | | Tunai | `cash` |
 | Kartu / PayLater | `card` | | Dana pendidikan | `school` |
-| Keluarga | `users` | | Pengaturan | `sliders` |
+| Buku | `book` | | Pengaturan | `sliders` |
+| Anggota | `users` | | | |
 
 Nama ikon sama dengan kunci `ICONS` di `design/_source/gen_svg.py` dan komponen `Icon` di `packages/ui`. Tanda * berarti ikon belum ada di generator dan wajib ditambahkan sebelum dipakai. Makna baru WAJIB ditambahkan ke registri ini sebelum dipakai.
 
@@ -228,7 +233,7 @@ Nama ikon sama dengan kunci `ICONS` di `design/_source/gen_svg.py` dan komponen 
 
 **Ketentuan.**
 - Hapus yang **bisa dipulihkan** (transaksi, kategori, target): langsung dijalankan, lalu snackbar "Transaksi dihapus · **Urungkan**" selama 6 detik. Tanpa konfirmasi.
-- Hapus yang **tidak bisa dipulihkan** atau berdampak luas (hapus rekening beserta transaksinya, keluarkan anggota, hapus ruang): bottom sheet konfirmasi dengan judul yang menyebut objek, isi yang menyebut akibat dalam angka ("128 transaksi ikut terhapus"), lalu tombol Batal (`ghost`) dan Hapus (`destructive`).
+- Hapus yang **tidak bisa dipulihkan** atau berdampak luas (hapus rekening beserta transaksinya, keluarkan anggota, hapus buku): bottom sheet konfirmasi dengan judul yang menyebut objek, isi yang menyebut akibat dalam angka ("128 transaksi ikut terhapus"), lalu tombol Batal (`ghost`) dan Hapus (`destructive`).
 - DILARANG memakai `window.confirm` / `alert`.
 
 **Penerimaan.** Setiap aksi hapus masuk ke salah satu dari dua jalur di atas.
@@ -436,7 +441,7 @@ DILARANG memakai `<select>`, checkbox, atau radio native tanpa komponen bersama.
 | Anggaran kategori (BR status anggaran) | Aman → inc · Pas → warn · Melebihi → exp |
 | Target tabungan | Sesuai jalur → inc · Berisiko → warn · Tercapai → pri |
 | Langganan | Aktif → inc · Jatuh tempo ≤ 3 hari → warn · Lewat → exp · Dijeda → netral |
-| Anggota keluarga | Pemilik · Pengelola · Anggota · Pemantau → netral (peran bukan status) |
+| Undangan buku | Aktif → pri · Kedaluwarsa / dibatalkan → netral |
 
 Pill: tinggi 22, 11/700, latar tint `*_S`, teks token yang lolos 4,5:1. Tanpa border. Tidak pernah memakai warna primer solid.
 
@@ -497,7 +502,7 @@ Snackbar diumumkan lewat `aria-live="polite"`. Error kritis memakai `assertive`.
 | Rekening | Wallet, Dompet digital |
 | Anggaran, Sisa anggaran | Budget, Variance |
 | Target tabungan | Goal, Sasaran |
-| Ruang keluarga | Space, Workspace |
+| Buku, Kode buku, Anggota | Ruang, Space, Workspace, Tenant, Grup |
 | Catat transaksi | Input transaksi, Tambah data |
 | Simpan · Batal · Hapus · Ubah · Kembali · Urungkan | Save, Cancel, Submit |
 

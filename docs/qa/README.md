@@ -27,7 +27,7 @@ Basis commit: <sha>. Penguji: <nama>. Tanggal: YYYY-MM-DD.
 | State: memuat / kosong / tidak cocok filter / gagal / offline | lulus (offline tidak relevan: <alasan>) | |
 | Data terburuk: nama 40 karakter, nominal 13 digit, 0 item, ≥ 200 item | lulus | |
 | Mode privasi menyembunyikan semua nominal | lulus | |
-| Peran: Pemilik / Pengelola / Anggota / Pemantau | lulus | |
+| Akses buku: dua akun anggota melihat data yang sama; akun bukan anggota ditolak; dua buku bernama sama bisa dibedakan | lulus | |
 | Keyboard: urutan fokus, ring fokus, Escape menutup sheet | lulus | |
 | Screen reader (TalkBack/VoiceOver): label tombol ikon, pengumuman snackbar | lulus | |
 | Teks sistem 200 % | lulus | |

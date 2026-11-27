@@ -47,7 +47,7 @@ Setiap alternatif wajib lolos **semua** gerbang. Alternatif yang gagal satu gerb
 | G5 | **State lengkap** | Periksa desain | Kelima state DS-STATE-01 yang relevan sudah didesain |
 | G6 | **Arti tidak hanya lewat warna** | Lihat desain dalam grayscale | Masuk/keluar/status tetap terbedakan |
 | G7 | **Kontrak yang ada** | Checklist DESIGN-SYSTEM.md | Tidak melanggar kontrak DS-xx, kecuali kontrak itu memang yang diusulkan untuk diubah (lalu jalur ADR) |
-| G8 | **Keamanan data** | Periksa | Tidak menampilkan data ruang lain, menghormati mode privasi (BR-44), dan tidak menampilkan aksi di luar izin peran |
+| G8 | **Keamanan data** | Periksa | Tidak menampilkan data buku lain, menghormati mode privasi (BR-44), dan buku bernama sama tetap bisa dibedakan lewat kodenya |
 
 ## Langkah 3 — Skor berbobot
 
@@ -138,7 +138,7 @@ Isi desain dengan data terburuk berikut, lalu hitung yang **rusak** (terpotong t
 5. 1 item
 6. ≥ 200 item
 7. 12 kategori dalam satu anggaran
-8. 5 anggota keluarga dengan nama mirip
+8. 5 anggota dengan nama mirip, dan 2 buku dengan nama sama
 9. Teks sistem 200 %
 10. Data lama dengan kategori yang sudah dihapus
 

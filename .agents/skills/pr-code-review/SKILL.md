@@ -67,7 +67,7 @@ Review the diff, reading beyond it whenever needed (callers of changed functions
 - **Performance** — N+1 queries, unbounded queries/loops, missing pagination, heavy work on hot paths — only with a realistic data size or call frequency in mind.
 - **Guideline violations** — only rules actually written in `CODING-GUIDELINES.md`, and only when the violation has a real consequence. The rules most likely to have real consequences in Vynance:
   - a route or service touching `db`/Drizzle directly, or a repository calling a service (layering);
-  - a repository query on family data without a `spaceId` filter (cross-family data leak — treat as Security);
+  - a repository query on book data without a `bookId` filter (cross-book data leak — treat as Security), or an endpoint under `/books/:bookId` that skips the `bookAccess` membership check;
   - money handled as `number`/float instead of `bigint` (data integrity);
   - writes that must be consistent (transaction + wallet balance + asset ledger) outside one `withTransaction`;
   - validation or business rules duplicated in `apps/*` instead of `packages/shared`, where the two copies can diverge;

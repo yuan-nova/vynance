@@ -21,7 +21,7 @@ Hasil analisa menunjukkan tiga hal:
 2. **Nama "Keluarga" belum terwujud**: setiap data terkunci per satu akun Google. Tidak ada fitur berbagi dompet dengan pasangan atau anggota keluarga.
 3. **Ada celah logika** yang membuat angka bisa salah (contoh: PayLater dihitung sebagai aset, hapus transaksi investasi tidak mengembalikan nilai aset). Rinciannya ada di bagian 9.
 
-Vynance mengambil inti yang sudah terbukti, memperbaiki celahnya, dan menambahkan **ruang keluarga bersama** sebagai pembeda utama. Desainnya dibuat *mobile first*: semua alur utama bisa selesai dengan satu tangan.
+Vynance mengambil inti yang sudah terbukti, memperbaiki celahnya, dan menambahkan **buku bersama** sebagai pembeda utama: satu akun bisa punya beberapa buku (misalnya Pribadi, Keluarga, Warung), dan setiap buku bisa dikelola bersama orang lain yang diundang. Desainnya dibuat *mobile first*: semua alur utama bisa selesai dengan satu tangan.
 
 ---
 
@@ -45,7 +45,7 @@ Vynance mengambil inti yang sudah terbukti, memperbaiki celahnya, dan menambahka
 | BO-1 | Pengguna rutin mencatat | % pengguna aktif mingguan yang mencatat ≥3 transaksi/minggu | ≥ 60% |
 | BO-2 | Mencatat cepat | Waktu rata-rata tambah transaksi manual | ≤ 10 detik |
 | BO-3 | Anggaran dipakai | % pengguna yang punya anggaran bulan berjalan | ≥ 40% |
-| BO-4 | Keluarga ikut bergabung | % ruang keluarga dengan ≥2 anggota aktif | ≥ 30% |
+| BO-4 | Keluarga ikut bergabung | % buku dengan ≥2 anggota aktif | ≥ 30% |
 | BO-5 | Angka bisa dipercaya | Laporan selisih saldo dari pengguna per 1.000 pengguna | < 5 |
 | BO-6 | Kebiasaan sehat | Rata-rata kenaikan skor kesehatan setelah 3 bulan | +10 poin |
 
@@ -75,7 +75,7 @@ Vynance mengambil inti yang sudah terbukti, memperbaiki celahnya, dan menambahka
 ## 5. Ruang Lingkup
 
 ### 5.1 Termasuk (MVP + fase lanjut)
-- Akun & ruang keluarga (baru)
+- Akun & buku: banyak buku per akun, undang anggota ke buku (baru)
 - Rekening (6 tipe) dan saldo berjalan
 - Transaksi: pemasukan, pengeluaran, transfer, beli aset, jual aset
 - Kategori dan anggaran per kategori
@@ -102,7 +102,9 @@ Vynance mengambil inti yang sudah terbukti, memperbaiki celahnya, dan menambahka
 | Entitas | Atribut utama | Catatan aturan |
 |---|---|---|
 | **Pengguna** | nama, email, foto, bahasa, tema | Login Google; Vynance menambah login email/OTP |
-| **Ruang Keluarga** *(baru)* | nama, anggota, peran | Peran: Pemilik, Pengelola, Anggota, Pemantau |
+| **Buku** *(baru)* | nama, kode, anggota | Wadah semua data keuangan. Semua entitas di bawah (Rekening s.d. Slip Gaji) milik tepat satu buku. Nama boleh sama, kode selalu beda (BR-47, BR-48) |
+| **Anggota Buku** *(baru)* | buku, pengguna, tanggal bergabung | Satu pengguna bisa menjadi anggota banyak buku. Semua anggota punya akses yang sama (BR-49) |
+| **Undangan** *(baru)* | buku, tautan, pengundang, kedaluwarsa, status | Status: aktif, dipakai, dibatalkan, kedaluwarsa (BR-50) |
 | **Rekening** | nama, tipe, ikon, saldo awal, limit | Tipe: bank, e-wallet, tunai, kartu kredit, PayLater, RDN. Limit hanya untuk tipe utang |
 | **Transaksi** | tipe, jumlah, tanggal, rekening, kategori, catatan, sumber | Tipe: `income`, `expense`, `transfer`, `investment`, `investment_sale`. Sumber: manual, langganan otomatis, scan |
 | **Kategori** | nama, tipe (masuk/keluar), anggaran bulanan, grup | Grup *(baru)*: Kebutuhan / Keinginan / Tabungan, untuk metode 50/30/20 |
@@ -121,18 +123,18 @@ Vynance mengambil inti yang sudah terbukti, memperbaiki celahnya, dan menambahka
 
 ### PB-01 Onboarding
 1. Pengguna masuk (Google / email).
-2. Sistem membuat data bawaan: **3 rekening** (Dompet Tunai, Bank, Kartu Kredit limit Rp10 jt), **10 kategori pengeluaran**, **4 kategori pemasukan**, **3 jenis investasi**.
-3. *(Vynance)* Pengguna mengisi saldo awal tiap rekening dalam satu layar, lalu memilih: kelola sendiri atau buat ruang keluarga.
+2. Sistem membuat buku pertama bernama **Pribadi** berisi data bawaan: **3 rekening** (Dompet Tunai, Bank, Kartu Kredit limit Rp10 jt), **10 kategori pengeluaran**, **4 kategori pemasukan**, **3 jenis investasi**.
+3. *(Vynance)* Pengguna mengisi saldo awal tiap rekening dalam satu layar, lalu memilih: kelola sendiri atau undang anggota ke buku ini.
 4. Jika ada data dari mode demo di perangkat, sistem menawarkan impor.
 
 ```mermaid
 flowchart LR
 A[Buka aplikasi] --> B{Sudah login?}
 B -- Belum --> C[Login Google / Email]
-C --> D[Buat data bawaan]
+C --> D[Buat buku Pribadi + data bawaan]
 D --> E[Isi saldo awal rekening]
 E --> F{Kelola bersama?}
-F -- Ya --> G[Buat ruang keluarga & undang]
+F -- Ya --> G[Undang anggota ke buku]
 F -- Tidak --> H[Dashboard]
 G --> H
 B -- Sudah --> H
@@ -226,18 +228,25 @@ H --> I[Akhir bulan: bawa sisa ke bulan depan]
 3. AI menjawab dalam Bahasa Indonesia, memakai angka pengguna, maksimal ±300 kata.
 4. Data ringkasan dikirim ke penyedia AI hanya setelah pengguna setuju.
 
-### PB-12 Ruang Keluarga *(baru di Vynance)*
-1. Pemilik membuat ruang keluarga dan mengundang lewat tautan / nomor HP.
-2. Setiap rekening punya visibilitas: **Bersama** (semua anggota lihat) atau **Pribadi**.
-3. Transaksi mencatat siapa yang membuatnya.
-4. Anggaran bulanan berlaku untuk ruang keluarga. Notifikasi saat kategori mencapai 90%.
+### PB-12 Buku & Anggota *(baru di Vynance)*
+1. Setiap akun punya minimal satu buku sejak daftar (PB-01). Pengguna bisa membuat buku lain kapan saja, misalnya untuk keluarga, usaha, atau arisan. Buku baru diisi data bawaan yang sama dengan PB-01.
+2. Pengguna memilih **buku aktif** dari Beranda. Semua layar hanya menampilkan data buku aktif. Saldo, anggaran, dan laporan tidak digabung lintas buku.
+3. Anggota mana pun bisa mengundang orang lain lewat tautan undangan. Penerima masuk atau daftar, lalu menjadi anggota buku itu.
+4. **Semua anggota punya akses yang sama**: melihat dan mengubah semua data buku, mengundang, mengeluarkan anggota lain, keluar dari buku, dan menghapus buku.
+5. Setiap transaksi dan perubahan mencatat siapa yang melakukannya, dan tampil di aktivitas buku.
+6. Anggaran bulanan berlaku untuk buku. Notifikasi dikirim ke semua anggota saat kategori mencapai 90%.
 
-| Peran | Lihat | Catat transaksi | Ubah anggaran/rekening | Kelola anggota |
-|---|---|---|---|---|
-| Pemilik | ✔ | ✔ | ✔ | ✔ |
-| Pengelola | ✔ | ✔ | ✔ | – |
-| Anggota | ✔ (bersama) | ✔ | – | – |
-| Pemantau | ✔ (bersama) | – | – | – |
+```mermaid
+flowchart LR
+A[Anggota buku] --> B[Buat tautan undangan]
+B --> C[Kirim lewat WhatsApp / salin]
+C --> D{Penerima sudah punya akun?}
+D -- Belum --> E[Daftar]
+D -- Sudah --> F[Masuk]
+E --> G[Gabung ke buku]
+F --> G
+G --> H[Buku muncul di daftar buku penerima]
+```
 
 ---
 
@@ -298,13 +307,27 @@ Label: **≥80 Sangat Baik**, **≥60 Baik**, **≥40 Cukup**, **<40 Perlu Perha
 | BR-43 | Inflasi pendidikan bawaan 12%/tahun, bisa diubah pengguna. |
 | BR-44 | Mode privasi mengganti semua nominal menjadi "Rp ••••••". |
 
+### 8.7 Buku & anggota
+| ID | Aturan |
+|---|---|
+| BR-45 | Setiap data keuangan (rekening, transaksi, kategori, anggaran, target, investasi, langganan, dan lainnya) milik tepat satu buku. Transfer hanya boleh antar rekening dalam buku yang sama. |
+| BR-46 | Saat daftar, sistem membuat satu buku bernama "Pribadi" dengan data bawaan PB-01. Setiap buku baru juga diisi data bawaan. |
+| BR-47 | Nama buku wajib, 1–40 karakter, dan **boleh sama** dengan buku lain, termasuk buku lain milik akun yang sama. |
+| BR-48 | **Kode buku** dibuat sistem saat buku dibuat: 8 karakter huruf besar dan angka tanpa huruf yang mirip angka (I, L, O, U), ditampilkan `XXXX-XXXX`. Kode unik di seluruh Vynance, tidak bisa diubah, dan tidak dipakai ulang setelah buku dihapus. Kode ditampilkan di samping nama buku supaya buku bernama sama bisa dibedakan. Mengetahui kode **tidak** memberi akses ke buku. |
+| BR-49 | Semua anggota buku punya hak yang sama. Tidak ada peran. |
+| BR-50 | Tautan undangan berisi token acak, berlaku 7 hari, sekali pakai, dan bisa dibatalkan anggota mana pun. Pengguna yang sudah menjadi anggota tidak bisa diundang lagi. |
+| BR-51 | Buku selalu punya minimal satu anggota. Anggota terakhir tidak bisa keluar; ia harus menghapus buku. |
+| BR-52 | Menghapus buku wajib dikonfirmasi dengan mengetik nama buku. Buku dan seluruh datanya disembunyikan dari semua anggota, bisa dipulihkan anggotanya selama 30 hari, lalu dihapus permanen. |
+| BR-53 | Anggota yang dikeluarkan atau keluar langsung kehilangan akses ke buku. Data yang pernah ia catat tetap ada dan tetap mencatat namanya sebagai pembuat. |
+| BR-54 | Bila pengguna tidak punya buku lagi (keluar dari buku terakhir), aplikasi memintanya membuat buku baru sebelum masuk ke Beranda. |
+
 ---
 
 ## 9. Temuan Analisa Kode (Celah yang Diperbaiki)
 
 | # | Temuan | Dampak | Keputusan Vynance |
 |---|---|---|---|
-| 1 | Tidak ada fitur berbagi keluarga; data per satu akun | Pasangan tidak bisa mencatat bersama | Tambah Ruang Keluarga (PB-12) |
+| 1 | Tidak ada fitur berbagi keluarga; data per satu akun | Pasangan tidak bisa mencatat bersama | Tambah Buku bersama dan banyak buku per akun (PB-12) |
 | 2 | PayLater dihitung sebagai kas likuid | Kekayaan bersih terlalu tinggi | BR-03 |
 | 3 | Hapus transaksi Beli/Jual Aset tidak membalik nilai aset; edit dinonaktifkan | Portofolio tidak cocok dengan riwayat | BR-34 |
 | 4 | Hapus rekening meninggalkan transaksi "Terhapus" | Saldo total berubah tanpa jejak | BR-35 (arsip) |
@@ -329,7 +352,8 @@ Prioritas: **M** = Must (MVP), **S** = Should, **C** = Could.
 |---|---|---|---|
 | FR-01 | Akun | Login Google dan email/OTP; logout | M |
 | FR-02 | Akun | Data bawaan saat pertama kali masuk | M |
-| FR-03 | Keluarga | Buat ruang, undang, atur peran, rekening bersama/pribadi | S |
+| FR-03 | Buku | Buat, ganti buku aktif, ubah nama, hapus dan pulihkan buku; kode buku unik | M |
+| FR-04 | Buku | Undang lewat tautan, batalkan undangan, lihat dan keluarkan anggota, keluar dari buku, aktivitas buku | S |
 | FR-10 | Rekening | CRUD rekening 6 tipe, saldo awal, limit utang, ikon | M |
 | FR-11 | Rekening | Detail rekening + riwayat transaksinya | M |
 | FR-12 | Rekening | Arsip rekening | S |
@@ -365,9 +389,9 @@ Prioritas: **M** = Must (MVP), **S** = Should, **C** = Could.
 
 | ID | Kebutuhan |
 |---|---|
-| NFR-01 | Data pengguna hanya bisa dibaca pemiliknya atau anggota ruang keluarga sesuai peran. |
+| NFR-01 | Data sebuah buku hanya bisa dibaca dan diubah oleh anggota buku itu. Tidak ada data yang bocor antar buku. |
 | NFR-02 | Gambar struk dan PDF slip gaji tidak disimpan setelah diproses (kecuali pengguna memilih arsip). |
-| NFR-03 | Perubahan tampil di perangkat anggota keluarga lain dalam ≤ 3 detik. |
+| NFR-03 | Perubahan tampil di perangkat anggota lain buku yang sama dalam ≤ 3 detik. |
 | NFR-04 | Pencatatan tetap bisa dilakukan saat offline dan tersinkron saat online. |
 | NFR-05 | Layar utama tampil ≤ 2 detik di HP kelas menengah dengan jaringan 4G. |
 | NFR-06 | Aksesibilitas WCAG 2.2 AA: kontras ≥ 4.5:1, target sentuh ≥ 44 px, dukung ukuran teks besar. |
@@ -415,7 +439,7 @@ Navigasi bawah 5 slot: **Beranda · Transaksi · [ + ] · Anggaran · Lainnya**
 | `14-more-menu.svg` | Menu Lainnya |
 | `15-zakat.svg` | Kalkulator zakat |
 | `16-education-fund.svg` | Dana pendidikan |
-| `17-family-space.svg` | Ruang keluarga |
+| `17-books.svg` | Buku & anggota: buku aktif, anggota, buku lain, buat buku |
 | `vynance-board.svg` | Semua layar dalam satu papan |
 
 ### 12.5 Alternatif tema warna
@@ -464,8 +488,8 @@ Sumber generator SVG: `design/_source/gen_svg.py` (token warna, ikon, dan kompon
 
 | Fase | Isi |
 |---|---|
-| **MVP** | Akun, rekening, transaksi 5 tipe, kategori + anggaran, rencana bulanan, dashboard + skor, target tabungan, mode privasi/gelap, ekspor CSV |
-| **Fase 2** | Ruang keluarga, langganan + pengingat, investasi, scan struk, wizard & carry-over, zakat |
+| **MVP** | Akun, buku (banyak buku per akun, ganti buku aktif), rekening, transaksi 5 tipe, kategori + anggaran, rencana bulanan, dashboard + skor, target tabungan, mode privasi/gelap, ekspor CSV |
+| **Fase 2** | Undang anggota ke buku, langganan + pengingat, investasi, scan struk, wizard & carry-over, zakat |
 | **Fase 3** | AI advisor, dana pendidikan, sumber penghasilan, slip gaji, offline penuh |
 
 ---
@@ -474,6 +498,9 @@ Sumber generator SVG: `design/_source/gen_svg.py` (token warna, ikon, dan kompon
 
 | Istilah | Arti |
 |---|---|
+| Buku | Wadah semua data keuangan, misalnya "Pribadi", "Keluarga Pratama", "Warung". Satu akun bisa punya banyak buku dan berbagi buku dengan anggota lain |
+| Kode buku | Kode 8 karakter (`K7QM-3XPA`) yang membedakan buku bernama sama |
+| Anggota | Pengguna yang tergabung di sebuah buku. Semua anggota punya hak yang sama |
 | Rekening / Kantong | Tempat uang: bank, e-wallet, tunai, kartu kredit, PayLater, RDN |
 | RDN | Rekening Dana Nasabah untuk transaksi saham |
 | Carry-over | Membawa sisa anggaran bulan lalu ke bulan ini |

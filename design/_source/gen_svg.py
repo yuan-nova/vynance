@@ -68,6 +68,7 @@ ICONS = {
  "cal": "M4 5h16v16H4zM4 10h16M8 3v4M16 3v4",
  "close": "M18 6 6 18M6 6l12 12", "check": "M20 6 9 17l-5-5",
  "user": "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
+ "book": "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5",
  "users": "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7M22 21a7 7 0 0 0-4-6.3",
  "heart": "M12 20s-7-4.4-9.3-8.8A4.9 4.9 0 0 1 12 6.2a4.9 4.9 0 0 1 9.3 5C19 15.6 12 20 12 20z",
  "school": "M22 9 12 4 2 9l10 5 10-5zM6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6",
@@ -282,7 +283,7 @@ def s_login():
     o += T(146, 668, "Lanjut dengan Google", 15, 700)
     o += button(24, 700, 342, "Masuk dengan email", "dark")
     o += T(W / 2, 786, "Coba dulu tanpa akun", 13, 700, PRI, "middle")
-    o += I("lock", 64, 801, 13, FAINT) + T(82, 811, "Data hanya terlihat oleh kamu & keluarga yang diundang", 10.5, 500, FAINT)
+    o += I("lock", 64, 801, 13, FAINT) + T(82, 811, "Data hanya terlihat oleh kamu & anggota yang diundang", 10.5, 500, FAINT)
     return o + home_ind()
 
 @screen("02b-onboarding", "Onboarding: saldo awal")
@@ -318,7 +319,7 @@ def s_onboard():
 def s_dash():
     o = R(0, 0, W, H, 0, BG) + status_bar()
     o += avatar(40, 78, "R", PRI, ONP, 20, 16)
-    o += T(70, 72, "Halo, Rina", 17, 800) + T(70, 92, "Keluarga Pratama · 3 anggota", 12, 500, MUTED)
+    o += T(70, 72, "Halo, Rina", 17, 800) + T(70, 92, "Keluarga Pratama · K7QM-3XPA", 12, 500, MUTED, num=True) + I("chev_d", 72 + tw("Keluarga Pratama · K7QM-3XPA", 12, 500), 83, 12, MUTED)
     o += R(286, 58, 40, 40, 20, SURF, LINE) + I("eye", 296, 68, 20)
     o += R(334, 58, 40, 40, 20, SURF, LINE) + I("bell", 344, 68, 20) + C(362, 66, 4.5, EXP, SURF, 2)
     # hero
@@ -711,10 +712,10 @@ def s_more():
     o = R(0, 0, W, H, 0, BG) + status_bar()
     o += app_bar("Lainnya")
     o += R(20, 108, 350, 76, 22, SURF, LINE) + avatar(56, 146, "R", PRI, ONP, 22, 17)
-    o += T(90, 140, "Rina Pratama", 15, 800) + T(90, 160, "Pemilik · Keluarga Pratama", 12, 500, MUTED) + I("chev_r", 340, 136, 20, FAINT)
+    o += T(90, 140, "Rina Pratama", 15, 800) + T(90, 160, "Buku aktif: Keluarga Pratama", 12, 500, MUTED) + I("chev_r", 340, 136, 20, FAINT)
     groups = [("UANG", [("wallet", "Rekening"), ("target", "Target"), ("trend", "Investasi"), ("repeat", "Langganan")]),
               ("PERENCANAAN", [("school", "Pendidikan"), ("brief", "Penghasilan"), ("hand", "Zakat"), ("spark", "Asisten AI")]),
-              ("DATA", [("doc", "Slip Gaji"), ("tag", "Kategori"), ("users", "Keluarga"), ("download", "Ekspor")])]
+              ("DATA", [("doc", "Slip Gaji"), ("tag", "Kategori"), ("book", "Buku"), ("download", "Ekspor")])]
     y = 206
     for g, items in groups:
         o += T(20, y + 12, g, 11, 700, FAINT, ls=0.8)
@@ -798,35 +799,39 @@ def s_edu():
         y += 88
     return o + home_ind()
 
-@screen("17-family-space", "Ruang keluarga")
-def s_family():
+@screen("17-books", "Buku & anggota")
+def s_books():
     o = R(0, 0, W, H, 0, BG) + status_bar()
-    o += app_bar("Keluarga Pratama", back=True, right=("edit",))
-    o += R(20, 108, 350, 270, 22, SURF, LINE)
-    o += T(38, 136, "Anggota", 13, 800) + T(352, 136, "3 dari 6", 12, 600, MUTED, "end")
-    mem = [("R", PRI, "Rina Pratama", "Kamu", "Pemilik"), ("B", TRF, "Budi Pratama", "Aktif 5 mnt lalu", "Pengelola"), ("S", INV, "Ibu Sari", "Hanya lihat rekening bersama", "Pemantau")]
-    y = 150
-    for i, (l, c, n, s, role) in enumerate(mem):
-        o += avatar(56, y + 26, l, c, ONP if c == PRI else "#FFFFFF", 18, 15) + T(84, y + 21, n, 14, 700) + T(84, y + 39, s, 11.5, 500, MUTED)
-        o += R(352 - tw(role, 11, 700) - 34, y + 13, tw(role, 11, 700) + 34, 26, 13, SURF2) + T(352 - tw(role, 11, 700) - 22, y + 30, role, 11, 700, INK) + I("chev_d", 336, y + 20, 12, MUTED)
-        y += 56
-    o += button(36, 324, 318, "Undang anggota", "soft", 40, "link", 13)
-    o += section(408, "Rekening bersama")
-    rows = [("bank", "Bank BCA", True), ("cash", "Dompet Tunai", True), ("wallet", "GoPay · Rina", False)]
-    y = 422
-    o += R(20, y, 350, len(rows) * 50 + 4, 20, SURF, LINE)
-    for i, (ic, n, on) in enumerate(rows):
-        yy = y + i * 50
-        if i: o += L(56, yy + 2, 370, yy + 2, LINE)
-        o += I(ic, 34, yy + 16, 20, MUTED) + T(64, yy + 31, n, 13.5, 600) + T(296, yy + 31, "Bersama" if on else "Pribadi", 11.5, 600, PRI if on else FAINT, "end") + toggle(312, yy + 13, on)
-    o += section(612, "Aktivitas terbaru")
-    acts = [("B", TRF, "Budi mencatat GoRide −Rp24.000", "10 menit lalu"), ("R", PRI, "Rina mengubah anggaran Makan Luar", "Kemarin, 21.14"), ("S", INV, "Ibu Sari bergabung sebagai Pemantau", "23 Nov")]
-    y = 626
-    for l, c, t, w_ in acts:
-        o += avatar(36, y + 18, l, c, ONP if c == PRI else "#FFFFFF", 12, 11) + T(58, y + 15, t, 12.5, 600) + T(58, y + 32, w_, 11, 500, FAINT)
-        y += 42
+    o += app_bar("Buku", back=True, right=("plus",))
+    # buku aktif
+    o += R(20, 108, 350, 300, 22, SURF, LINE)
+    o += icon_tile(54, 144, "book", PRI, PRI_S, 40, 20)
+    o += T(84, 139, "Keluarga Pratama", 16, 800) + T(84, 158, "Kode K7QM-3XPA · 3 anggota", 12, 500, MUTED, num=True)
+    p, _ = pill(352, 126, "Aktif", PRI, PRI_S, 11, 22, "end"); o += p
+    o += L(38, 182, 352, 182, LINE)
+    o += T(38, 208, "Anggota", 13, 800) + T(352, 208, "Akses sama", 12, 600, MUTED, "end")
+    mem = [("R", PRI, "Rina Pratama", "Kamu"), ("B", TRF, "Budi Pratama", "Aktif 5 mnt lalu"), ("S", INV, "Ibu Sari", "Bergabung 23 Nov")]
+    y = 218
+    for l, c, n, sub in mem:
+        o += avatar(56, y + 24, l, c, ONP if c == PRI else "#FFFFFF", 17, 14) + T(84, y + 20, n, 14, 700) + T(84, y + 38, sub, 11.5, 500, MUTED)
+        if sub != "Kamu": o += I("more", 336, y + 14, 18, MUTED)
+        y += 46
+    o += button(36, 356, 318, "Undang anggota", "soft", 40, "link", 13)
+    # buku lain: nama boleh sama, kode selalu beda
+    o += section(440, "Buku lain")
+    rows = [("Pribadi", "9FQ2-HX4T", "1 anggota"), ("Keluarga Pratama", "3MZ8-KD1W", "2 anggota"), ("Warung Bu Rina", "T6PN-2RCE", "2 anggota")]
+    y = 454
+    o += R(20, y, 350, len(rows) * 58 + 4, 20, SURF, LINE)
+    for i, (n, code, cnt) in enumerate(rows):
+        yy = y + i * 58
+        if i: o += L(80, yy + 2, 356, yy + 2, LINE)
+        o += icon_tile(50, yy + 31, "book", MUTED, SURF2, 36, 18) + T(80, yy + 27, n, 14, 700) + T(80, yy + 45, f"Kode {code} · {cnt}", 11.5, 500, MUTED, num=True)
+        o += T(338, yy + 35, "Pakai", 13, 700, PRI, "end") + I("chev_r", 340, yy + 22, 16, FAINT)
+    o += R(20, 640, 350, 48, 18, "none", PRI_T, 1.5, extra=' stroke-dasharray="5 5"') + I("plus", 120, 654, 20, PRI) + T(146, 669, "Buat buku baru", 14, 700, PRI)
+    o += T(W / 2, 712, "Nama buku boleh sama. Kode dibuat otomatis dan selalu beda.", 11, 500, MUTED, "middle")
+    o += section(748, "Aktivitas terbaru")
+    o += avatar(36, 778, "B", TRF, "#FFFFFF", 12, 11) + T(58, 775, "Budi mencatat GoRide −Rp24.000", 12.5, 600) + T(58, 792, "10 menit lalu · Keluarga Pratama", 11, 500, MUTED)
     o += home_ind()
-    o += R(20, 758, 350, 50, 16, PRI_S) + I("bell", 34, 773, 20, PRI) + T(64, 788, "Beri tahu semua saat anggaran ≥ 90%", 12.5, 700, PRI) + toggle(318, 770, True)
     return o
 
 # ======================================================================
@@ -910,7 +915,7 @@ def sitemap():
     o += box(56, 170, 200, "Buka aplikasi", kind="g")
     o += box(56, 250, 200, "Masuk", "Google · Email · Demo", "n")
     o += box(56, 340, 200, "Onboarding", "Saldo awal · data bawaan", "n")
-    o += box(56, 430, 200, "Ruang keluarga", "Buat / gabung (opsional)", "new")
+    o += box(56, 430, 200, "Undang ke buku", "Opsional, bisa nanti", "new")
     o += arrow(156, 214, 156, 250) .replace("C156,214 156,250", "L156,250") + arrow(156, 312, 156, 340).replace("C156,312 156,340", "L156,340") + arrow(156, 402, 156, 430).replace("C156,402 156,430", "L156,430")
     # nav tabs
     tabs = [(340, "Beranda", "Kekayaan · skor · anggaran"), (340 + 210, "Transaksi", "Daftar · filter · ekspor"), (340 + 420, "+ Catat", "Bottom sheet"), (340 + 630, "Anggaran", "Rencana bulanan"), (340 + 840, "Lainnya", "Semua modul")]
@@ -932,10 +937,10 @@ def sitemap():
             y += 80
     more = [("Rekening", "6 tipe · arsip"), ("Target Tabungan", "Setor · status"), ("Investasi", "Jenis · aset · untung/rugi"), ("Langganan", "Otomatis · pengingat"),
             ("Dana Pendidikan", "Per anak · inflasi 12%"), ("Sumber Penghasilan", "Aktif vs pasif"), ("Zakat Maal", "Nisab 85 g · 2,5%"), ("Slip Gaji", "PDF → tren"),
-            ("Kategori", "Anggaran · grup 50/30/20"), ("Keluarga", "Anggota · peran · bersama"), ("Asisten AI", "Tanya jawab data"), ("Pengaturan", "Privasi · tema · bahasa")]
+            ("Kategori", "Anggaran · grup 50/30/20"), ("Buku", "Ganti · buat · anggota"), ("Asisten AI", "Tanya jawab data"), ("Pengaturan", "Privasi · tema · bahasa")]
     for i, (t, s) in enumerate(more):
         y = 270 + i * 54
-        o += box(1180, y, 190, t, s, "new" if t == "Keluarga" else "n", 46).replace('y="' + str(y + 47) + '"', 'y="' + str(y + 40) + '"')
+        o += box(1180, y, 190, t, s, "new" if t == "Buku" else "n", 46).replace('y="' + str(y + 47) + '"', 'y="' + str(y + 40) + '"')
     # main flow strip
     fy = 970
     o += T(56, fy - 24, "ALUR HARIAN (target ≤ 10 detik)", 12, 700, FAINT, ls=1.2)

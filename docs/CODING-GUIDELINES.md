@@ -114,7 +114,7 @@ Aturan impor diperiksa otomatis oleh **dependency-cruiser** (`.dependency-cruise
 
 ### 4.1 Aturan umum
 
-1. **Semua tipe wajib dibuat di `shared`.** Ini mencakup tipe domain (Wallet, Transaction, Budget, …), tipe input/output API, enum, kode error, dan tipe konteks (`ServiceCtx`, `Role`).
+1. **Semua tipe wajib dibuat di `shared`.** Ini mencakup tipe domain (Wallet, Transaction, Budget, …), tipe input/output API, enum, kode error, dan tipe konteks (`ServiceCtx`).
 2. **Semua fungsi yang dipakai lebih dari satu tempat wajib dibuat di `shared`.** Contohnya format Rupiah, parse uang, perhitungan periode, dan aturan bisnis.
 3. **Validasi yang dipakai frontend dan backend wajib dibuat di `shared`.**
 4. `shared` wajib berisi **TypeScript murni**. Dilarang mengimpor `react`, `hono`, `drizzle-orm`, `bun:*`, `node:*`, atau API DOM. Satu-satunya dependensi luar yang diizinkan adalah `zod`.
@@ -176,14 +176,14 @@ Setiap fungsi di `rules/` wajib punya unit test dan mencantumkan nomor aturan BR
 |---|---|---|
 | Bentuk & format input (tipe, wajib, rentang, enum, aturan antar-field) | `shared/schemas` | form FE, route, worker, scan/AI |
 | Aturan bisnis murni (data dikirim sebagai parameter) | `shared/rules` | FE (umpan balik), service |
-| Hak akses | `shared/rules/permissions` (`can(role, action)`) | FE (sembunyikan aksi), middleware |
+| Keanggotaan buku | middleware `bookAccess`: pengguna wajib anggota buku di URL. Tidak ada peran; semua anggota punya hak sama (BR-49) | backend saja |
 | Aturan yang butuh query DB | service | backend saja |
 | Integritas data | constraint DB di migrasi | backend saja |
 
 1. **Setiap pintu masuk wajib mem-parse inputnya** dengan skema dari `shared`: route (`zValidator`), payload job worker, dan keluaran OCR/LLM.
 2. **Service menerima input yang sudah bertipe** dan tidak mem-parse ulang bentuknya. Service fokus pada aturan bisnis.
 3. Validasi frontend hanya untuk kenyamanan pengguna. **Semua aturan wajib dicek ulang di backend.**
-4. Field yang ditentukan server (`spaceId`, `createdBy`, `createdAt`) dilarang ada di skema input. Nilainya diambil dari sesi dan URL.
+4. Field yang ditentukan server (`bookId`, `code` buku, `createdBy`, `createdAt`) dilarang ada di skema input. Nilainya diambil dari sesi dan URL.
 
 ---
 
@@ -203,21 +203,21 @@ apps/api/src/modules/<fitur>/
 
 ### 6.2 Route
 
-- Hanya berisi: validator, middleware izin, memanggil **satu** method service, dan mengembalikan respons.
+- Hanya berisi: validator, memanggil **satu** method service, dan mengembalikan respons. Middleware `auth` dan `bookAccess` dipasang sekali di grup `/books/:bookId`, bukan di tiap route.
 - Dilarang berisi logika bisnis, perulangan atas data, atau perhitungan.
 - Route wajib dirangkai (*chained*) supaya `AppType` terbaca oleh Hono RPC.
 
 ```ts
 export const walletRoutes = (svc: WalletService) =>
   new Hono<AppEnv>()
-    .get("/", requirePermission("wallet:read"), async (c) => ok(c, await svc.list(c.var.ctx)))
-    .post("/", zValidator("json", createWalletSchema, validationHook), requirePermission("wallet:create"),
+    .get("/", async (c) => ok(c, await svc.list(c.var.ctx)))
+    .post("/", zValidator("json", createWalletSchema, validationHook),
       async (c) => created(c, await svc.create(c.var.ctx, c.req.valid("json"))))
 ```
 
 ### 6.3 Service
 
-- Parameter pertama selalu `ctx: ServiceCtx` (`{ userId, spaceId, role }`). Dilarang menerima `Context` Hono.
+- Parameter pertama selalu `ctx: ServiceCtx` (`{ userId, bookId }`). Dilarang menerima `Context` Hono.
 - Menjalankan aturan bisnis lewat `shared/rules`. Kalau hasilnya gagal, lempar `BusinessError`.
 - Batas transaksi DB ditentukan di service lewat `withTransaction`.
 - Kalau service memanggil service lain di dalam transaksi, executor transaksi wajib diteruskan supaya semuanya berjalan di transaksi yang sama.
@@ -225,7 +225,7 @@ export const walletRoutes = (svc: WalletService) =>
 ### 6.4 Repository
 
 - Satu repository per agregat/tabel utama.
-- **Setiap query wajib difilter `spaceId`.** Dilarang ada query data keluarga tanpa filter ruang.
+- **Setiap query wajib difilter `bookId`.** Dilarang ada query data keuangan tanpa filter buku. Pengecualian: query daftar buku dan keanggotaan milik pengguna (`books`, `book_members`), yang difilter `userId`.
 - Menerima `Executor` (`db` atau `tx`) di constructor.
 - Mengembalikan tipe domain dari `shared`, bukan baris Drizzle mentah.
 - Dilarang berisi aturan bisnis (misalnya memutuskan status anggaran). Repository hanya membaca dan menulis.
@@ -256,7 +256,7 @@ Perubahan yang harus konsisten (transaksi + saldo dompet + ledger aset) wajib be
 
 ### 6.7 Konvensi API
 
-- URL: `/api/v1/spaces/:spaceId/<resource>`, kata benda jamak, kebab-case.
+- URL: `/api/v1/books/:bookId/<resource>`, kata benda jamak, kebab-case.
 - Respons sukses: `{ data }`; daftar: `{ data, nextCursor }` (cursor, bukan offset).
 - `POST` yang membuat transaksi wajib mendukung header `Idempotency-Key`.
 
@@ -282,7 +282,7 @@ Perubahan yang harus konsisten (transaksi + saldo dompet + ledger aset) wajib be
 | `features/<fitur>/hooks/` | TanStack Query/Mutation, `queryOptions` untuk `loader`, invalidasi. Query key diambil dari `lib/query-keys.ts`. |
 | `features/<fitur>/services/` | Panggilan API lewat `hc`, konversi data. |
 | `components/` | Komponen generik aplikasi (layout, form, data, feedback). |
-| `stores/` | State UI saja (ruang aktif, tema, draf). |
+| `stores/` | State UI saja (buku aktif, tema, draf). |
 
 ### 7.2 Aturan
 
@@ -292,7 +292,7 @@ Perubahan yang harus konsisten (transaksi + saldo dompet + ledger aset) wajib be
 4. Filter, tab, dan bulan aktif disimpan di URL (`validateSearch`), bukan di state lokal.
 5. Halaman memakai `getRouteApi()` untuk membaca param dan search. Dilarang mengimpor file route.
 6. Form memakai TanStack Form + skema dari `shared/schemas`.
-7. Tombol dan aksi disembunyikan memakai `can(role, action)` dari `shared`.
+7. Tidak ada peran: semua anggota buku melihat tombol dan aksi yang sama (BR-49). Jangan menambah logika sembunyikan-tampilkan berdasarkan pengguna.
 8. Error API dengan `field` wajib ditampilkan di field form yang sesuai.
 
 ### 7.3 Aturan `useEffect`
@@ -320,7 +320,7 @@ Perubahan yang harus konsisten (transaksi + saldo dompet + ledger aset) wajib be
 
 #### `useEffect` boleh dipakai untuk:
 
-1. **Langganan ke sumber luar yang tidak cocok untuk `useSyncExternalStore`**, misalnya WebSocket ruang keluarga atau `BroadcastChannel` antar tab.
+1. **Langganan ke sumber luar yang tidak cocok untuk `useSyncExternalStore`**, misalnya WebSocket buku atau `BroadcastChannel` antar tab.
 2. **Pustaka non-React** yang perlu dipasang dan dilepas, misalnya kamera untuk scan struk, chart imperatif, atau scanner barcode.
 3. **API browser yang imperatif**, misalnya `document.title`, atribut `data-theme` di `<html>`, wake lock, atau `IntersectionObserver` untuk infinite scroll.
 4. **Timer** yang terikat pada umur komponen, misalnya hitung mundur kirim ulang OTP.
@@ -328,7 +328,7 @@ Perubahan yang harus konsisten (transaksi + saldo dompet + ledger aset) wajib be
 
 #### Syarat setiap `useEffect`:
 
-1. **Wajib dibungkus custom hook** yang namanya menjelaskan tujuannya, misalnya `useDocumentTitle`, `useSpaceRealtime`, `useCameraStream`. Hook ditaruh di `features/<fitur>/hooks/` atau `lib/hooks/`. **Pages dan components dilarang memanggil `useEffect` langsung.**
+1. **Wajib dibungkus custom hook** yang namanya menjelaskan tujuannya, misalnya `useDocumentTitle`, `useBookRealtime`, `useCameraStream`. Hook ditaruh di `features/<fitur>/hooks/` atau `lib/hooks/`. **Pages dan components dilarang memanggil `useEffect` langsung.**
 2. **Wajib punya cleanup** bila memasang sesuatu: listener, langganan, timer, observer, stream kamera.
 3. **Daftar dependensi wajib lengkap.** Biome `useExhaustiveDependencies` diset ke error. Dilarang mematikannya untuk "mengakali" dependensi. Kalau effect berjalan terlalu sering, perbaiki desainnya (pindahkan fungsi ke dalam effect, pakai `useEffectEvent`, atau pisahkan effect).
 4. **Wajib aman dijalankan dua kali.** React StrictMode memasang–melepas–memasang ulang effect di mode development. Effect yang rusak saat dijalankan dua kali berarti cleanup-nya salah.
@@ -385,8 +385,7 @@ Semua aturan tampilan dan perilaku UI ada di **[DESIGN-SYSTEM.md](DESIGN-SYSTEM.
 | Konstanta global | UPPER_SNAKE | `TX_TYPES`, `NISAB_GOLD_GRAMS` |
 | Skema Zod | camelCase + `Schema` | `createTransactionSchema` |
 | Kode error | UPPER_SNAKE | `WALLET_NOT_FOUND` |
-| Tabel & kolom DB | snake_case, tabel jamak | `transactions.space_id` |
-| Izin | `<resource>:<aksi>` | `budget:update` |
+| Tabel & kolom DB | snake_case, tabel jamak | `transactions.book_id` |
 
 Nama variabel, fungsi, kelas, dan tipe diperiksa Biome `useNamingConvention` (camelCase, PascalCase, UPPER_SNAKE untuk konstanta). Key objek yang ditulis dalam tanda kutip, misalnya header `"Idempotency-Key"`, tidak diperiksa.
 
@@ -444,7 +443,7 @@ Nama di kode memakai **bahasa Inggris**. Teks yang tampil ke pengguna memakai Ba
 |---|---|---|
 | `shared/rules`, `shared/money`, `shared/date` | unit test `bun test` | ✅ setiap fungsi |
 | Service | `bun test` dengan repository palsu | ✅ setiap aturan bisnis |
-| Repository | `bun test` ke MySQL di Docker | ✅ setiap query, termasuk filter `spaceId` |
+| Repository | `bun test` ke MySQL di Docker | ✅ setiap query, termasuk filter `bookId` |
 | Route | `app.request()` Hono | sebaiknya untuk alur utama |
 | Komponen | Vitest + Testing Library, API dipalsukan dengan MSW | sebaiknya untuk komponen berlogika |
 | Alur utama | Playwright | ✅ login, catat transaksi, anggaran, undang anggota |
@@ -457,7 +456,8 @@ Setiap bug yang diperbaiki wajib disertai test yang gagal sebelum perbaikan.
 
 - Rahasia (kunci API, `AUTH_SECRET`, URL DB) hanya ada di env server dan dibaca lewat `config/env.ts`. `process.env` dilarang dipakai di file lain. Dilarang menyimpannya di DB, di kode, atau di bundle frontend.
 - Variabel `VITE_*` dianggap publik. Dilarang berisi rahasia.
-- Setiap endpoint data keluarga wajib melewati `auth` → `spaceAccess` → `requirePermission`.
+- Setiap endpoint data buku wajib melewati `auth` → `bookAccess`. `bookAccess` menolak dengan 404 (bukan 403) bila pengguna bukan anggota, supaya keberadaan buku tidak bocor.
+- Kode buku bukan rahasia dan tidak pernah dipakai sebagai bukti akses. Undangan memakai token acak terpisah (BR-48, BR-50).
 - Query hanya lewat Drizzle atau `sql` template. Dilarang menyusun SQL dengan gabungan string.
 - Keluaran OCR/LLM diperlakukan sebagai input tidak tepercaya dan wajib divalidasi skema.
 - Dilarang mencatat (log) data pribadi atau nominal keuangan pengguna dalam bentuk mentah.
@@ -475,7 +475,7 @@ Setiap bug yang diperbaiki wajib disertai test yang gagal sebelum perbaikan.
 ### Checklist review
 
 - [ ] Route hanya memanggil service; service dan route tidak menyentuh `db`.
-- [ ] Repository tidak memanggil service; semua query difilter `spaceId`.
+- [ ] Repository tidak memanggil service; semua query difilter `bookId`.
 - [ ] Tidak ada dependensi melingkar antar service atau antar repository.
 - [ ] Tipe baru dibuat di `shared` (atau termasuk pengecualian di 4.1).
 - [ ] Fungsi yang dipakai di lebih dari satu tempat ada di `shared`.
@@ -570,19 +570,19 @@ Aturan berikut tetap diperiksa di review (checklist §12 dan skill `pr-code-revi
 |---|---|
 | §3.1 butir 6 | Instance service/repository hanya dibuat di `container.ts` |
 | §4.1 | Fungsi yang dipakai di lebih dari satu tempat sudah dipindah ke `shared` |
-| §5 | Setiap pintu masuk mem-parse input dengan skema `shared`; service tidak mem-parse ulang; `spaceId`, `createdBy`, `createdAt` tidak ada di skema input |
+| §5 | Setiap pintu masuk mem-parse input dengan skema `shared`; service tidak mem-parse ulang; `bookId`, `createdBy`, `createdAt` tidak ada di skema input |
 | §6.2 | Route hanya memanggil satu method service, tanpa logika bisnis |
 | §6.3 | Parameter pertama service adalah `ServiceCtx`; aturan bisnis lewat `shared/rules` |
-| §6.4 | Setiap query difilter `spaceId` dan `deletedAt IS NULL`; repository tanpa aturan bisnis; mengembalikan tipe domain |
+| §6.4 | Setiap query difilter `bookId` dan `deletedAt IS NULL`; repository tanpa aturan bisnis; mengembalikan tipe domain |
 | §6.5 | Perubahan yang harus konsisten ada dalam satu `withTransaction` |
 | §6.6 | Kode error dari `shared/errors` |
 | §6.7 | Konvensi URL, bentuk respons, cursor, `Idempotency-Key` |
 | §6.8 | Uang memakai `bigint`, bukan `number` |
-| §7.2 | Data server tidak disalin ke `useState`/store; mutasi meng-invalidate semua query terkait; filter di URL; form memakai TanStack Form; aksi disembunyikan dengan `can()`; error `field` tampil di field |
+| §7.2 | Data server tidak disalin ke `useState`/store; mutasi meng-invalidate semua query terkait; filter di URL; form memakai TanStack Form; error `field` tampil di field |
 | §7.3 | Syarat `useEffect` butir 2 dan 4–7: cleanup, aman dijalankan dua kali, tanpa `setState` tanpa syarat, pembatalan kerja asinkron, komentar sistem luar |
 | §9 | Tipe kembalian eksplisit pada fungsi yang diekspor. Biome `useExplicitType` masih *nursery* dan ikut menandai konstanta biasa, jadi belum dipakai. |
 | §10 | Test untuk aturan bisnis dan query |
-| §11 | Variabel `VITE_*` tanpa rahasia; endpoint melewati `auth` → `spaceAccess` → `requirePermission`; keluaran OCR/LLM divalidasi; tidak mencatat data pribadi |
+| §11 | Variabel `VITE_*` tanpa rahasia; endpoint melewati `auth` → `bookAccess`; keluaran OCR/LLM divalidasi; tidak mencatat data pribadi |
 
 Batas yang perlu diingat:
 
