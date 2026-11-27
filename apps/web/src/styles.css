@@ -1602,3 +1602,9 @@ p {
   padding-left: 18px;
   font-size: 14px;
 }
+
+.book-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -9,9 +9,13 @@ import { TopBar } from "@/components/TopBar"
 import {
   BookCode,
   BookNameForm,
+  DeleteBookForm,
+  DeletedBooks,
   useActiveBook,
+  useBookDeletionInfo,
   useBooks,
   useCreateBook,
+  useDeleteBook,
   useRenameBook,
   useSwitchBook,
 } from "@/features/books"
@@ -25,7 +29,9 @@ export function BooksPage() {
   const switchBook = useSwitchBook()
   const create = useCreateBook()
   const rename = useRenameBook(active?.id ?? "")
-  const [sheet, setSheet] = useState<"create" | "rename" | null>(null)
+  const [sheet, setSheet] = useState<"create" | "rename" | "delete" | null>(null)
+  const remove = useDeleteBook()
+  const deletionInfo = useBookDeletionInfo(active?.id ?? "", sheet === "delete")
 
   const others = (books.data ?? []).filter((b) => b.id !== active?.id)
 
@@ -51,9 +57,12 @@ export function BooksPage() {
           <p className="row-sub">
             Kode <BookCode code={active.code} /> · {active.memberCount} anggota
           </p>
-          <div className="section-sm">
+          <div className="section-sm book-actions">
             <Button variant="soft" icon="edit" onClick={() => setSheet("rename")}>
               Ubah nama
+            </Button>
+            <Button variant="ghost" icon="trash" onClick={() => setSheet("delete")}>
+              Hapus buku
             </Button>
           </div>
         </section>
@@ -105,6 +114,44 @@ export function BooksPage() {
           Buat buku baru
         </Button>
       </section>
+
+      <DeletedBooks onRestored={() => void navigate({ to: "/" })} />
+
+      <Sheet
+        open={sheet === "delete"}
+        title={active ? `Hapus buku ${active.name}?` : "Hapus buku"}
+        onClose={() => setSheet(null)}
+      >
+        {deletionInfo.isPending ? <Skeleton rows={2} /> : null}
+        {deletionInfo.isError ? (
+          <ErrorState
+            message="Data buku gagal dimuat."
+            onRetry={() => void deletionInfo.refetch()}
+            retrying={deletionInfo.isFetching}
+          />
+        ) : null}
+        {active && deletionInfo.data ? (
+          <DeleteBookForm
+            book={active}
+            info={deletionInfo.data}
+            pending={remove.isPending}
+            onCancel={() => setSheet(null)}
+            onSubmit={(confirmName, onError) =>
+              remove.mutate(
+                { bookId: active.id, confirmName },
+                {
+                  onSuccess: () => {
+                    setSheet(null)
+                    showSnackbar(`Buku ${active.name} dihapus. Bisa dipulihkan 30 hari.`)
+                    void navigate({ to: "/" })
+                  },
+                  onError,
+                },
+              )
+            }
+          />
+        ) : null}
+      </Sheet>
 
       <Sheet open={sheet === "create"} title="Buat buku baru" onClose={() => setSheet(null)}>
         <BookNameForm

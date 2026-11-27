@@ -11,6 +11,7 @@ export const ERROR_MESSAGES = {
   RATE_LIMITED: "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",
   BOOK_NOT_FOUND: "Buku tidak ditemukan atau kamu bukan anggotanya.",
   BOOK_CODE_EXHAUSTED: "Gagal membuat kode buku. Coba lagi.",
+  BOOK_NAME_MISMATCH: "Nama yang diketik tidak sama dengan nama buku.",
   WALLET_NOT_FOUND: "Rekening tidak ditemukan.",
   WALLET_HAS_TRANSACTIONS: "Rekening ini sudah punya transaksi, jadi tidak bisa dihapus. Arsipkan saja.",
   WALLET_LIMIT_NOT_ALLOWED: "Limit hanya untuk kartu kredit dan PayLater.",

@@ -1,6 +1,6 @@
-import { bookMembers, bookSettings, books, type Executor } from "@vynance/db"
-import type { Book } from "@vynance/shared"
-import { and, asc, count, eq, inArray, isNull } from "drizzle-orm"
+import { bookMembers, bookSettings, books, type Executor, transactions } from "@vynance/db"
+import type { Book, DeletedBook } from "@vynance/shared"
+import { and, asc, count, desc, eq, gt, inArray, isNotNull, isNull } from "drizzle-orm"
 
 type BookRow = { id: string; name: string; code: string; createdAt: Date; memberCount: number }
 
@@ -79,6 +79,65 @@ export class BooksRepository {
 
   async insertSettings(bookId: string, createdBy: string): Promise<void> {
     await this.db.insert(bookSettings).values({ bookId, createdBy })
+  }
+
+  /** BR-52: sembunyikan dari semua anggota; bisa dipulihkan sampai `purgeAfter`. */
+  async softDelete(bookId: string, at: Date, purgeAfter: Date): Promise<void> {
+    await this.db
+      .update(books)
+      .set({ deletedAt: at, purgeAfter })
+      .where(and(eq(books.id, bookId), isNull(books.deletedAt)))
+  }
+
+  /** Buku terhapus yang masih dalam masa pulih, tempat pengguna anggota aktif. */
+  async listDeletedForUser(userId: string, now: Date): Promise<DeletedBook[]> {
+    const rows = await this.db
+      .select({
+        id: books.id,
+        name: books.name,
+        code: books.code,
+        deletedAt: books.deletedAt,
+        purgeAfter: books.purgeAfter,
+      })
+      .from(books)
+      .innerJoin(bookMembers, and(activeMembers(books.id), eq(bookMembers.userId, userId)))
+      .where(and(isNotNull(books.deletedAt), gt(books.purgeAfter, now)))
+      .orderBy(desc(books.deletedAt))
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      code: r.code,
+      deletedAt: r.deletedAt?.toISOString() ?? "",
+      purgeAfter: r.purgeAfter?.toISOString() ?? "",
+    }))
+  }
+
+  /** Pulihkan bila pengguna anggota aktif dan masa pulih belum lewat; selain itu false. */
+  async restore(bookId: string, userId: string, now: Date): Promise<boolean> {
+    const [member] = await this.db
+      .select({ id: bookMembers.id })
+      .from(bookMembers)
+      .innerJoin(books, eq(books.id, bookMembers.bookId))
+      .where(
+        and(
+          activeMembers(bookId),
+          eq(bookMembers.userId, userId),
+          isNotNull(books.deletedAt),
+          gt(books.purgeAfter, now),
+        ),
+      )
+      .limit(1)
+    if (!member) return false
+    await this.db.update(books).set({ deletedAt: null, purgeAfter: null }).where(eq(books.id, bookId))
+    return true
+  }
+
+  async transactionCount(bookId: string): Promise<number> {
+    const [row] = await this.db
+      .select({ n: count(transactions.id) })
+      .from(transactions)
+      .where(and(eq(transactions.bookId, bookId), isNull(transactions.deletedAt)))
+    return Number(row?.n ?? 0)
   }
 
   async rename(bookId: string, name: string): Promise<void> {
