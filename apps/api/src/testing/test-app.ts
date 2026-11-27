@@ -21,6 +21,7 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
     booksService: empty,
     walletsService: empty,
     categoriesService: empty,
+    onboardingService: empty,
     ...deps,
     authService: deps.authService ?? fakeAuth(userId),
   } as Deps

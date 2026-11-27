@@ -21,6 +21,8 @@ export const meSchema = z.object({
   theme: themePrefSchema,
   privacyMode: z.boolean(),
   lastBookId: z.string().nullable(),
+  /** null = belum melewati layar saldo awal (PB-01 langkah 3). */
+  onboardedAt: z.string().nullable(),
 })
 export type Me = z.infer<typeof meSchema>
 

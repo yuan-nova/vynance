@@ -1,23 +1,27 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
-import { activityLogs, bookMembers, bookSettings, books, createDb, users } from "@vynance/db"
-import { inArray } from "drizzle-orm"
+import { books, users } from "@vynance/db"
+import { eq, inArray } from "drizzle-orm"
+import { makeBookRepos } from "../../db/book-repos"
+import { cleanupUsers, testDb } from "../../db/test-fixtures"
 import { UnitOfWork } from "../../db/unit-of-work"
 import { generateBookCode } from "../../lib/book-code"
 import { newId } from "../../lib/id"
 import { testApp } from "../../testing/test-app"
-import { ActivityRepository } from "../activity/activity.repository"
+import { CategoriesRepository } from "../categories/categories.repository"
+import type { InvestmentTypesRepository } from "../investments/investment-types.repository"
+import { WalletsRepository } from "../wallets/wallets.repository"
 import { BooksRepository } from "./books.repository"
 import { BooksService } from "./books.service"
 
 // Integrasi ke MySQL dev: isolasi buku, 404 bukan anggota, kode tidak bisa diubah.
-const db = createDb(Bun.env.DATABASE_URL ?? "mysql://vynance:vynance_dev@localhost:12306/vynance")
+const db = testDb
 const ALICE = "01JTESTBOOKAAAAAAAAAAAAAAA"
 const BOB = "01JTESTBOOKBBBBBBBBBBBBBBB"
 
 function service(newCode: () => string = generateBookCode) {
   return new BooksService({
     books: new BooksRepository(db),
-    uow: new UnitOfWork(db, (exec) => ({ books: new BooksRepository(exec), activity: new ActivityRepository(exec) })),
+    uow: new UnitOfWork(db, makeBookRepos),
     newId: () => newId(),
     newCode,
   })
@@ -28,19 +32,7 @@ function app(userId: string) {
 }
 
 async function cleanup(): Promise<void> {
-  const ids = (
-    await db
-      .select({ id: books.id })
-      .from(books)
-      .where(inArray(books.createdBy, [ALICE, BOB]))
-  ).map((r) => r.id)
-  if (ids.length) {
-    await db.delete(activityLogs).where(inArray(activityLogs.bookId, ids))
-    await db.delete(bookSettings).where(inArray(bookSettings.bookId, ids))
-    await db.delete(bookMembers).where(inArray(bookMembers.bookId, ids))
-    await db.delete(books).where(inArray(books.id, ids))
-  }
-  await db.delete(users).where(inArray(users.id, [ALICE, BOB]))
+  await cleanupUsers([ALICE, BOB])
 }
 
 describe("buku", () => {
@@ -53,7 +45,6 @@ describe("buku", () => {
   })
   afterAll(async () => {
     await cleanup()
-    await db.$client.end()
   })
 
   test("dua buku bernama sama punya kode berbeda (BR-47, BR-48)", async () => {
@@ -64,6 +55,40 @@ describe("buku", () => {
     expect(a.memberCount).toBe(1)
     const list = await svc.list({ userId: ALICE })
     expect(list.map((x) => x.id)).toEqual(expect.arrayContaining([a.id, b.id]))
+  })
+
+  test("buku baru berisi data bawaan lengkap (BR-46)", async () => {
+    const b = await service().create({ userId: ALICE }, { name: "Isi" })
+    const cats = await new CategoriesRepository(db).list(b.id)
+    expect((await new WalletsRepository(db).list(b.id)).map((w) => w.name)).toEqual([
+      "Dompet Tunai",
+      "Bank",
+      "Kartu Kredit",
+    ])
+    expect(cats.filter((c) => c.kind === "expense")).toHaveLength(10)
+    expect(cats.filter((c) => c.kind === "income")).toHaveLength(4)
+  })
+
+  test("satu insert gagal → tidak ada buku setengah jadi", async () => {
+    const broken = new BooksService({
+      books: new BooksRepository(db),
+      uow: new UnitOfWork(db, (exec) => ({
+        ...makeBookRepos(exec),
+        investmentTypes: {
+          insertMany: async () => {
+            throw new Error("gagal sengaja")
+          },
+        } as unknown as InvestmentTypesRepository,
+      })),
+      newId: () => newId(),
+      newCode: generateBookCode,
+    })
+    const before = (await service().list({ userId: BOB })).length
+    const err = await broken.create({ userId: BOB }, { name: "Setengah" }).catch((e: unknown) => e)
+    expect(String(err)).toContain("gagal sengaja")
+    expect((await service().list({ userId: BOB })).length).toBe(before)
+    const orphan = await db.select({ id: books.id }).from(books).where(eq(books.name, "Setengah"))
+    expect(orphan).toHaveLength(0)
   })
 
   test("data buku A tidak terbaca dari pengguna lain", async () => {

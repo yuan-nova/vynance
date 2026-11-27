@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
-import { activityLogs, bookMembers, bookSettings, books, createDb, transactions, users, wallets } from "@vynance/db"
+import { transactions, users } from "@vynance/db"
 import type { Wallet, WalletList } from "@vynance/shared"
-import { inArray } from "drizzle-orm"
+import { makeBookRepos } from "../../db/book-repos"
+import { cleanupUsers, testDb } from "../../db/test-fixtures"
 import { UnitOfWork } from "../../db/unit-of-work"
 import { generateBookCode } from "../../lib/book-code"
 import { newId } from "../../lib/id"
@@ -13,13 +14,13 @@ import { WalletsRepository } from "./wallets.repository"
 import { WalletsService } from "./wallets.service"
 
 // Integrasi ke MySQL dev: saldo BR-01, utang BR-03, hapus BR-35, isolasi buku.
-const db = createDb(Bun.env.DATABASE_URL ?? "mysql://vynance:vynance_dev@localhost:12306/vynance")
+const db = testDb
 const U = "01JTESTWALLETUSERAAAAAAAAA"
 const V = "01JTESTWALLETUSERBBBBBBBBB"
 
 const booksService = new BooksService({
   books: new BooksRepository(db),
-  uow: new UnitOfWork(db, (exec) => ({ books: new BooksRepository(exec), activity: new ActivityRepository(exec) })),
+  uow: new UnitOfWork(db, makeBookRepos),
   newId: () => newId(),
   newCode: generateBookCode,
 })
@@ -46,21 +47,7 @@ function post(userId: string, path: string, body: unknown): Promise<Response> {
 }
 
 async function cleanup(): Promise<void> {
-  const ids = (
-    await db
-      .select({ id: books.id })
-      .from(books)
-      .where(inArray(books.createdBy, [U, V]))
-  ).map((r) => r.id)
-  if (ids.length) {
-    await db.delete(transactions).where(inArray(transactions.bookId, ids))
-    await db.delete(wallets).where(inArray(wallets.bookId, ids))
-    await db.delete(activityLogs).where(inArray(activityLogs.bookId, ids))
-    await db.delete(bookSettings).where(inArray(bookSettings.bookId, ids))
-    await db.delete(bookMembers).where(inArray(bookMembers.bookId, ids))
-    await db.delete(books).where(inArray(books.id, ids))
-  }
-  await db.delete(users).where(inArray(users.id, [U, V]))
+  await cleanupUsers([U, V])
 }
 
 let bookId = ""
@@ -78,7 +65,6 @@ describe("rekening", () => {
   })
   afterAll(async () => {
     await cleanup()
-    await db.$client.end()
   })
 
   test("saldo = awal + Σ efek; kartu kredit dihitung utang (BR-01, BR-03, BR-05)", async () => {
@@ -113,7 +99,8 @@ describe("rekening", () => {
     expect(byId.get(tunai.id)?.balance).toBe("300000")
     expect(byId.get(kk.id)?.balance).toBe("-6200000")
     expect(byId.get(kk.id)?.limitUsageBp).toBe(4133)
-    expect(list.summary).toMatchObject({ cash: "16750000", debt: "-6200000", walletCount: 2, debtCount: 1 })
+    // + rekening bawaan buku (BR-46): Dompet Tunai, Bank (kas, saldo 0) dan Kartu Kredit (utang, saldo 0)
+    expect(list.summary).toMatchObject({ cash: "16750000", debt: "-6200000", walletCount: 4, debtCount: 2 })
   })
 
   test("limit untuk rekening bank ditolak 422 field creditLimit", async () => {

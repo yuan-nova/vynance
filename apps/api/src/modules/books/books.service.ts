@@ -1,11 +1,31 @@
-import type { Book, CreateBookInput, ServiceCtx, UpdateBookInput, UserCtx } from "@vynance/shared"
+import {
+  type Book,
+  type CreateBookInput,
+  DEFAULT_BOOK_NAME,
+  SEED_EXPENSE_CATEGORIES,
+  SEED_INCOME_CATEGORIES,
+  SEED_INVESTMENT_TYPES,
+  SEED_WALLETS,
+  type ServiceCtx,
+  type UpdateBookInput,
+  type UserCtx,
+} from "@vynance/shared"
 import type { UnitOfWork } from "../../db/unit-of-work"
 import { AppError, NotFound } from "../../lib/errors"
 import { logger } from "../../lib/logger"
 import type { ActivityRepository } from "../activity/activity.repository"
+import type { CategoriesRepository } from "../categories/categories.repository"
+import type { InvestmentTypesRepository } from "../investments/investment-types.repository"
+import type { WalletsRepository } from "../wallets/wallets.repository"
 import type { BooksRepository } from "./books.repository"
 
-type Repos = { books: BooksRepository; activity: ActivityRepository }
+type Repos = {
+  books: BooksRepository
+  activity: ActivityRepository
+  wallets: WalletsRepository
+  categories: CategoriesRepository
+  investmentTypes: InvestmentTypesRepository
+}
 type Deps = {
   books: Pick<BooksRepository, "listForUser" | "findForMember" | "isActiveMember">
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
@@ -34,11 +54,12 @@ export class BooksService {
   }
 
   /** BR-46/BR-48: buat buku + anggota pembuat + pengaturan + aktivitas dalam satu transaksi; ulangi bila kode bentrok. */
-  async create(
-    ctx: UserCtx,
-    input: CreateBookInput,
-    seed?: (repos: Repos, bookId: string) => Promise<void>,
-  ): Promise<Book> {
+  /** Buku pertama saat daftar (PB-01). */
+  createDefault(ctx: UserCtx): Promise<Book> {
+    return this.create(ctx, { name: DEFAULT_BOOK_NAME })
+  }
+
+  async create(ctx: UserCtx, input: CreateBookInput): Promise<Book> {
     for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt++) {
       const bookId = this.d.newId()
       const code = this.d.newCode()
@@ -50,7 +71,7 @@ export class BooksService {
         }
         await r.books.addMember({ id: this.d.newId(), bookId, userId: ctx.userId, createdBy: ctx.userId })
         await r.books.insertSettings(bookId, ctx.userId)
-        if (seed) await seed(r, bookId)
+        await this.seed(r, bookId, ctx.userId)
         await r.activity.record({
           id: this.d.newId(),
           bookId,
@@ -66,6 +87,49 @@ export class BooksService {
     }
     logger.error("kode buku bentrok terus", { attempts: MAX_CODE_ATTEMPTS })
     throw new AppError(500, "BOOK_CODE_EXHAUSTED")
+  }
+
+  /** BR-46: data bawaan dari shared/defaults, dalam transaksi yang sama dengan pembuatan buku. */
+  private async seed(r: Repos, bookId: string, userId: string): Promise<void> {
+    for (const w of SEED_WALLETS) {
+      await r.wallets.insert({
+        id: this.d.newId(),
+        bookId,
+        name: w.name,
+        type: w.type,
+        icon: w.icon,
+        openingBalance: 0n,
+        creditLimit: w.creditLimit,
+        createdBy: userId,
+      })
+    }
+    const cats = [
+      ...SEED_EXPENSE_CATEGORIES.map((c, i) => ({ ...c, kind: "expense" as const, sortOrder: i })),
+      ...SEED_INCOME_CATEGORIES.map((c, i) => ({ ...c, kind: "income" as const, sortOrder: i })),
+    ]
+    for (const c of cats) {
+      await r.categories.insert({
+        id: this.d.newId(),
+        bookId,
+        name: c.name,
+        kind: c.kind,
+        budgetGroup: c.budgetGroup,
+        icon: c.icon,
+        monthlyBudget: null,
+        sortOrder: c.sortOrder,
+        createdBy: userId,
+      })
+    }
+    await r.investmentTypes.insertMany(
+      SEED_INVESTMENT_TYPES.map((t, i) => ({
+        id: this.d.newId(),
+        bookId,
+        name: t.name,
+        icon: t.icon,
+        sortOrder: i,
+        createdBy: userId,
+      })),
+    )
   }
 
   async rename(ctx: ServiceCtx, input: UpdateBookInput): Promise<Book> {

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabsRouteImport } from './routes/_tabs'
 import { Route as BukuBaruRouteImport } from './routes/buku-baru'
 import { Route as MasukRouteImport } from './routes/masuk'
+import { Route as MulaiRouteImport } from './routes/mulai'
 import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
 import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
 import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
@@ -32,6 +33,11 @@ const BukuBaruRoute = BukuBaruRouteImport.update({
 const MasukRoute = MasukRouteImport.update({
   id: '/masuk',
   path: '/masuk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MulaiRoute = MulaiRouteImport.update({
+  id: '/mulai',
+  path: '/mulai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TabsIndexRoute = TabsIndexRouteImport.update({
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
   '/buku-baru': typeof BukuBaruRoute
   '/masuk': typeof MasukRoute
+  '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/buku-baru': typeof BukuBaruRoute
   '/masuk': typeof MasukRoute
+  '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/': typeof TabsIndexRoute
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/_tabs': typeof TabsRouteWithChildren
   '/buku-baru': typeof BukuBaruRoute
   '/masuk': typeof MasukRoute
+  '/mulai': typeof MulaiRoute
   '/_tabs/anggaran': typeof TabsAnggaranRoute
   '/_tabs/transaksi': typeof TabsTransaksiRoute
   '/_tabs/': typeof TabsIndexRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/'
     | '/buku-baru'
     | '/masuk'
+    | '/mulai'
     | '/anggaran'
     | '/transaksi'
     | '/lainnya/buku'
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
   to:
     | '/buku-baru'
     | '/masuk'
+    | '/mulai'
     | '/anggaran'
     | '/transaksi'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/_tabs'
     | '/buku-baru'
     | '/masuk'
+    | '/mulai'
     | '/_tabs/anggaran'
     | '/_tabs/transaksi'
     | '/_tabs/'
@@ -146,6 +158,7 @@ export interface RootRouteChildren {
   TabsRoute: typeof TabsRouteWithChildren
   BukuBaruRoute: typeof BukuBaruRoute
   MasukRoute: typeof MasukRoute
+  MulaiRoute: typeof MulaiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,6 +182,13 @@ declare module '@tanstack/react-router' {
       path: '/masuk'
       fullPath: '/masuk'
       preLoaderRoute: typeof MasukRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mulai': {
+      id: '/mulai'
+      path: '/mulai'
+      fullPath: '/mulai'
+      preLoaderRoute: typeof MulaiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_tabs/': {
@@ -249,6 +269,7 @@ const rootRouteChildren: RootRouteChildren = {
   TabsRoute: TabsRouteWithChildren,
   BukuBaruRoute: BukuBaruRoute,
   MasukRoute: MasukRoute,
+  MulaiRoute: MulaiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
