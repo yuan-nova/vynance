@@ -1,2 +1,10 @@
 export { AddTransactionForm } from "./components/AddTransactionForm"
-export { categoryUsageQueryOptions, useCategoryUsage, useCreateTransaction } from "./hooks/useTransactions"
+export { TransactionList } from "./components/TransactionList"
+export { TransactionRow } from "./components/TransactionRow"
+export {
+  categoryUsageQueryOptions,
+  useCategoryUsage,
+  useCreateTransaction,
+  useTransactionList,
+  useTransactionSummary,
+} from "./hooks/useTransactions"

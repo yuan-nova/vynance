@@ -1,9 +1,15 @@
 import { zValidator } from "@hono/zod-validator"
-import { categoryKindSchema, createTransactionSchema, idempotencyKeySchema } from "@vynance/shared"
+import {
+  categoryKindSchema,
+  createTransactionSchema,
+  idempotencyKeySchema,
+  transactionListQuerySchema,
+  transactionSummaryQuerySchema,
+} from "@vynance/shared"
 import { Hono } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "../../lib/app-env"
-import { created, ok } from "../../lib/respond"
+import { created, ok, page } from "../../lib/respond"
 import { validationHook } from "../../lib/validation"
 import type { TransactionsService } from "./transactions.service"
 
@@ -12,6 +18,13 @@ const idemHeader = z.object({ "idempotency-key": idempotencyKeySchema.optional()
 /** `/books/:bookId/transactions` (FR-20). Daftar, ubah, hapus di #12–#13. */
 export const transactionRoutes = (svc: TransactionsService) =>
   new Hono<AppEnv>()
+    .get("/", zValidator("query", transactionListQuerySchema, validationHook), async (c) =>
+      page(c, await svc.list(c.var.ctx, c.req.valid("query"))),
+    )
+    .get("/summary", zValidator("query", transactionSummaryQuerySchema, validationHook), async (c) => {
+      const q = c.req.valid("query")
+      return ok(c, await svc.summary(c.var.ctx, q.from, q.to))
+    })
     .post(
       "/",
       zValidator("header", idemHeader, validationHook),

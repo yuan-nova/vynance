@@ -9,6 +9,11 @@ describe("newId", () => {
     expect(a).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/)
     expect(a.slice(0, 10) < b.slice(0, 10)).toBe(true)
   })
+  test("monoton dalam milidetik yang sama", () => {
+    const ids = Array.from({ length: 50 }, () => newId(1_700_000_000_500))
+    expect([...ids].sort()).toEqual(ids)
+    expect(new Set(ids).size).toBe(50)
+  })
 })
 
 describe("logger.redact", () => {

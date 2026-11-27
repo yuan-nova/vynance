@@ -9,6 +9,9 @@ import {
   monthOf,
   type ServiceCtx,
   type Transaction,
+  type TransactionListQuery,
+  type TransactionPage,
+  type TransactionSummary,
 } from "@vynance/shared"
 import type { UnitOfWork } from "../../db/unit-of-work"
 import { BusinessError, NotFound } from "../../lib/errors"
@@ -24,7 +27,10 @@ type Repos = {
   activity: ActivityRepository
 }
 type Deps = {
-  transactions: Pick<TransactionsRepository, "findById" | "findByIdempotencyKey" | "categoryUsage">
+  transactions: Pick<
+    TransactionsRepository,
+    "findById" | "findByIdempotencyKey" | "categoryUsage" | "list" | "sumIncomeExpense"
+  >
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
   now: () => Date
@@ -93,6 +99,18 @@ export class TransactionsService {
     const tx = await this.d.transactions.findById(ctx.bookId, id)
     if (!tx) throw new NotFound("TRANSACTION_NOT_FOUND")
     return tx
+  }
+
+  /** FR-21: daftar dengan filter + cursor. */
+  async list(ctx: ServiceCtx, q: TransactionListQuery): Promise<TransactionPage> {
+    const { items, hasMore } = await this.d.transactions.list(ctx.bookId, q)
+    const last = items[items.length - 1]
+    return { data: items, nextCursor: hasMore && last ? `${last.txDate}.${last.id}` : null }
+  }
+
+  async summary(ctx: ServiceCtx, from: string, to: string): Promise<TransactionSummary> {
+    const s = await this.d.transactions.sumIncomeExpense(ctx.bookId, from, to)
+    return { income: s.income.toString(), expense: s.expense.toString() }
   }
 
   /** Kategori sering dipakai dalam 3 bulan terakhir (zona Asia/Jakarta). */

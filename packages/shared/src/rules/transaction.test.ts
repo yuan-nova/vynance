@@ -1,6 +1,13 @@
 import { describe, expect, test } from "bun:test"
 import { createTransactionSchema } from "../schemas/transaction"
-import { checkCategoryKind, checkTransferWallets, countsAsExpense, countsAsIncome } from "./transaction"
+import {
+  checkCategoryKind,
+  checkTransferWallets,
+  countsAsExpense,
+  countsAsIncome,
+  groupByDate,
+  txSign,
+} from "./transaction"
 
 describe("BR-31 transfer", () => {
   test("sumber = tujuan ditolak", () =>
@@ -36,4 +43,24 @@ describe("BR-30 skema", () => {
       createTransactionSchema.safeParse({ ...base, type: "expense", amount: "287500", categoryId: base.walletId })
         .success,
     ).toBe(true))
+})
+
+describe("groupByDate (DS-DATA-01)", () => {
+  test("total harian: masuk − keluar, transfer diabaikan", () => {
+    const g = groupByDate([
+      { txDate: "2026-11-26", type: "expense", amount: "287500" },
+      { txDate: "2026-11-26", type: "expense", amount: "24000" },
+      { txDate: "2026-11-25", type: "income", amount: "18500000" },
+      { txDate: "2026-11-25", type: "transfer", amount: "500000" },
+      { txDate: "2026-11-25", type: "expense", amount: "186000" },
+    ] as const)
+    expect(g.map((x) => [x.date, x.total])).toEqual([
+      ["2026-11-26", -311_500n],
+      ["2026-11-25", 18_314_000n],
+    ])
+  })
+  test("tanda", () => {
+    expect(txSign("income")).toBe("income")
+    expect(txSign("transfer")).toBe("none")
+  })
 })

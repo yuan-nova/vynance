@@ -144,6 +144,14 @@ export function formatDateLong(date: DateOnly): string {
   return `${DAY_NAMES_ID[weekday]}, ${p.day} ${MONTH_NAMES_ID[p.month - 1]} ${p.year}`
 }
 
+/** "Kamis, 26 Nov" — header grup tanggal (DS-DATA-01). */
+export function formatDateWeekdayShort(date: DateOnly): string {
+  const p = parseDateOnly(date)
+  if (!p) return date
+  const weekday = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay()
+  return `${DAY_NAMES_ID[weekday]}, ${p.day} ${MONTH_SHORT_ID[p.month - 1]}`
+}
+
 /** Jam "14.30" WIB. */
 export function formatTime(instant: Date): string {
   const p = jakartaParts(instant)

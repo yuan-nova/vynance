@@ -68,3 +68,42 @@ export const idempotencyKeySchema = z
 /** Jumlah pemakaian kategori untuk mengurutkan chip "sering dipakai" (PB-02 langkah 3). */
 export const categoryUsageSchema = z.array(z.object({ categoryId: z.string(), count: z.number().int() }))
 export type CategoryUsage = z.infer<typeof categoryUsageSchema>
+
+/** Baris daftar transaksi dengan nama terkait (DS-DATA-01). Nama kategori/rekening yang dihapus tetap tampil. */
+export const transactionListItemSchema = transactionSchema.extend({
+  categoryName: z.string().nullable(),
+  categoryIcon: z.string().nullable(),
+  walletName: z.string(),
+  toWalletName: z.string().nullable(),
+  createdByName: z.string(),
+})
+export type TransactionListItem = z.infer<typeof transactionListItemSchema>
+
+export const transactionPageSchema = z.object({
+  data: z.array(transactionListItemSchema),
+  nextCursor: z.string().nullable(),
+})
+export type TransactionPage = z.infer<typeof transactionPageSchema>
+
+/** Filter daftar (FR-21). `cursor` = "YYYY-MM-DD.<id>" dari halaman sebelumnya. */
+export const transactionListQuerySchema = z
+  .object({
+    type: txTypeSchema.optional(),
+    from: dateOnlySchema.optional(),
+    to: dateOnlySchema.optional(),
+    walletId: ulid.optional(),
+    q: z.string().trim().max(100).optional(),
+    cursor: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}\.[0-9A-HJKMNP-TV-Z]{26}$/)
+      .optional(),
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+  })
+  .strict()
+export type TransactionListQuery = z.infer<typeof transactionListQuerySchema>
+
+/** Ringkasan masuk/keluar suatu rentang (transfer & aset tidak dihitung, PB-02). */
+export const transactionSummarySchema = z.object({ income: z.string(), expense: z.string() })
+export type TransactionSummary = z.infer<typeof transactionSummarySchema>
+
+export const transactionSummaryQuerySchema = z.object({ from: dateOnlySchema, to: dateOnlySchema }).strict()
