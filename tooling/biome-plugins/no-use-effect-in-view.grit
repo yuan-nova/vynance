@@ -1,0 +1,11 @@
+language js
+
+// CODING-GUIDELINES §7.3: pages dan components dilarang memanggil useEffect langsung.
+or {
+  `useEffect($...)`,
+  `useLayoutEffect($...)`,
+  `React.useEffect($...)`,
+  `React.useLayoutEffect($...)`
+} as $call where {
+  register_diagnostic(span=$call, message="useEffect dilarang di pages/components (CODING-GUIDELINES §7.3). Bungkus di custom hook (features/<fitur>/hooks atau lib/hooks), atau pakai pengganti: nilai turunan, event handler, TanStack Query, useSyncExternalStore.", severity="error")
+}

@@ -1,0 +1,336 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!design", "!docs", "!.agents", "!.claude", "!**/dist", "!**/drizzle/meta", "!**/*.md"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "asNeeded",
+      "trailingCommas": "all",
+      "arrowParentheses": "always"
+    }
+  },
+  "assist": { "enabled": true, "actions": { "source": { "organizeImports": "on" } } },
+  "plugins": [
+    { "path": "./tooling/biome-plugins/no-sql-raw.grit", "includes": ["apps/**", "packages/**"] },
+    {
+      "path": "./tooling/biome-plugins/shared-deterministic.grit",
+      "includes": ["packages/shared/src/**", "!**/*.test.ts"]
+    },
+    {
+      "path": "./tooling/biome-plugins/no-use-effect-in-view.grit",
+      "includes": [
+        "apps/web/src/pages/**",
+        "apps/web/src/components/**",
+        "apps/web/src/features/*/components/**",
+        "packages/ui/src/components/**"
+      ]
+    },
+    {
+      "path": "./tooling/biome-plugins/no-hex-color.grit",
+      "includes": ["apps/web/src/**", "packages/ui/src/components/**", "!**/*.test.*"]
+    },
+    {
+      "path": "./tooling/biome-plugins/no-exported-types-outside-shared.grit",
+      "includes": ["apps/**", "packages/ui/**", "!**/*.d.ts", "!**/*.test.*"]
+    }
+  ],
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noTsIgnore": "error",
+        "noEmptyBlockStatements": "error",
+        "noImportCycles": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "error",
+        "useHookAtTopLevel": "error",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "error",
+        "noEnum": "error",
+        "useConsistentTypeDefinitions": { "level": "error", "options": { "style": "type" } },
+        "useImportType": "error",
+        "noParameterAssign": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": ["../../../**"],
+                "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9). Pakai alias @/ atau @vynance/."
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/shared/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "react": "packages/shared wajib TypeScript murni (CODING-GUIDELINES §4.1).",
+                  "react-dom": "packages/shared wajib TypeScript murni (CODING-GUIDELINES §4.1).",
+                  "hono": "packages/shared wajib TypeScript murni (CODING-GUIDELINES §4.1).",
+                  "drizzle-orm": "packages/shared wajib TypeScript murni (CODING-GUIDELINES §4.1).",
+                  "@vynance/db": "packages/shared dilarang bergantung pada packages/db (CODING-GUIDELINES §3.3).",
+                  "@vynance/ui": "packages/shared dilarang bergantung pada packages/ui (CODING-GUIDELINES §3.3)."
+                },
+                "patterns": [
+                  {
+                    "group": ["node:*", "bun", "bun:*"],
+                    "message": "packages/shared dilarang memakai API Node/Bun (CODING-GUIDELINES §4.1)."
+                  },
+                  {
+                    "group": ["hono/**", "drizzle-orm/**", "react/**", "@vynance/db/**", "@vynance/ui/**"],
+                    "message": "packages/shared wajib TypeScript murni (CODING-GUIDELINES §4.1, §3.3)."
+                  },
+                  {
+                    "group": ["../../../**"],
+                    "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9)."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "packages/shared dilarang memakai API DOM (CODING-GUIDELINES §4.1).",
+                  "document": "packages/shared dilarang memakai API DOM (CODING-GUIDELINES §4.1).",
+                  "localStorage": "packages/shared dilarang memakai API DOM (CODING-GUIDELINES §4.1).",
+                  "navigator": "packages/shared dilarang memakai API DOM (CODING-GUIDELINES §4.1).",
+                  "fetch": "packages/shared dilarang mengambil data sendiri (CODING-GUIDELINES §4.1).",
+                  "process": "packages/shared dilarang membaca env (CODING-GUIDELINES §4.1).",
+                  "Bun": "packages/shared dilarang memakai API Bun (CODING-GUIDELINES §4.1)."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/**/*.route.ts", "apps/api/src/middleware/**", "apps/worker/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@vynance/db": "Route, middleware, dan job hanya boleh memanggil service (CODING-GUIDELINES §3.1).",
+                  "drizzle-orm": "Route, middleware, dan job hanya boleh memanggil service (CODING-GUIDELINES §3.1)."
+                },
+                "patterns": [
+                  {
+                    "group": [
+                      "**/*.repository",
+                      "**/*.repository.ts",
+                      "**/db",
+                      "**/db/**",
+                      "@vynance/db/**",
+                      "drizzle-orm/**"
+                    ],
+                    "message": "Route, middleware, dan job hanya boleh memanggil service (CODING-GUIDELINES §3.1)."
+                  },
+                  {
+                    "group": ["../../../**"],
+                    "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/**/*.service.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@vynance/db": "Service dilarang menyentuh DB, lewat repository (CODING-GUIDELINES §3.1).",
+                  "drizzle-orm": "Service dilarang menyentuh DB, lewat repository (CODING-GUIDELINES §3.1).",
+                  "hono": "Service dilarang menerima Context Hono, parameter pertama ServiceCtx (CODING-GUIDELINES §6.3)."
+                },
+                "patterns": [
+                  {
+                    "group": ["@vynance/db/**", "drizzle-orm/**", "hono/**", "**/db/client", "**/db/client.ts"],
+                    "message": "Service dilarang menyentuh DB atau Hono. Batas transaksi lewat withTransaction dari db/unit-of-work (CODING-GUIDELINES §3.1, §6.3, §6.5)."
+                  },
+                  {
+                    "group": ["../../../**"],
+                    "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/**/*.repository.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/*.service", "**/*.service.ts"],
+                    "message": "Repository dilarang memanggil service (CODING-GUIDELINES §3.1)."
+                  },
+                  {
+                    "group": ["hono", "hono/**"],
+                    "message": "Repository dilarang bergantung pada Hono (CODING-GUIDELINES §3.1)."
+                  },
+                  {
+                    "group": ["../../../**"],
+                    "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/pages/**", "apps/web/src/components/**", "apps/web/src/features/*/components/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "hono/client": "Komponen dan halaman mengambil data lewat hook (CODING-GUIDELINES §3.2).",
+                  "@/lib/api-client": "Komponen dan halaman mengambil data lewat hook (CODING-GUIDELINES §3.2)."
+                },
+                "patterns": [
+                  {
+                    "group": ["**/services", "**/services/**"],
+                    "message": "Komponen dan halaman dilarang memanggil service, pakai hook (CODING-GUIDELINES §3.2)."
+                  },
+                  {
+                    "group": ["**/routes/**", "@/routes/**"],
+                    "message": "Halaman memakai getRouteApi(), bukan mengimpor file route (CODING-GUIDELINES §7.2)."
+                  },
+                  {
+                    "group": ["../../../**"],
+                    "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9)."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "fetch": "Komponen dan halaman dilarang memanggil fetch, pakai hook TanStack Query (CODING-GUIDELINES §3.2)."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/features/*/services/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "react": "Service frontend dilarang memakai React (CODING-GUIDELINES §3.2).",
+                  "@tanstack/react-query": "Service frontend dilarang memakai React, query ada di hooks (CODING-GUIDELINES §3.2)."
+                },
+                "patterns": [
+                  {
+                    "group": ["../../../**"],
+                    "message": "Impor relatif lebih dari dua tingkat dilarang (CODING-GUIDELINES §9)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/api/**/*.ts",
+        "apps/worker/**/*.ts",
+        "packages/shared/**/*.ts",
+        "packages/db/**/*.ts",
+        "apps/web/src/features/*/services/**/*.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": { "useFilenamingConvention": { "level": "error", "options": { "filenameCases": ["kebab-case"] } } }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/web/src/pages/**/*.tsx",
+        "apps/web/src/components/**/*.tsx",
+        "apps/web/src/features/*/components/**/*.tsx",
+        "packages/ui/src/components/**/*.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "style": { "useFilenamingConvention": { "level": "error", "options": { "filenameCases": ["PascalCase"] } } }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/**/hooks/**/*.ts", "apps/web/src/**/hooks/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": { "filenameCases": ["camelCase"], "match": "(use[A-Z][a-zA-Z0-9]*|index)[.](.+)" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx"],
+      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+    }
+  ]
+}

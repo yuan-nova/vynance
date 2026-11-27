@@ -99,7 +99,7 @@ If you can't write a specific "Trigger" line for a finding (see the format below
 ### Common false-positive traps — check before publishing
 
 - Flagging a "missing" check that exists one layer up or down.
-- Flagging lint/format/type problems CI already catches.
+- Flagging lint/format/type problems CI already catches. In Vynance this includes every rule in the table in `CODING-GUIDELINES.md` §13.3 (Biome, GritQL plugins, dependency-cruiser). Spend review effort on §13.4, the rules no tool checks. Exception: a new `biome-ignore`, a disabled rule in `biome.json` / `.dependency-cruiser.cjs`, or a skipped hook (`LEFTHOOK=0`) without a stated reason is a valid finding.
 - Commenting on generated or vendored files (lockfiles, generated migrations/clients, `vendor/`, build output).
 - "Missing tests" — only a finding when a confirmed P1/P2-risk path is untested, not as a general wish.
 - "Could be slow" without a realistic data volume.

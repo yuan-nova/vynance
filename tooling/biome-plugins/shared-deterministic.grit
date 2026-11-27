@@ -1,0 +1,11 @@
+language js
+
+// CODING-GUIDELINES §4.1 butir 5: fungsi shared wajib deterministik.
+or {
+  `Date.now()`,
+  `new Date()`,
+  `Math.random()`,
+  `crypto.randomUUID()`
+} as $call where {
+  register_diagnostic(span=$call, message="packages/shared wajib deterministik (CODING-GUIDELINES §4.1). Terima tanggal/nilai acak sebagai parameter.", severity="error")
+}

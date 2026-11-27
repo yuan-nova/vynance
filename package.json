@@ -1,0 +1,22 @@
+{
+  "name": "vynance",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "biome check . && bun run lint:deps",
+    "lint:fix": "biome check --write .",
+    "lint:deps": "bun tooling/lint-deps.ts",
+    "format": "biome format --write .",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.9",
+    "dependency-cruiser": "18.9.0",
+    "lefthook": "2.2.4",
+    "typescript": "6"
+  }
+}

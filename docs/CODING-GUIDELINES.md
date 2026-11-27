@@ -33,7 +33,8 @@ vynance/
 │  ├─ shared/       tipe, skema validasi, aturan bisnis, util: dipakai FE & BE
 │  ├─ db/           skema Drizzle, migrasi, seed: hanya backend
 │  ├─ ui/           token tema + komponen dasar: hanya frontend
-│  └─ config/       tsconfig, biome
+│  └─ config/       tsconfig bersama
+├─ tooling/         plugin Biome (GritQL), runner dependency-cruiser
 └─ docs/
 ```
 
@@ -102,7 +103,7 @@ routes ──▶ pages ──▶ features/*/components ──▶ features/*/hook
 
 ### 3.4 Penegakan
 
-Aturan impor diperiksa otomatis di CI dengan **dependency-cruiser** (`.dependency-cruiser.cjs`) dan Biome `noRestrictedImports`. PR yang melanggar akan gagal di CI.
+Aturan impor diperiksa otomatis oleh **dependency-cruiser** (`.dependency-cruiser.cjs`) dan Biome `noRestrictedImports`, di hook pre-commit dan di CI. Daftar lengkap aturan yang ditegakkan alat ada di [§13](#13-penegakan-otomatis).
 
 ---
 
@@ -479,3 +480,76 @@ Setiap bug yang diperbaiki wajib disertai test yang gagal sebelum perbaikan.
 - [ ] Tidak ada warna hex langsung di komponen.
 - [ ] PR UI memenuhi checklist DESIGN-SYSTEM.md dan menyertakan bukti DS-QA-01.
 - [ ] Ada test untuk aturan bisnis yang baru atau berubah.
+
+---
+
+## 13. Penegakan otomatis
+
+Sebagian besar aturan di dokumen ini diperiksa alat, bukan diingat. Konfigurasinya:
+
+| Berkas | Isi |
+|---|---|
+| [`biome.json`](../biome.json) | Linter + formatter. Aturan per folder lewat `overrides`. |
+| [`tooling/biome-plugins/*.grit`](../tooling/biome-plugins/) | Aturan kustom Biome (GritQL) yang tidak ada bawaannya. |
+| [`.dependency-cruiser.cjs`](../.dependency-cruiser.cjs) | Aturan lapisan dan paket (§3). |
+| [`tooling/lint-deps.ts`](../tooling/lint-deps.ts) | Menjalankan dependency-cruiser per app dengan tsconfig-nya, supaya alias `@/` ter-resolve. |
+| [`lefthook.yml`](../lefthook.yml) | Hook pre-commit. |
+
+### 13.1 Perintah
+
+```bash
+bun install          # sekaligus memasang hook git (script "prepare")
+bun run lint         # biome check + dependency-cruiser, seperti di CI
+bun run lint:fix     # perbaiki format, urutan impor, dan lint yang bisa diperbaiki otomatis
+bun run lint:deps    # aturan lapisan saja
+```
+
+### 13.2 Hook pre-commit
+
+Setiap `git commit` menjalankan, secara paralel:
+
+1. `biome check --write` pada file yang di-*stage*. Format dan urutan impor diperbaiki otomatis lalu di-*stage* ulang. Pelanggaran lint yang tidak bisa diperbaiki otomatis **menggagalkan commit**.
+2. `bun run lint:deps` bila ada file JS/TS yang di-*stage*. Pelanggaran lapisan **menggagalkan commit**.
+
+Hook boleh dilewati (`LEFTHOOK=0 git commit …`) hanya dalam keadaan darurat, dan alasannya wajib ditulis di PR. CI tetap menjalankan pemeriksaan yang sama, jadi melewati hook tidak membuat PR lolos.
+
+Format kode: indentasi 2 spasi, lebar baris 120, kutip ganda, tanpa titik koma kecuali perlu, *trailing comma*. Jangan memperdebatkan format di review; ikuti keluaran Biome.
+
+### 13.3 Peta aturan → alat
+
+| Aturan | Bagian | Alat |
+|---|---|---|
+| Route/middleware/worker hanya memanggil service | §3.1 | depcruise `route-only-calls-service`, Biome `noRestrictedImports` |
+| Service tidak menyentuh db/Drizzle; transaksi lewat `db/unit-of-work` | §3.1, §6.5 | depcruise `service-no-db`, Biome `noRestrictedImports` |
+| Service tidak bergantung pada Hono | §6.3 | depcruise `service-no-hono`, Biome `noRestrictedImports` |
+| Repository tidak memanggil service | §3.1 | depcruise `repository-no-service`, Biome `noRestrictedImports` |
+| `@vynance/db`/`drizzle-orm` hanya di repository, `db/`, `container.ts` | §3.1 | depcruise `db-only-in-repository` |
+| Tidak ada dependensi melingkar | §3.1 | depcruise `no-circular`, Biome `noImportCycles` |
+| Pages/components tidak memanggil service, `hc`, `fetch` | §3.2 | depcruise `web-view-no-service`, Biome `noRestrictedImports` + `noRestrictedGlobals` |
+| Halaman tidak mengimpor file route | §7.2 | Biome `noRestrictedImports` |
+| Komponen generik tidak mengimpor fitur/halaman/store | §3.2 | depcruise `web-generic-components-pure` |
+| Hooks tidak mengimpor komponen/halaman | §3.2 | depcruise `web-hooks-no-view` |
+| Service frontend tanpa React | §3.2 | depcruise `web-services-no-react`, Biome `noRestrictedImports` |
+| Fitur lain hanya lewat `features/<nama>/index.ts` | §3.2 | depcruise `web-feature-public-api`, `web-outside-feature-public-api` |
+| Aturan antar paket (shared/db/ui/apps) | §3.3 | depcruise `shared-no-workspace-deps`, `db-no-ui`, `ui-no-db`, `packages-no-apps` |
+| `shared` TypeScript murni, dependensi luar hanya zod | §4.1 | depcruise `shared-is-pure`, Biome `noRestrictedImports` + `noRestrictedGlobals` |
+| `shared` deterministik (`Date.now()`, `new Date()`, `Math.random()`) | §4.1 | plugin `shared-deterministic.grit` |
+| Tipe yang diekspor hanya di `shared` (kecuali `*Props`, `AppEnv`, `AppType`) | §4.1 | plugin `no-exported-types-outside-shared.grit` |
+| `type`, bukan `interface`; tanpa `enum` | §4.3 | Biome `useConsistentTypeDefinitions`, `noEnum` |
+| Tanpa `catch {}` kosong | §6.6 | Biome `noEmptyBlockStatements` |
+| `useEffect` tidak dipanggil langsung di pages/components | §7.3 | plugin `no-use-effect-in-view.grit` |
+| Dependensi hook lengkap, hook di level atas | §7.3 | Biome `useExhaustiveDependencies`, `useHookAtTopLevel` |
+| Tanpa warna hex di komponen | §7.4 | plugin `no-hex-color.grit` |
+| Penamaan file (kebab-case backend, PascalCase komponen, `useX` hook) | §8 | Biome `useFilenamingConvention` per folder |
+| Tanpa `any`, `@ts-ignore`, non-null assertion | §9, §9.1 | Biome `noExplicitAny`, `noTsIgnore`, `noNonNullAssertion` |
+| Impor relatif maksimal dua tingkat | §9 | Biome `noRestrictedImports` |
+| `import type` untuk impor tipe | §9 | Biome `useImportType` |
+| Tanpa `sql.raw()` | §11 | plugin `no-sql-raw.grit` |
+
+### 13.4 Yang **tidak** bisa diperiksa alat
+
+Aturan berikut tetap diperiksa di review (checklist §12 dan skill `pr-code-review`): filter `spaceId` dan `deletedAt` di setiap query, uang memakai `bigint`, cakupan `withTransaction`, invalidasi query setelah mutasi, fungsi berulang yang belum dipindah ke `shared`, validasi ganda, tipe kembalian eksplisit pada fungsi yang diekspor, dan pesan error dari `shared/errors`. Pemeriksaan tipe (`tsc --noEmit`) dan test berjalan di CI, tidak di hook, supaya commit tetap cepat.
+
+### 13.5 Menonaktifkan aturan
+
+Menonaktifkan aturan untuk satu baris wajib memakai `// biome-ignore <grup>/<aturan>: <alasan>` dan disebut di deskripsi PR. Menonaktifkan aturan di `biome.json` atau `.dependency-cruiser.cjs` wajib lewat ADR.

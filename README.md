@@ -33,6 +33,16 @@ python -I contrast.py                            # tabel kontras token
 
 Monorepo Bun · Hono · Vite + React + TanStack Router/Query/Form · MySQL + Drizzle · Zod. Alasannya ada di [ADR 0002](docs/adr/0002-monorepo-stack-and-layering.md).
 
+## Lint & format
+
+```bash
+bun install        # memasang dependensi dan hook pre-commit
+bun run lint       # Biome + dependency-cruiser
+bun run lint:fix   # perbaiki otomatis
+```
+
+Hook pre-commit menjalankan Biome (lint + format) pada file yang di-stage dan memeriksa aturan lapisan. Detailnya ada di [CODING-GUIDELINES §13](docs/CODING-GUIDELINES.md#13-penegakan-otomatis).
+
 ## Review PR
 
 Skill review PR untuk agen ada di [`.agents/skills/pr-code-review/`](.agents/skills/pr-code-review/SKILL.md). Skill ini memeriksa PR terhadap BRD, coding guidelines, design system, dan ADR.

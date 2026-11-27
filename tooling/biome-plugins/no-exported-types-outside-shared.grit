@@ -1,0 +1,11 @@
+language js
+
+// CODING-GUIDELINES §4.1 butir 1: semua tipe dibuat di packages/shared.
+// Pengecualian: Props komponen, AppEnv/AppType Hono, baris Drizzle di packages/db.
+JsExport(export_clause=or {
+  TsTypeAliasDeclaration(binding_identifier=$name),
+  TsInterfaceDeclaration(id=$name)
+}) as $decl where {
+  not $name <: r"^(?:[A-Za-z0-9_]+Props|AppEnv|AppType)$",
+  register_diagnostic(span=$decl, message="Tipe yang diekspor wajib dibuat di packages/shared (CODING-GUIDELINES §4.1). Pengecualian: *Props, AppEnv, AppType.", severity="error")
+}

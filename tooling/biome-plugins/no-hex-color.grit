@@ -1,0 +1,11 @@
+language js
+
+// CODING-GUIDELINES §7.4 / DS-THEME-01: warna hanya dari token packages/ui.
+or {
+  JsStringLiteralExpression(),
+  JsxString(),
+  JsTemplateChunkElement()
+} as $str where {
+  $str <: r"(?s).*#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b.*",
+  register_diagnostic(span=$str, message="Warna hex langsung dilarang di komponen (DS-THEME-01). Pakai token dari @vynance/ui.", severity="error")
+}

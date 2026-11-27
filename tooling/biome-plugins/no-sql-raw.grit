@@ -1,0 +1,6 @@
+language js
+
+// CODING-GUIDELINES §11: dilarang menyusun SQL dari gabungan string.
+`sql.raw($...)` as $call where {
+  register_diagnostic(span=$call, message="sql.raw() dilarang (CODING-GUIDELINES §11). Pakai query builder Drizzle atau template sql`...` dengan parameter.", severity="error")
+}
