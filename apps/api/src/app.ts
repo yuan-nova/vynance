@@ -13,6 +13,8 @@ import { dashboardRoutes } from "./modules/dashboard/dashboard.route"
 import type { DashboardService } from "./modules/dashboard/dashboard.service"
 import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
+import { healthScoreRoutes } from "./modules/health-score/health-score.route"
+import type { HealthScoreService } from "./modules/health-score/health-score.service"
 import { investmentTypeRoutes } from "./modules/investments/investments.route"
 import type { InvestmentsService } from "./modules/investments/investments.service"
 import { meRoutes } from "./modules/me/me.route"
@@ -38,6 +40,7 @@ type Deps = {
   plansService: PlansService
   investmentsService: InvestmentsService
   dashboardService: DashboardService
+  healthScoreService: HealthScoreService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -64,7 +67,8 @@ export const createApp = (deps: Deps) => {
         .route("/transactions", transactionRoutes(deps.transactionsService))
         .route("/plans", planRoutes(deps.plansService))
         .route("/investment-types", investmentTypeRoutes(deps.investmentsService))
-        .route("/dashboard", dashboardRoutes(deps.dashboardService)),
+        .route("/dashboard", dashboardRoutes(deps.dashboardService))
+        .route("/health-score", healthScoreRoutes(deps.healthScoreService)),
     )
 }
 

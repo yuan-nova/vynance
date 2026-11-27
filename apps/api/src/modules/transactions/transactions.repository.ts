@@ -217,6 +217,25 @@ export class TransactionsRepository {
     return Object.fromEntries(rows.map((r) => [r.categoryId ?? "", BigInt(r.total ?? "0")]))
   }
 
+  /** Nilai aset dari transaksi beli/jual aset sejak awal sampai akhir rentang (pilar investasi §8.2, #31 mengisi aset). */
+  async sumAssetNet(bookId: string, to: string): Promise<bigint> {
+    const [row] = await this.db
+      .select({
+        bought: sql<string>`coalesce(sum(case when ${transactions.type} = 'asset_buy' then ${transactions.amount} else 0 end), 0)`,
+        sold: sql<string>`coalesce(sum(case when ${transactions.type} = 'asset_sell' then ${transactions.amount} else 0 end), 0)`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.bookId, bookId),
+          isNull(transactions.deletedAt),
+          lte(transactions.txDate, to),
+          sql`${transactions.type} in ('asset_buy', 'asset_sell')`,
+        ),
+      )
+    return BigInt(row?.bought ?? "0") - BigInt(row?.sold ?? "0")
+  }
+
   /** Kategori paling sering dipakai sejak tanggal tertentu (chip "sering dipakai"). */
   async categoryUsage(bookId: string, kind: CategoryKind, since: string): Promise<CategoryUsage> {
     const rows = await this.db

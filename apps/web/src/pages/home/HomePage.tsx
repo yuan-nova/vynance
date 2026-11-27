@@ -6,6 +6,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/States"
 import { useMe } from "@/features/auth"
 import { BookPicker, useActiveBook } from "@/features/books"
 import { TopBudgets, useDashboard } from "@/features/dashboard"
+import { HealthScoreCard, useHealthScore } from "@/features/health-score"
 import { TransactionRow } from "@/features/transactions"
 
 const route = getRouteApi("/_tabs/")
@@ -18,6 +19,7 @@ export function HomePage() {
   const bookId = useActiveBook()?.id ?? ""
   const me = useMe()
   const q = useDashboard(bookId, month)
+  const score = useHealthScore(bookId, month)
   const d = q.data
   const firstName = me.data?.name.split(" ")[0] ?? ""
 
@@ -83,6 +85,18 @@ export function HomePage() {
                 <Money value={BigInt(d.monthSummary.expense)} tone="exp" />
               </div>
             </div>
+          </section>
+
+          <section className="section" aria-labelledby="home-health">
+            <h2 id="home-health" className="sr-only">
+              Skor kesehatan
+            </h2>
+            {score.data ? (
+              <HealthScoreCard
+                score={score.data}
+                onOpen={() => void navigate({ to: "/skor-kesehatan", search: { bulan: month } })}
+              />
+            ) : null}
           </section>
 
           <section className="section" aria-labelledby="home-budget">
