@@ -1,23 +1,16 @@
 import { useNavigate } from "@tanstack/react-router"
-import { heroNeedsShort, isDebtWallet, type Wallet } from "@vynance/shared"
+import { heroNeedsShort, isDebtWallet } from "@vynance/shared"
 import { useState } from "react"
-import { Button, IconButton } from "@/components/Button"
+import { IconButton } from "@/components/Button"
 import { Money } from "@/components/Money"
 import { Sheet } from "@/components/Sheet"
 import { EmptyState, ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
-import {
-  useCreateWallet,
-  useDeleteWallet,
-  useUpdateWallet,
-  useWallets,
-  WalletForm,
-  WalletRow,
-} from "@/features/wallets"
+import { useCreateWallet, useWallets, WalletForm, WalletRow } from "@/features/wallets"
 import { showSnackbar } from "@/lib/snackbar"
 
-type SheetState = { kind: "create" } | { kind: "edit"; wallet: Wallet } | { kind: "delete"; wallet: Wallet } | null
+type SheetState = { kind: "create" } | null
 
 /** Layar Rekening (design/06-wallets.svg, FR-10): total kas, rekening per kelompok, utang + pemakaian limit. */
 export function WalletsPage() {
@@ -26,10 +19,9 @@ export function WalletsPage() {
   const bookId = book?.id ?? ""
   const query = useWallets(bookId)
   const create = useCreateWallet(bookId)
-  const update = useUpdateWallet(bookId)
-  const remove = useDeleteWallet(bookId)
   const [sheet, setSheet] = useState<SheetState>(null)
   const close = () => setSheet(null)
+  const open = (id: string) => void navigate({ to: "/lainnya/rekening/$id", params: { id } })
 
   const data = query.data
   const active = (data?.wallets ?? []).filter((w) => w.archivedAt === null)
@@ -85,7 +77,7 @@ export function WalletsPage() {
           </h2>
           <div className="card plain-list">
             {cash.map((w) => (
-              <WalletRow key={w.id} wallet={w} onOpen={() => setSheet({ kind: "edit", wallet: w })} />
+              <WalletRow key={w.id} wallet={w} onOpen={() => open(w.id)} />
             ))}
           </div>
         </section>
@@ -98,7 +90,7 @@ export function WalletsPage() {
           </h2>
           <div className="card plain-list">
             {debts.map((w) => (
-              <WalletRow key={w.id} wallet={w} onOpen={() => setSheet({ kind: "edit", wallet: w })} />
+              <WalletRow key={w.id} wallet={w} onOpen={() => open(w.id)} />
             ))}
           </div>
         </section>
@@ -118,68 +110,6 @@ export function WalletsPage() {
             })
           }
         />
-      </Sheet>
-
-      <Sheet open={sheet?.kind === "edit"} title="Ubah rekening" onClose={close}>
-        {sheet?.kind === "edit" ? (
-          <WalletForm
-            key={sheet.wallet.id}
-            initial={sheet.wallet}
-            submitLabel="Simpan"
-            pending={update.isPending}
-            onDelete={() => setSheet({ kind: "delete", wallet: sheet.wallet })}
-            onSubmit={(v, onError) =>
-              update.mutate(
-                { id: sheet.wallet.id, input: v },
-                {
-                  onSuccess: () => {
-                    close()
-                    showSnackbar("Rekening disimpan")
-                  },
-                  onError,
-                },
-              )
-            }
-          />
-        ) : null}
-      </Sheet>
-
-      <Sheet
-        open={sheet?.kind === "delete"}
-        title={sheet?.kind === "delete" ? `Hapus rekening ${sheet.wallet.name}?` : ""}
-        onClose={close}
-        footer={
-          sheet?.kind === "delete" ? (
-            <>
-              <Button
-                variant="destructive"
-                full
-                loading={remove.isPending}
-                onClick={() =>
-                  remove.mutate(sheet.wallet.id, {
-                    onSuccess: () => {
-                      close()
-                      showSnackbar("Rekening dihapus")
-                    },
-                    onError: (e) => {
-                      close()
-                      showSnackbar(e.message, { tone: "error" })
-                    },
-                  })
-                }
-              >
-                Hapus
-              </Button>
-              <Button variant="ghost" full onClick={close}>
-                Batal
-              </Button>
-            </>
-          ) : null
-        }
-      >
-        <p className="body">
-          Rekening hanya bisa dihapus bila belum punya transaksi. Rekening yang sudah dipakai bisa diarsipkan.
-        </p>
       </Sheet>
     </>
   )

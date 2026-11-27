@@ -24,6 +24,7 @@ import { Route as TabsLainnyaPengaturanRouteImport } from './routes/_tabs/lainny
 import { Route as TabsLainnyaRekeningRouteImport } from './routes/_tabs/lainnya/rekening'
 import { Route as TabsLainnyaTargetRouteImport } from './routes/_tabs/lainnya/target'
 import { Route as TabsTransaksiIdRouteImport } from './routes/_tabs/transaksi_.$id'
+import { Route as TabsLainnyaRekeningIdRouteImport } from './routes/_tabs/lainnya/rekening_.$id'
 
 const TabsRoute = TabsRouteImport.update({
   id: '/_tabs',
@@ -99,6 +100,11 @@ const TabsTransaksiIdRoute = TabsTransaksiIdRouteImport.update({
   path: '/transaksi/$id',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsLainnyaRekeningIdRoute = TabsLainnyaRekeningIdRouteImport.update({
+  id: '/lainnya/rekening_/$id',
+  path: '/lainnya/rekening/$id',
+  getParentRoute: () => TabsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/lainnya/target': typeof TabsLainnyaTargetRoute
   '/transaksi/$id': typeof TabsTransaksiIdRoute
   '/lainnya/': typeof TabsLainnyaIndexRoute
+  '/lainnya/rekening/$id': typeof TabsLainnyaRekeningIdRoute
 }
 export interface FileRoutesByTo {
   '/buku-baru': typeof BukuBaruRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/lainnya/target': typeof TabsLainnyaTargetRoute
   '/transaksi/$id': typeof TabsTransaksiIdRoute
   '/lainnya': typeof TabsLainnyaIndexRoute
+  '/lainnya/rekening/$id': typeof TabsLainnyaRekeningIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_tabs/lainnya/target': typeof TabsLainnyaTargetRoute
   '/_tabs/transaksi_/$id': typeof TabsTransaksiIdRoute
   '/_tabs/lainnya/': typeof TabsLainnyaIndexRoute
+  '/_tabs/lainnya/rekening_/$id': typeof TabsLainnyaRekeningIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/lainnya/target'
     | '/transaksi/$id'
     | '/lainnya/'
+    | '/lainnya/rekening/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/buku-baru'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/lainnya/target'
     | '/transaksi/$id'
     | '/lainnya'
+    | '/lainnya/rekening/$id'
   id:
     | '__root__'
     | '/_tabs'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_tabs/lainnya/target'
     | '/_tabs/transaksi_/$id'
     | '/_tabs/lainnya/'
+    | '/_tabs/lainnya/rekening_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +328,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsTransaksiIdRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/lainnya/rekening_/$id': {
+      id: '/_tabs/lainnya/rekening_/$id'
+      path: '/lainnya/rekening/$id'
+      fullPath: '/lainnya/rekening/$id'
+      preLoaderRoute: typeof TabsLainnyaRekeningIdRouteImport
+      parentRoute: typeof TabsRoute
+    }
   }
 }
 
@@ -331,6 +350,7 @@ interface TabsRouteChildren {
   TabsLainnyaTargetRoute: typeof TabsLainnyaTargetRoute
   TabsTransaksiIdRoute: typeof TabsTransaksiIdRoute
   TabsLainnyaIndexRoute: typeof TabsLainnyaIndexRoute
+  TabsLainnyaRekeningIdRoute: typeof TabsLainnyaRekeningIdRoute
 }
 
 const TabsRouteChildren: TabsRouteChildren = {
@@ -345,6 +365,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsLainnyaTargetRoute: TabsLainnyaTargetRoute,
   TabsTransaksiIdRoute: TabsTransaksiIdRoute,
   TabsLainnyaIndexRoute: TabsLainnyaIndexRoute,
+  TabsLainnyaRekeningIdRoute: TabsLainnyaRekeningIdRoute,
 }
 
 const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
