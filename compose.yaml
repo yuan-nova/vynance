@@ -52,6 +52,12 @@ services:
       NODE_ENV: development
       PORT: "12081"
       DATABASE_URL: mysql://vynance:${DB_PASSWORD:-vynance_dev}@db:3306/vynance
+      # Nilai bawaan hanya untuk development. Produksi wajib mengisi dari env server.
+      AUTH_SECRET: ${AUTH_SECRET:-dev-only-secret-change-me-0123456789abcdef}
+      APP_URL: ${APP_URL:-http://localhost:12080}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      EMAIL_API_KEY: ${EMAIL_API_KEY:-}
     ports:
       - "12081:12081"
     depends_on:

@@ -9,6 +9,10 @@ export const ERROR_MESSAGES = {
   NOT_FOUND: "Data tidak ditemukan.",
   CONFLICT: "Data sudah berubah. Muat ulang lalu coba lagi.",
   RATE_LIMITED: "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",
+  AUTH_FAILED: "Gagal masuk. Coba lagi sebentar lagi.",
+  OTP_INVALID: "Kode salah. Periksa lagi email kamu.",
+  OTP_EXPIRED: "Kode sudah kedaluwarsa. Minta kode baru.",
+  OTP_TOO_MANY_ATTEMPTS: "Terlalu banyak kode salah. Minta kode baru.",
 } as const
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES

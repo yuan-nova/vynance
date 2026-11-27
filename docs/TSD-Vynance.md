@@ -595,7 +595,7 @@ Mengikuti CODING-GUIDELINES §10. Tambahan:
 
 | # | Pertanyaan | Usulan |
 |---|---|---|
-| 1 | Penyedia email OTP | Penyedia email transaksional dengan domain Vynance; dipilih saat tiket auth |
+| 1 | Penyedia email OTP | **Diputuskan (#6): Resend** lewat `EMAIL_API_KEY`. Tanpa kunci di development, kode OTP dicetak ke log api. |
 | 2 | Penyedia OCR dan LLM | Dipilih di tiket scan dan AI; kunci milik layanan Vynance |
 | 3 | Hosting produksi | Ditentukan sebelum rilis MVP |
 | 4 | Batas jumlah buku per akun dan anggota per buku | Usul 20 buku per akun, 10 anggota per buku, untuk mencegah penyalahgunaan |
