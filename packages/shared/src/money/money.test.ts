@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { formatMoney, formatMoneyShort, moneySchema, parseMoney, positiveMoneySchema } from "./money"
+import { formatMoney, formatMoneyShort, heroNeedsShort, moneySchema, parseMoney, positiveMoneySchema } from "./money"
 
 describe("formatMoney", () => {
   test("nol", () => expect(formatMoney(0n)).toBe("Rp0"))
@@ -37,6 +37,13 @@ describe("parseMoney", () => {
     expect(parseMoney("abc")).toBeNull()
     expect(parseMoney("1,5")).toBeNull()
     expect(parseMoney("1.50")).toBeNull()
+  })
+})
+
+describe("heroNeedsShort", () => {
+  test("≤ 11 digit penuh, 12+ disingkat", () => {
+    expect(heroNeedsShort(99_999_999_999n)).toBe(false)
+    expect(heroNeedsShort(-100_000_000_000n)).toBe(true)
   })
 })
 

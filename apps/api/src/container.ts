@@ -13,6 +13,8 @@ import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
+import { WalletsRepository } from "./modules/wallets/wallets.repository"
+import { WalletsService } from "./modules/wallets/wallets.service"
 
 // Composition root: satu-satunya tempat membuat instance repository dan service (CODING-GUIDELINES §3.1 butir 6).
 const isProduction = env.NODE_ENV === "production"
@@ -40,4 +42,13 @@ export const container = {
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
   meService: new MeService(new MeRepository(db), booksService),
   booksService,
+  walletsService: new WalletsService({
+    wallets: new WalletsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      wallets: new WalletsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
 }

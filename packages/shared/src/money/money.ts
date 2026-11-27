@@ -100,3 +100,8 @@ export function parseMoney(input: string): bigint | null {
   const value = intValue + fracValue
   return neg ? -value : value
 }
+
+/** Angka hero 32/800 muat sampai 11 digit di 320 px; lebih dari itu disingkat (DS-MONEY-01). */
+export function heroNeedsShort(value: bigint): boolean {
+  return abs(value) >= 100_000_000_000n
+}

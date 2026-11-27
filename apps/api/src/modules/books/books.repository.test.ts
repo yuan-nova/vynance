@@ -1,14 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { activityLogs, bookMembers, bookSettings, books, createDb, users } from "@vynance/db"
 import { inArray } from "drizzle-orm"
-import { createApp } from "../../app"
 import { UnitOfWork } from "../../db/unit-of-work"
 import { generateBookCode } from "../../lib/book-code"
 import { newId } from "../../lib/id"
+import { testApp } from "../../testing/test-app"
 import { ActivityRepository } from "../activity/activity.repository"
-import { AuthService } from "../auth/auth.service"
-import type { HealthService } from "../health/health.service"
-import type { MeService } from "../me/me.service"
 import { BooksRepository } from "./books.repository"
 import { BooksService } from "./books.service"
 
@@ -27,17 +24,7 @@ function service(newCode: () => string = generateBookCode) {
 }
 
 function app(userId: string) {
-  const authService = new AuthService(
-    { getSession: async () => ({ user: { id: userId } }) },
-    async () => new Response(null, { status: 404 }),
-    false,
-  )
-  return createApp({
-    healthService: {} as HealthService,
-    authService,
-    meService: {} as MeService,
-    booksService: service(),
-  })
+  return testApp(userId, { booksService: service() })
 }
 
 async function cleanup(): Promise<void> {

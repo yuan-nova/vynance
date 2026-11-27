@@ -860,3 +860,134 @@ p {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ---------- MoneyInput, chip, bar ---------- */
+
+.money-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.money-prefix {
+  position: absolute;
+  left: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.money-input {
+  width: 100%;
+  padding-left: 44px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.money-field-lg .money-input {
+  height: 64px;
+  font-size: 32px;
+  font-weight: 800;
+  padding-left: 56px;
+}
+
+.money-field-lg .money-prefix {
+  font-size: 22px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-full);
+  background: var(--surf);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip-on {
+  border-color: var(--pri);
+  background: var(--pri-s);
+  color: var(--pri);
+}
+
+.bar {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surf2);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.bar-inc {
+  background: var(--inc);
+}
+
+.bar-warn {
+  background: var(--warn);
+}
+
+.bar-exp {
+  background: var(--exp);
+}
+
+.bar-pri {
+  background: var(--pri);
+}
+
+/* ---------- Kartu hero (DS-DATA-03) ---------- */
+
+.hero {
+  padding: 20px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, var(--hero1), var(--hero2));
+  color: var(--hero-fg);
+  box-shadow: var(--shadow);
+}
+
+.hero-label {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.hero-value {
+  font-size: 32px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.hero-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hero .money-exp,
+.hero .money {
+  color: inherit;
+}
+
+.wallet-debt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+}
