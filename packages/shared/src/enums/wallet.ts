@@ -37,3 +37,25 @@ export const WALLET_TYPE_ICON: Record<WalletType, IconName> = {
 export const TX_TYPES = ["income", "expense", "transfer", "asset_buy", "asset_sell"] as const
 export const txTypeSchema = z.enum(TX_TYPES)
 export type TxType = z.infer<typeof txTypeSchema>
+
+/** Ikon arah per tipe transaksi (DS-ICON-01, DS-COLOR-01). */
+export const TX_TYPE_ICON: Record<TxType, IconName> = {
+  income: "in",
+  expense: "out",
+  transfer: "transfer",
+  // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
+  asset_buy: "coins",
+  // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
+  asset_sell: "coins",
+}
+
+/** Token warna per tipe transaksi (DS-COLOR-01). */
+export const TX_TYPE_TONE: Record<TxType, "inc" | "exp" | "trf" | "inv"> = {
+  income: "inc",
+  expense: "exp",
+  transfer: "trf",
+  // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
+  asset_buy: "inv",
+  // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
+  asset_sell: "inv",
+}

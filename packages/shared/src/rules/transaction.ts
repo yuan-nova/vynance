@@ -24,3 +24,34 @@ export function countsAsIncome(type: TxType): boolean {
 export function countsAsExpense(type: TxType): boolean {
   return type === "expense"
 }
+
+/** Tanda nominal di daftar (DS-MONEY-01): masuk "+", keluar "−", lainnya tanpa tanda. */
+export function txSign(type: TxType): "income" | "expense" | "none" {
+  if (type === "income") return "income"
+  if (type === "expense") return "expense"
+  return "none"
+}
+
+/** Efek bersih transaksi terhadap total harian masuk/keluar (transfer & aset = 0). */
+export function dailyNet(type: TxType, amount: bigint): bigint {
+  if (type === "income") return amount
+  if (type === "expense") return -amount
+  return 0n
+}
+
+/** Grup per tanggal dengan total harian, urutan mengikuti input (DS-DATA-01). */
+export function groupByDate<T extends { txDate: string; type: TxType; amount: string }>(
+  rows: readonly T[],
+): { date: string; total: bigint; items: T[] }[] {
+  const out: { date: string; total: bigint; items: T[] }[] = []
+  for (const r of rows) {
+    let g = out[out.length - 1]
+    if (!g || g.date !== r.txDate) {
+      g = { date: r.txDate, total: 0n, items: [] }
+      out.push(g)
+    }
+    g.items.push(r)
+    g.total += dailyNet(r.type, BigInt(r.amount))
+  }
+  return out
+}

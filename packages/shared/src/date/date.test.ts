@@ -6,6 +6,7 @@ import {
   formatDate,
   formatDateLong,
   formatDateShort,
+  formatDateWeekdayShort,
   formatMonth,
   formatTime,
   monthDateRange,
@@ -45,6 +46,7 @@ describe("format", () => {
     expect(formatDate("2026-11-26")).toBe("26 Nov 2026")
     expect(formatDateShort("2026-11-26")).toBe("26 Nov")
     expect(formatDateLong("2026-11-26")).toBe("Kamis, 26 November 2026")
+    expect(formatDateWeekdayShort("2026-11-26")).toBe("Kamis, 26 Nov")
   })
   test("jam WIB", () => expect(formatTime(new Date("2026-11-26T07:30:00Z"))).toBe("14.30"))
 })

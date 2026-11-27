@@ -1,6 +1,15 @@
-import { categories, type Executor, transactions } from "@vynance/db"
-import type { CategoryKind, CategoryUsage, Transaction, TxSource, TxType } from "@vynance/shared"
-import { and, count, desc, eq, gte, isNotNull, isNull } from "drizzle-orm"
+import { categories, type Executor, transactions, users, wallets } from "@vynance/db"
+import type {
+  CategoryKind,
+  CategoryUsage,
+  Transaction,
+  TransactionListItem,
+  TransactionListQuery,
+  TxSource,
+  TxType,
+} from "@vynance/shared"
+import { and, count, desc, eq, gte, isNotNull, isNull, like, lt, lte, or, sql, sum } from "drizzle-orm"
+import { alias } from "drizzle-orm/mysql-core"
 
 type Row = typeof transactions.$inferSelect
 
@@ -51,6 +60,70 @@ export class TransactionsRepository {
     }
   }
 
+  /** Daftar per tanggal terbaru, cursor (tx_date, id) (TSD §11). Mengambil limit+1 untuk tahu ada halaman berikut. */
+  async list(bookId: string, q: TransactionListQuery): Promise<{ items: TransactionListItem[]; hasMore: boolean }> {
+    const toWallet = alias(wallets, "to_wallet")
+    const [cDate, cId] = q.cursor ? q.cursor.split(".") : []
+    const rows = await this.db
+      .select({
+        tx: transactions,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        walletName: wallets.name,
+        toWalletName: toWallet.name,
+        createdByName: users.name,
+      })
+      .from(transactions)
+      .innerJoin(wallets, and(eq(wallets.id, transactions.walletId), eq(wallets.bookId, bookId)))
+      .leftJoin(toWallet, and(eq(toWallet.id, transactions.toWalletId), eq(toWallet.bookId, bookId)))
+      .leftJoin(categories, and(eq(categories.id, transactions.categoryId), eq(categories.bookId, bookId)))
+      .innerJoin(users, eq(users.id, transactions.createdBy))
+      .where(
+        and(
+          eq(transactions.bookId, bookId),
+          isNull(transactions.deletedAt),
+          q.type ? eq(transactions.type, q.type) : undefined,
+          q.from ? gte(transactions.txDate, q.from) : undefined,
+          q.to ? lte(transactions.txDate, q.to) : undefined,
+          q.walletId ? or(eq(transactions.walletId, q.walletId), eq(transactions.toWalletId, q.walletId)) : undefined,
+          q.q ? like(transactions.note, `%${escapeLike(q.q)}%`) : undefined,
+          cDate && cId
+            ? or(lt(transactions.txDate, cDate), and(eq(transactions.txDate, cDate), lt(transactions.id, cId)))
+            : undefined,
+        ),
+      )
+      .orderBy(desc(transactions.txDate), desc(transactions.id))
+      .limit(q.limit + 1)
+    const items = rows.slice(0, q.limit).map((r) => ({
+      ...toTransaction(r.tx),
+      categoryName: r.categoryName,
+      categoryIcon: r.categoryIcon,
+      walletName: r.walletName,
+      toWalletName: r.toWalletName,
+      createdByName: r.createdByName,
+    }))
+    return { items, hasMore: rows.length > q.limit }
+  }
+
+  /** Σ uang masuk dan keluar dalam rentang tanggal (transfer & aset tidak dihitung). */
+  async sumIncomeExpense(bookId: string, from: string, to: string): Promise<{ income: bigint; expense: bigint }> {
+    const rows = await this.db
+      .select({ type: transactions.type, total: sum(transactions.amount) })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.bookId, bookId),
+          isNull(transactions.deletedAt),
+          gte(transactions.txDate, from),
+          lte(transactions.txDate, to),
+          sql`${transactions.type} in ('income', 'expense')`,
+        ),
+      )
+      .groupBy(transactions.type)
+    const get = (t: TxType) => BigInt(rows.find((r) => r.type === t)?.total ?? "0")
+    return { income: get("income"), expense: get("expense") }
+  }
+
   /** Kategori paling sering dipakai sejak tanggal tertentu (chip "sering dipakai"). */
   async categoryUsage(bookId: string, kind: CategoryKind, since: string): Promise<CategoryUsage> {
     const rows = await this.db
@@ -88,6 +161,11 @@ export function toTransaction(r: Row): Transaction {
     createdBy: r.createdBy,
     createdAt: r.createdAt.toISOString(),
   }
+}
+
+/** % dan _ di kata cari diperlakukan sebagai huruf biasa. */
+function escapeLike(v: string): string {
+  return v.replace(/[\\%_]/g, (c) => `\\${c}`)
 }
 
 function isDuplicate(e: unknown, index: string): boolean {

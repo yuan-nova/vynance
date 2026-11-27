@@ -10,6 +10,10 @@ export const qk = {
   wallets: (bookId: string) => ["book", bookId, "wallets"] as const,
   categoryUsage: (bookId: string, kind: string) => ["book", bookId, "category-usage", kind] as const,
   transactions: (bookId: string) => ["book", bookId, "transactions"] as const,
+  transactionList: (bookId: string, filter: Record<string, string | undefined>) =>
+    ["book", bookId, "transactions", "list", filter] as const,
+  transactionSummary: (bookId: string, from: string, to: string) =>
+    ["book", bookId, "transactions", "summary", from, to] as const,
   categories: (bookId: string, kind?: string) =>
     kind ? (["book", bookId, "categories", kind] as const) : (["book", bookId, "categories"] as const),
 }
