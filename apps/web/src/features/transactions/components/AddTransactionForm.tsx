@@ -13,18 +13,21 @@ import { ChipGroup } from "@/components/ChipGroup"
 import { MoneyInput } from "@/components/MoneyInput"
 import { TextField } from "@/components/TextField"
 import { useCategories } from "@/features/categories"
+import { usePortfolio } from "@/features/investments"
 import { useWallets } from "@/features/wallets"
 import { splitApiError } from "@/lib/api-error"
 import { usePrivacyMode } from "@/lib/hooks/usePrivacyMode"
 import { useCategoryUsage, useCreateTransaction, useUpdateTransaction } from "../hooks/useTransactions"
 
-type TxKind = "expense" | "income" | "transfer"
-type Field = "amount" | "categoryId" | "walletId" | "toWalletId" | "txDate" | "note"
+type TxKind = "expense" | "income" | "transfer" | "asset_buy" | "asset_sell"
+type Field = "amount" | "categoryId" | "walletId" | "toWalletId" | "assetId" | "txDate" | "note"
 
 const TYPE_OPTIONS = [
   { value: "expense", label: "Keluar" },
   { value: "income", label: "Masuk" },
   { value: "transfer", label: "Transfer" },
+  { value: "asset_buy", label: "Beli aset" },
+  { value: "asset_sell", label: "Jual aset" },
 ] as const
 
 const CHIP_LIMIT = 8
@@ -49,13 +52,13 @@ type AddTransactionFormProps = { bookId: string; onSaved: () => void; initial?: 
  */
 export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionFormProps) {
   const privacy = usePrivacyMode()
-  const [type, setType] = useState<TxKind>(
-    initial && (initial.type === "income" || initial.type === "transfer") ? initial.type : "expense",
-  )
+  const [type, setType] = useState<TxKind>(initial?.type ?? "expense")
+  const isAsset = type === "asset_buy" || type === "asset_sell"
   const kind: CategoryKind = type === "income" ? "income" : "expense"
   const wallets = useWallets(bookId)
   const categories = useCategories(bookId, kind)
   const usage = useCategoryUsage(bookId, kind)
+  const portfolio = usePortfolio(bookId)
   const create = useCreateTransaction(bookId)
   const update = useUpdateTransaction(bookId)
   const saving = initial ? update : create
@@ -67,6 +70,7 @@ export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionF
   const [categoryId, setCategoryId] = useState<string | null>(initial?.categoryId ?? null)
   const [walletId, setWalletId] = useState<string | null>(initial?.walletId ?? null)
   const [toWalletId, setToWalletId] = useState<string | null>(initial?.toWalletId ?? null)
+  const [assetId, setAssetId] = useState<string | null>(initial?.assetId ?? null)
   const [txDate, setTxDate] = useState(initial?.txDate ?? today)
   const [note, setNote] = useState(initial?.note ?? "")
   const [showAll, setShowAll] = useState(false)
@@ -85,7 +89,9 @@ export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionF
     const parsed = createTransactionSchema.safeParse(
       type === "transfer"
         ? { ...base, type, toWalletId: toWalletId ?? "" }
-        : { ...base, type, categoryId: categoryId ?? "" },
+        : type === "asset_buy" || type === "asset_sell"
+          ? { ...base, type, assetId: assetId ?? "" }
+          : { ...base, type, categoryId: categoryId ?? "" },
     )
     if (!parsed.success) {
       const issue = parsed.error.issues[0]
@@ -95,9 +101,11 @@ export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionF
           ? "Isi jumlah lebih dari 0"
           : field === "categoryId"
             ? "Pilih kategori"
-            : field === "toWalletId" && !toWalletId
-              ? "Pilih rekening tujuan"
-              : issue?.message
+            : field === "assetId"
+              ? "Pilih aset"
+              : field === "toWalletId" && !toWalletId
+                ? "Pilih rekening tujuan"
+                : issue?.message
       setErrors({ [field ?? "form"]: message })
       return
     }
@@ -110,6 +118,7 @@ export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionF
           "categoryId",
           "walletId",
           "toWalletId",
+          "assetId",
           "txDate",
           "note",
         ] as const)
@@ -134,7 +143,27 @@ export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionF
       />
       <MoneyInput label="Jumlah" value={amount} onChange={setAmount} error={errors.amount} large autoFocus={!initial} />
 
-      {type !== "transfer" ? (
+      {isAsset ? (
+        <div className="field">
+          {(portfolio.data?.assets.length ?? 0) > 0 ? (
+            <ChipGroup
+              label="Aset"
+              options={(portfolio.data?.assets ?? []).map((a) => ({
+                value: a.id,
+                label: privacy ? a.name : `${a.name} · ${formatMoney(BigInt(a.currentValue))}`,
+              }))}
+              value={assetId ?? ""}
+              onChange={setAssetId}
+            />
+          ) : (
+            <p className="row-sub">Belum ada aset. Tambahkan dulu di Lainnya → Investasi.</p>
+          )}
+          {errors.assetId ? <p className="field-error">{errors.assetId}</p> : null}
+          <p className="row-sub">Beli dan jual aset tidak dihitung sebagai pemasukan atau pengeluaran.</p>
+        </div>
+      ) : null}
+
+      {type !== "transfer" && !isAsset ? (
         <div className="field">
           <ChipGroup
             label="Kategori"

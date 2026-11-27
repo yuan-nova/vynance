@@ -1,8 +1,10 @@
 import {
   addMonths,
+  assetTradeDelta,
   type CategoryKind,
   type CategoryUsage,
   type CreateTransactionInput,
+  checkAssetSell,
   checkCategoryKind,
   checkTransferWallets,
   formatMoney,
@@ -19,6 +21,7 @@ import type { UnitOfWork } from "../../db/unit-of-work"
 import { BusinessError, NotFound } from "../../lib/errors"
 import type { ActivityRepository } from "../activity/activity.repository"
 import type { CategoriesRepository } from "../categories/categories.repository"
+import type { AssetsRepository } from "../investments/assets.repository"
 import type { WalletsRepository } from "../wallets/wallets.repository"
 import type { TransactionsRepository } from "./transactions.repository"
 
@@ -26,6 +29,7 @@ type Repos = {
   transactions: TransactionsRepository
   wallets: WalletsRepository
   categories: CategoriesRepository
+  assets: AssetsRepository
   activity: ActivityRepository
 }
 type Deps = {
@@ -52,7 +56,7 @@ export class TransactionsService {
     }
     const id = this.d.newId()
     const result = await this.d.uow.withTransaction(async (r) => {
-      const { toWalletId, categoryId } = await this.resolveRefs(r, ctx.bookId, input)
+      const { toWalletId, categoryId, assetId } = await this.resolveRefs(r, ctx.bookId, input)
       const inserted = await r.transactions.insert({
         id,
         bookId: ctx.bookId,
@@ -62,12 +66,14 @@ export class TransactionsService {
         walletId: input.walletId,
         toWalletId,
         categoryId,
+        assetId,
         note: input.note || null,
         source: "manual",
         idempotencyKey: idempotencyKey ?? null,
         createdBy: ctx.userId,
       })
       if (inserted === "duplicate_key") return "duplicate" as const
+      await this.applyAsset(r, ctx.bookId, input.type, assetId, input.amount)
       await r.activity.record({
         id: this.d.newId(),
         bookId: ctx.bookId,
@@ -100,10 +106,10 @@ export class TransactionsService {
     await this.d.uow.withTransaction(async (r) => {
       const current = await r.transactions.findById(ctx.bookId, id)
       if (!current) throw new NotFound("TRANSACTION_NOT_FOUND")
-      // Beli/jual aset punya dampak ke aset (BR-34); diubah lewat #32.
-      if (current.type === "asset_buy" || current.type === "asset_sell")
-        throw new BusinessError("TRANSACTION_ASSET_EDIT")
-      const { toWalletId, categoryId } = await this.resolveRefs(r, ctx.bookId, input)
+      // BR-34: balik dampak lama ke aset, lalu terapkan dampak baru (BR-33 dicek setelah dibalik).
+      await this.revertAsset(r, ctx.bookId, current)
+      const { toWalletId, categoryId, assetId } = await this.resolveRefs(r, ctx.bookId, input)
+      await this.applyAsset(r, ctx.bookId, input.type, assetId, input.amount)
       await r.transactions.update(ctx.bookId, id, {
         type: input.type,
         amount: input.amount,
@@ -111,6 +117,7 @@ export class TransactionsService {
         walletId: input.walletId,
         toWalletId,
         categoryId,
+        assetId,
         note: input.note || null,
         updatedBy: ctx.userId,
       })
@@ -124,8 +131,7 @@ export class TransactionsService {
     await this.d.uow.withTransaction(async (r) => {
       const current = await r.transactions.findById(ctx.bookId, id)
       if (!current) throw new NotFound("TRANSACTION_NOT_FOUND")
-      if (current.type === "asset_buy" || current.type === "asset_sell")
-        throw new BusinessError("TRANSACTION_ASSET_EDIT")
+      await this.revertAsset(r, ctx.bookId, current)
       await r.transactions.setDeleted(ctx.bookId, id, this.d.now(), ctx.userId)
       await this.log(r, ctx, "transaction.deleted", id, BigInt(current.amount), current.note ?? undefined)
     })
@@ -136,6 +142,7 @@ export class TransactionsService {
       const tx = await r.transactions.findAny(ctx.bookId, id)
       if (!tx) throw new NotFound("TRANSACTION_NOT_FOUND")
       if (tx.deleted) {
+        await this.applyAsset(r, ctx.bookId, tx.type, tx.assetId, BigInt(tx.amount))
         await r.transactions.setDeleted(ctx.bookId, id, null, ctx.userId)
         await this.log(r, ctx, "transaction.restored", id, BigInt(tx.amount), tx.note ?? undefined)
       }
@@ -166,19 +173,44 @@ export class TransactionsService {
     r: Repos,
     bookId: string,
     input: CreateTransactionInput,
-  ): Promise<{ toWalletId: string | null; categoryId: string | null }> {
+  ): Promise<{ toWalletId: string | null; categoryId: string | null; assetId: string | null }> {
     await this.assertWallet(r, bookId, input.walletId, "walletId")
     if (input.type === "transfer") {
       const rule = checkTransferWallets(input.walletId, input.toWalletId)
       if (!rule.ok) throw new BusinessError(rule.code, rule.field)
       await this.assertWallet(r, bookId, input.toWalletId, "toWalletId")
-      return { toWalletId: input.toWalletId, categoryId: null }
+      return { toWalletId: input.toWalletId, categoryId: null, assetId: null }
+    }
+    if ("assetId" in input) {
+      // BR-32: aset wajib milik buku ini.
+      if (!(await r.assets.findById(bookId, input.assetId))) throw new BusinessError("ASSET_NOT_FOUND", "assetId")
+      return { toWalletId: null, categoryId: null, assetId: input.assetId }
     }
     const [cat] = await r.categories.existActive(bookId, [input.categoryId])
     if (!cat) throw new BusinessError("CATEGORY_NOT_FOUND", "categoryId")
     const rule = checkCategoryKind(input.type, cat.kind)
     if (!rule.ok) throw new BusinessError(rule.code, rule.field)
-    return { toWalletId: null, categoryId: cat.id }
+    return { toWalletId: null, categoryId: cat.id, assetId: null }
+  }
+
+  /** Terapkan dampak beli/jual ke aset; jual dicek BR-33 terhadap nilai aset saat ini. */
+  private async applyAsset(r: Repos, bookId: string, type: string, assetId: string | null, amount: bigint) {
+    if (!assetId || (type !== "asset_buy" && type !== "asset_sell")) return
+    const asset = await r.assets.findById(bookId, assetId)
+    if (!asset) throw new BusinessError("ASSET_NOT_FOUND", "assetId")
+    if (type === "asset_sell") {
+      const rule = checkAssetSell(asset, amount)
+      if (!rule.ok) throw new BusinessError(rule.code, rule.field)
+    }
+    const d = assetTradeDelta(type, amount)
+    await r.assets.applyDelta(bookId, assetId, d.cost, d.value)
+  }
+
+  /** BR-34: balik dampak transaksi lama ke asetnya. */
+  private async revertAsset(r: Repos, bookId: string, tx: { type: string; assetId: string | null; amount: string }) {
+    if (!tx.assetId || (tx.type !== "asset_buy" && tx.type !== "asset_sell")) return
+    const d = assetTradeDelta(tx.type, BigInt(tx.amount))
+    await r.assets.applyDelta(bookId, tx.assetId, -d.cost, -d.value)
   }
 
   private log(r: Repos, ctx: ServiceCtx, action: string, id: string, amount: bigint, note?: string): Promise<void> {

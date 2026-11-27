@@ -47,6 +47,7 @@ export class TransactionsRepository {
     walletId: string
     toWalletId: string | null
     categoryId: string | null
+    assetId?: string | null
     note: string | null
     source: TxSource
     idempotencyKey: string | null
@@ -162,6 +163,7 @@ export class TransactionsRepository {
       walletId: string
       toWalletId: string | null
       categoryId: string | null
+      assetId?: string | null
       note: string | null
       updatedBy: string
     },
