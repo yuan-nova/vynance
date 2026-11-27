@@ -1,43 +1,132 @@
-/* Token tema dari design/_source/themes.py (Hutan terang, Malam gelap). DS-THEME-01. */
-:root {
+/* Token tema dari design/_source/themes.py (Hutan terang, Malam gelap). DS-THEME-01.
+   Gelap mengikuti prefers-color-scheme kecuali <html data-theme="light|dark"> dipilih pengguna. */
+:root,
+:root[data-theme="light"] {
   color-scheme: light;
   --bg: #f5f4ef;
   --surf: #ffffff;
   --surf2: #edebe4;
+  --surf3: #e4e1d8;
   --ink: #15201c;
   --muted: #5c6863;
   --faint: #6d7672;
   --line: #e3e0d7;
   --field-line: #828b87;
   --pri: #1c5d4c;
+  --pri-d: #123f34;
   --pri-s: #ddebe4;
+  --pri-t: #b9d6c9;
   --onp: #ffffff;
+  --on-ink: #ffffff;
+  --hero1: #21705c;
+  --hero2: #123f34;
+  --hero-fg: #ffffff;
+  --gold: #e0b04f;
   --inc: #1d7650;
+  --inc-s: #dcf1e5;
   --exp: #c0453a;
   --exp-s: #f8e1de;
+  --exp-d: #8e342c;
+  --trf: #3967a6;
+  --trf-s: #e0e9f5;
+  --inv: #8a601a;
+  --inv-s: #f6ebd3;
+  --warn: #a3660b;
+  --warn-s: #fbefd2;
+  --warn-d: #7a5208;
+  --auto: #6b4fa0;
+  --auto-s: #ece6f6;
+  --scrim: rgb(0 0 0 / 0.4);
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+
+:root {
   --radius-card: 20px;
+  --radius-btn: 16px;
+  --radius-field: 14px;
+  --radius-tile: 12px;
+  --radius-full: 999px;
   --gutter: 20px;
+  --nav-h: 64px;
   --font: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #0e1412;
     --surf: #161e1b;
     --surf2: #1f2925;
+    --surf3: #2c3833;
     --ink: #e8f0ec;
     --muted: #9daba5;
     --faint: #7b8a83;
     --line: #26322d;
     --field-line: #616d68;
     --pri: #4fd1a1;
+    --pri-d: #0b3b2c;
     --pri-s: #163a2f;
+    --pri-t: #9fe6cb;
     --onp: #05231a;
+    --on-ink: #0e1412;
+    --hero1: #1d5443;
+    --hero2: #0e2620;
+    --hero-fg: #ffffff;
+    --gold: #f2c46b;
     --inc: #5ad69a;
+    --inc-s: #15332a;
     --exp: #ff7b6c;
     --exp-s: #3a201d;
+    --exp-d: #ffb7ad;
+    --trf: #86aeff;
+    --trf-s: #1c2742;
+    --inv: #f0b45a;
+    --inv-s: #3a2d15;
+    --warn: #f5b83d;
+    --warn-s: #3a3013;
+    --warn-d: #f6d58c;
+    --auto: #c6aaff;
+    --auto-s: #2b2343;
+    --scrim: rgb(0 0 0 / 0.6);
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1412;
+  --surf: #161e1b;
+  --surf2: #1f2925;
+  --surf3: #2c3833;
+  --ink: #e8f0ec;
+  --muted: #9daba5;
+  --faint: #7b8a83;
+  --line: #26322d;
+  --field-line: #616d68;
+  --pri: #4fd1a1;
+  --pri-d: #0b3b2c;
+  --pri-s: #163a2f;
+  --pri-t: #9fe6cb;
+  --onp: #05231a;
+  --on-ink: #0e1412;
+  --hero1: #1d5443;
+  --hero2: #0e2620;
+  --hero-fg: #ffffff;
+  --gold: #f2c46b;
+  --inc: #5ad69a;
+  --inc-s: #15332a;
+  --exp: #ff7b6c;
+  --exp-s: #3a201d;
+  --exp-d: #ffb7ad;
+  --trf: #86aeff;
+  --trf-s: #1c2742;
+  --inv: #f0b45a;
+  --inv-s: #3a2d15;
+  --warn: #f5b83d;
+  --warn-s: #3a3013;
+  --warn-d: #f6d58c;
+  --auto: #c6aaff;
+  --auto-s: #2b2343;
+  --scrim: rgb(0 0 0 / 0.6);
 }
 
 @media (max-width: 374px) {

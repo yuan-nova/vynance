@@ -9,50 +9,133 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as TabsRouteImport } from './routes/_tabs'
+import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
+import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
+import { Route as TabsLainnyaRouteImport } from './routes/_tabs/lainnya'
+import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
 
-const IndexRoute = IndexRouteImport.update({
+const TabsRoute = TabsRouteImport.update({
+  id: '/_tabs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TabsIndexRoute = TabsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsAnggaranRoute = TabsAnggaranRouteImport.update({
+  id: '/anggaran',
+  path: '/anggaran',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsLainnyaRoute = TabsLainnyaRouteImport.update({
+  id: '/lainnya',
+  path: '/lainnya',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsTransaksiRoute = TabsTransaksiRouteImport.update({
+  id: '/transaksi',
+  path: '/transaksi',
+  getParentRoute: () => TabsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof TabsIndexRoute
+  '/anggaran': typeof TabsAnggaranRoute
+  '/lainnya': typeof TabsLainnyaRoute
+  '/transaksi': typeof TabsTransaksiRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/anggaran': typeof TabsAnggaranRoute
+  '/lainnya': typeof TabsLainnyaRoute
+  '/transaksi': typeof TabsTransaksiRoute
+  '/': typeof TabsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_tabs': typeof TabsRouteWithChildren
+  '/_tabs/anggaran': typeof TabsAnggaranRoute
+  '/_tabs/lainnya': typeof TabsLainnyaRoute
+  '/_tabs/transaksi': typeof TabsTransaksiRoute
+  '/_tabs/': typeof TabsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/anggaran' | '/lainnya' | '/transaksi'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/anggaran' | '/lainnya' | '/transaksi' | '/'
+  id:
+    | '__root__'
+    | '/_tabs'
+    | '/_tabs/anggaran'
+    | '/_tabs/lainnya'
+    | '/_tabs/transaksi'
+    | '/_tabs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  TabsRoute: typeof TabsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_tabs': {
+      id: '/_tabs'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof TabsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_tabs/': {
+      id: '/_tabs/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof TabsIndexRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/anggaran': {
+      id: '/_tabs/anggaran'
+      path: '/anggaran'
+      fullPath: '/anggaran'
+      preLoaderRoute: typeof TabsAnggaranRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/lainnya': {
+      id: '/_tabs/lainnya'
+      path: '/lainnya'
+      fullPath: '/lainnya'
+      preLoaderRoute: typeof TabsLainnyaRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/transaksi': {
+      id: '/_tabs/transaksi'
+      path: '/transaksi'
+      fullPath: '/transaksi'
+      preLoaderRoute: typeof TabsTransaksiRouteImport
+      parentRoute: typeof TabsRoute
     }
   }
 }
 
+interface TabsRouteChildren {
+  TabsAnggaranRoute: typeof TabsAnggaranRoute
+  TabsLainnyaRoute: typeof TabsLainnyaRoute
+  TabsTransaksiRoute: typeof TabsTransaksiRoute
+  TabsIndexRoute: typeof TabsIndexRoute
+}
+
+const TabsRouteChildren: TabsRouteChildren = {
+  TabsAnggaranRoute: TabsAnggaranRoute,
+  TabsLainnyaRoute: TabsLainnyaRoute,
+  TabsTransaksiRoute: TabsTransaksiRoute,
+  TabsIndexRoute: TabsIndexRoute,
+}
+
+const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  TabsRoute: TabsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

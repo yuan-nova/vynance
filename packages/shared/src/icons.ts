@@ -1,0 +1,75 @@
+// Registri ikon DS-ICON-01. Disalin dari design/_source/gen_svg.py (ICONS); jangan ubah path di sini saja.
+
+export const ICON_PATHS = {
+  home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  list: "M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01",
+  plus: "M12 5v14M5 12h14",
+  pie: "M21 12A9 9 0 1 1 12 3v9zM15 3.5A9 9 0 0 1 20.5 9H15z",
+  grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
+  eye: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+  bell: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0",
+  wallet: "M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5M16.5 14h.01",
+  card: "M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM2 10h20M6 15h4",
+  bank: "M3 21h18M5 21V10M19 21V10M9.5 21V10M14.5 21V10M12 3 2 8h20z",
+  cash: "M3 7h18v10H3zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 10v4M18 10v4",
+  target:
+    "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  trend: "M22 7l-8.5 8.5-5-5L2 17M16 7h6v6",
+  repeat: "M17 2l4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3",
+  scan: "M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10",
+  spark: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 2v4M21 4h-4",
+  // biome-ignore lint/style/useNamingConvention: nama ikon mengikuti kunci ICONS di generator
+  chev_r: "M9 18l6-6-6-6",
+  // biome-ignore lint/style/useNamingConvention: nama ikon mengikuti kunci ICONS di generator
+  chev_l: "M15 18l-6-6 6-6",
+  // biome-ignore lint/style/useNamingConvention: nama ikon mengikuti kunci ICONS di generator
+  chev_d: "M6 9l6 6 6-6",
+  search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",
+  filter: "M3 5h18M6 12h12M10 19h4",
+  in: "M17 7 7 17M17 17H7V7",
+  out: "M7 17 17 7M7 7h10v10",
+  transfer: "M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7",
+  cal: "M4 5h16v16H4zM4 10h16M8 3v4M16 3v4",
+  close: "M18 6 6 18M6 6l12 12",
+  check: "M20 6 9 17l-5-5",
+  user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
+  book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5",
+  users: "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7M22 21a7 7 0 0 0-4-6.3",
+  heart: "M12 20s-7-4.4-9.3-8.8A4.9 4.9 0 0 1 12 6.2a4.9 4.9 0 0 1 9.3 5C19 15.6 12 20 12 20z",
+  school: "M22 9 12 4 2 9l10 5 10-5zM6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6",
+  doc: "M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M9 13h6M9 17h6",
+  tag: "M3 3h8l10 10-8 8L3 11zM7.5 7.5h.01",
+  sliders: "M4 6h9M17 6h3M15 4v4M4 12h3M11 12h9M9 10v4M4 18h11M19 18h1M17 16v4",
+  download: "M12 3v12M7 10l5 5 5-5M4 21h16",
+  camera:
+    "M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+  coins:
+    "M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 7v5c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12v5c0 1.7 3.6 3 8 3s8-1.3 8-3v-5",
+  send: "M22 2 11 13M22 2l-7 20-4-9-9-4z",
+  lock: "M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4",
+  moon: "M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z",
+  globe: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20",
+  logout: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
+  bag: "M6 7h12l1 13H5zM9 7a3 3 0 0 1 6 0",
+  food: "M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 2-3 5s1 4 3 4v9",
+  car: "M5 17h14v-5l-2-5H7l-2 5zM5 12h14M7.5 17v2.5M16.5 17v2.5",
+  zap: "M13 2 4 14h7l-1 8 9-12h-7z",
+  brief: "M3 7h18v13H3zM8 7V4h8v3M3 12h18",
+  wifi: "M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0M12 20h.01",
+  info: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01",
+  alert: "M12 3 2 20h20zM12 10v4M12 17h.01",
+  shield: "M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z",
+  edit: "M4 20h4L19 9l-4-4L4 16zM14 6l4 4",
+  link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+  img: "M4 4h16v16H4zM4 16l5-5 4 4 3-3 4 4M15.5 8.5h.01",
+  mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3",
+  backspace: "M21 5H9l-6 7 6 7h12zM16 9l-5 6M11 9l5 6",
+  hand: "M12 20s-7-4.4-9.3-8.8A4.9 4.9 0 0 1 12 6.2a4.9 4.9 0 0 1 9.3 5C19 15.6 12 20 12 20zM9 12h6",
+  more: "M5 12h.01M12 12h.01M19 12h.01",
+  trash: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
+  // biome-ignore lint/style/useNamingConvention: nama ikon mengikuti kunci ICONS di generator
+  eye_off:
+    "M3 3l18 18M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.9 0 3.5-.6 4.9-1.4M9.9 9.9a3 3 0 0 0 4.2 4.2",
+} as const
+
+export type IconName = keyof typeof ICON_PATHS

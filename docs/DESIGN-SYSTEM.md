@@ -210,14 +210,14 @@ DILARANG membuat varian ad hoc lewat class (misalnya `ghost` + warna merah).
 |---|---|---|---|---|
 | Uang masuk | `in` | | Tambah | `plus` |
 | Uang keluar | `out` | | Ubah | `edit` |
-| Transfer | `transfer` | | Hapus | `trash` * |
+| Transfer | `transfer` | | Hapus | `trash` |
 | Investasi | `coins` | | Scan struk | `scan` |
 | Beranda | `home` | | Cari | `search` |
 | Transaksi | `list` | | Filter | `filter` |
 | Anggaran | `pie` | | Lainnya (nav) | `grid` |
 | Target tabungan | `target` | | Menu baris | `more` |
 | Langganan | `repeat` | | Undang | `link` |
-| Zakat | `moon` | | Privasi nominal | `eye` / `eye_off` * |
+| Zakat | `moon` | | Privasi nominal | `eye` / `eye_off` |
 | Kembali | `chev_l` | | Tutup | `close` |
 | Notifikasi | `bell` | | AI advisor | `spark` |
 | Rekening bank | `bank` | | Tunai | `cash` |
