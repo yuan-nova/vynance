@@ -1,6 +1,6 @@
 import { type ErrorCode, errorMessage } from "@vynance/shared"
 
-type Status = 401 | 403 | 404 | 409 | 410 | 422 | 500
+type Status = 401 | 403 | 404 | 409 | 410 | 422 | 500 | 503
 
 /** Dasar semua error aplikasi. Diubah menjadi `{ error: { code, message, field? } }` oleh error-handler. */
 export class AppError extends Error {
@@ -41,5 +41,11 @@ export class Forbidden extends AppError {
 export class Unauthorized extends AppError {
   constructor(code: ErrorCode = "UNAUTHORIZED") {
     super(401, code)
+  }
+}
+
+export class ServiceUnavailable extends AppError {
+  constructor(code: ErrorCode) {
+    super(503, code)
   }
 }

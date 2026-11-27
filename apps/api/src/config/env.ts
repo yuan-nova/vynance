@@ -14,6 +14,8 @@ const envSchema = z
     GOOGLE_CLIENT_SECRET: optional,
     EMAIL_FROM: z.string().min(3).default("Vynance <noreply@vynance.local>"),
     EMAIL_API_KEY: optional,
+    /** Kunci penyedia AI advisor (TSD §3). Kosong = fitur AI mati (503). */
+    LLM_API_KEY: optional,
     /** Sumber harga emas per gram (JSON berisi `price` dalam rupiah). Kosong = pakai cache/bawaan. */
     GOLD_PRICE_URL: optional,
   })

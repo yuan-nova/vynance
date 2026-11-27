@@ -6,8 +6,11 @@ import { UnitOfWork } from "./db/unit-of-work"
 import { generateBookCode } from "./lib/book-code"
 import { bookEvents } from "./lib/book-events"
 import { newId } from "./lib/id"
+import { createClaudeAsk } from "./lib/llm"
 import { createMailer } from "./lib/mailer"
 import { ActivityRepository } from "./modules/activity/activity.repository"
+import { AdvisorRepository } from "./modules/advisor/advisor.repository"
+import { AdvisorService } from "./modules/advisor/advisor.service"
 import { AuthService } from "./modules/auth/auth.service"
 import { BooksRepository } from "./modules/books/books.repository"
 import { BooksService } from "./modules/books/books.service"
@@ -220,6 +223,15 @@ async function fetchGoldPrice(): Promise<bigint | null> {
   return Number.isFinite(n) && n > 0 ? BigInt(Math.round(n)) : null
 }
 
+const dashboardService = new DashboardService({
+  wallets: services.walletsService,
+  plans: services.plansService,
+  transactions: services.transactionsService,
+  categories: services.categoriesService,
+  investments: services.investmentsService,
+  healthScore: healthScoreService,
+})
+
 export const container = {
   ...services,
   notificationsService,
@@ -244,12 +256,13 @@ export const container = {
   }),
   bookEvents,
   healthScoreService,
-  dashboardService: new DashboardService({
-    wallets: services.walletsService,
-    plans: services.plansService,
-    transactions: services.transactionsService,
-    categories: services.categoriesService,
+  dashboardService,
+  advisorService: new AdvisorService({
+    advisor: new AdvisorRepository(db),
+    dashboard: dashboardService,
+    goals: services.goalsService,
     investments: services.investmentsService,
-    healthScore: healthScoreService,
+    llm: createClaudeAsk(env.LLM_API_KEY),
+    now: () => new Date(),
   }),
 }

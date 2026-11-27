@@ -6,6 +6,8 @@ export const ERROR_MESSAGES = {
   VALIDATION: "Data yang dikirim belum benar.",
   UNAUTHORIZED: "Silakan masuk terlebih dahulu.",
   FORBIDDEN: "Kamu tidak punya akses untuk tindakan ini.",
+  AI_CONSENT_REQUIRED: "Setujui dulu pengiriman ringkasan data ke penyedia AI.",
+  AI_UNAVAILABLE: "Asisten AI belum tersedia. Coba lagi nanti.",
   NOT_FOUND: "Data tidak ditemukan.",
   CONFLICT: "Data sudah berubah. Muat ulang lalu coba lagi.",
   RATE_LIMITED: "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",

@@ -21,6 +21,7 @@ import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
 import { Route as UndanganTokenRouteImport } from './routes/undangan.$token'
 import { Route as TabsAnggaranWizardRouteImport } from './routes/_tabs/anggaran_.wizard'
 import { Route as TabsLainnyaIndexRouteImport } from './routes/_tabs/lainnya/index'
+import { Route as TabsLainnyaAsistenRouteImport } from './routes/_tabs/lainnya/asisten'
 import { Route as TabsLainnyaBukuRouteImport } from './routes/_tabs/lainnya/buku'
 import { Route as TabsLainnyaInvestasiRouteImport } from './routes/_tabs/lainnya/investasi'
 import { Route as TabsLainnyaKategoriRouteImport } from './routes/_tabs/lainnya/kategori'
@@ -91,6 +92,11 @@ const TabsLainnyaIndexRoute = TabsLainnyaIndexRouteImport.update({
   path: '/lainnya/',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsLainnyaAsistenRoute = TabsLainnyaAsistenRouteImport.update({
+  id: '/lainnya/asisten',
+  path: '/lainnya/asisten',
+  getParentRoute: () => TabsRoute,
+} as any)
 const TabsLainnyaBukuRoute = TabsLainnyaBukuRouteImport.update({
   id: '/lainnya/buku',
   path: '/lainnya/buku',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
   '/anggaran/wizard': typeof TabsAnggaranWizardRoute
+  '/lainnya/asisten': typeof TabsLainnyaAsistenRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/investasi': typeof TabsLainnyaInvestasiRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/undangan/$token': typeof UndanganTokenRoute
   '/': typeof TabsIndexRoute
   '/anggaran/wizard': typeof TabsAnggaranWizardRoute
+  '/lainnya/asisten': typeof TabsLainnyaAsistenRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/investasi': typeof TabsLainnyaInvestasiRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/undangan/$token': typeof UndanganTokenRoute
   '/_tabs/': typeof TabsIndexRoute
   '/_tabs/anggaran_/wizard': typeof TabsAnggaranWizardRoute
+  '/_tabs/lainnya/asisten': typeof TabsLainnyaAsistenRoute
   '/_tabs/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/_tabs/lainnya/investasi': typeof TabsLainnyaInvestasiRoute
   '/_tabs/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/transaksi'
     | '/undangan/$token'
     | '/anggaran/wizard'
+    | '/lainnya/asisten'
     | '/lainnya/buku'
     | '/lainnya/investasi'
     | '/lainnya/kategori'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/undangan/$token'
     | '/'
     | '/anggaran/wizard'
+    | '/lainnya/asisten'
     | '/lainnya/buku'
     | '/lainnya/investasi'
     | '/lainnya/kategori'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/undangan/$token'
     | '/_tabs/'
     | '/_tabs/anggaran_/wizard'
+    | '/_tabs/lainnya/asisten'
     | '/_tabs/lainnya/buku'
     | '/_tabs/lainnya/investasi'
     | '/_tabs/lainnya/kategori'
@@ -380,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsLainnyaIndexRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/lainnya/asisten': {
+      id: '/_tabs/lainnya/asisten'
+      path: '/lainnya/asisten'
+      fullPath: '/lainnya/asisten'
+      preLoaderRoute: typeof TabsLainnyaAsistenRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/lainnya/buku': {
       id: '/_tabs/lainnya/buku'
       path: '/lainnya/buku'
@@ -460,6 +479,7 @@ interface TabsRouteChildren {
   TabsTransaksiRoute: typeof TabsTransaksiRoute
   TabsIndexRoute: typeof TabsIndexRoute
   TabsAnggaranWizardRoute: typeof TabsAnggaranWizardRoute
+  TabsLainnyaAsistenRoute: typeof TabsLainnyaAsistenRoute
   TabsLainnyaBukuRoute: typeof TabsLainnyaBukuRoute
   TabsLainnyaInvestasiRoute: typeof TabsLainnyaInvestasiRoute
   TabsLainnyaKategoriRoute: typeof TabsLainnyaKategoriRoute
@@ -480,6 +500,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsTransaksiRoute: TabsTransaksiRoute,
   TabsIndexRoute: TabsIndexRoute,
   TabsAnggaranWizardRoute: TabsAnggaranWizardRoute,
+  TabsLainnyaAsistenRoute: TabsLainnyaAsistenRoute,
   TabsLainnyaBukuRoute: TabsLainnyaBukuRoute,
   TabsLainnyaInvestasiRoute: TabsLainnyaInvestasiRoute,
   TabsLainnyaKategoriRoute: TabsLainnyaKategoriRoute,

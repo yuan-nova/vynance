@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `ai_consent_at` datetime(3);
