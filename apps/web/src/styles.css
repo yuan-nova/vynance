@@ -2209,3 +2209,26 @@ p {
 .payslip-bar-ded {
   background: var(--muted);
 }
+
+/* Mode demo (FR-151) */
+.demo-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surf2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.demo-import {
+  margin-bottom: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.demo-import-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}

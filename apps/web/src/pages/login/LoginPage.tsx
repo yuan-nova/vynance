@@ -47,6 +47,9 @@ export function LoginPage() {
         <Button variant={providers.data?.google ? "ghost" : "dark"} full onClick={() => setEmailOpen(true)}>
           Masuk dengan email
         </Button>
+        <Button variant="ghost" full onClick={() => void navigate({ to: "/demo" })}>
+          Coba dulu tanpa akun
+        </Button>
         <p className="login-note">
           <Icon name="lock" size={16} />
           Data hanya terlihat oleh kamu &amp; anggota yang diundang

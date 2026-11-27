@@ -6,6 +6,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/States"
 import { useMe, useUpdateMe } from "@/features/auth"
 import { BookPicker, useActiveBook } from "@/features/books"
 import { HomeCharts, TopBudgets, useDashboard, useDashboardCharts } from "@/features/dashboard"
+import { ImportDemoCard } from "@/features/demo"
 import { HealthScoreCard, useHealthScore } from "@/features/health-score"
 import { useNotifications } from "@/features/notifications"
 import { TransactionRow } from "@/features/transactions"
@@ -19,7 +20,8 @@ export function HomePage() {
   const navigate = useNavigate({ from: "/" })
   const { bulan } = route.useSearch()
   const month = bulan ?? monthOf(new Date())
-  const bookId = useActiveBook()?.id ?? ""
+  const activeBook = useActiveBook()
+  const bookId = activeBook?.id ?? ""
   const me = useMe()
   const t = useT()
   const privacy = usePrivacyMode()
@@ -60,6 +62,8 @@ export function HomePage() {
         </div>
         <BookPicker />
       </header>
+
+      {activeBook ? <ImportDemoCard bookId={activeBook.id} bookName={activeBook.name} /> : null}
 
       {q.isPending ? <Skeleton rows={3} height={96} /> : null}
       {q.isError && !d ? (
