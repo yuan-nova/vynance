@@ -40,8 +40,8 @@ describe("DashboardService", () => {
           return { income: "6000000", expense: "800000" }
         },
         list: async () => ({ data: [{ id: "t1" }], nextCursor: null }),
-        getHealthInputs: async () => ({ investments: 0n }),
       } as never,
+      investments: { totalValue: async () => 0n } as never,
       healthScore: {
         get: async () => ({ score: 78, level: "good", levelLabel: "Baik" }),
       } as never,

@@ -2,7 +2,7 @@ import { type Executor, investmentTypes } from "@vynance/db"
 import type { InvestmentType } from "@vynance/shared"
 import { and, asc, eq, inArray, isNull } from "drizzle-orm"
 
-// Jenis investasi (TSD §6.2). Daftar dan CRUD lengkap di #31; di sini insert untuk data bawaan.
+// Jenis investasi (TSD §6.2, PB-06). Setiap query difilter bookId.
 export class InvestmentTypesRepository {
   constructor(private readonly db: Executor) {}
 
@@ -41,5 +41,35 @@ export class InvestmentTypesRepository {
     rows: { id: string; bookId: string; name: string; icon: string; sortOrder: number; createdBy: string }[],
   ): Promise<void> {
     if (rows.length) await this.db.insert(investmentTypes).values(rows)
+  }
+
+  async insert(v: {
+    id: string
+    bookId: string
+    name: string
+    icon: string
+    targetValue: bigint | null
+    sortOrder: number
+    createdBy: string
+  }): Promise<void> {
+    await this.db.insert(investmentTypes).values(v)
+  }
+
+  async update(
+    bookId: string,
+    id: string,
+    v: { name: string; icon: string; targetValue: bigint | null },
+  ): Promise<void> {
+    await this.db
+      .update(investmentTypes)
+      .set(v)
+      .where(and(eq(investmentTypes.bookId, bookId), eq(investmentTypes.id, id), isNull(investmentTypes.deletedAt)))
+  }
+
+  async softDelete(bookId: string, id: string, at: Date): Promise<void> {
+    await this.db
+      .update(investmentTypes)
+      .set({ deletedAt: at })
+      .where(and(eq(investmentTypes.bookId, bookId), eq(investmentTypes.id, id)))
   }
 }

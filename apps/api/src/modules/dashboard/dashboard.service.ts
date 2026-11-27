@@ -10,6 +10,7 @@ import {
 } from "@vynance/shared"
 import type { CategoriesService } from "../categories/categories.service"
 import type { HealthScoreService } from "../health-score/health-score.service"
+import type { InvestmentsService } from "../investments/investments.service"
 import type { PlansService } from "../plans/plans.service"
 import type { TransactionsService } from "../transactions/transactions.service"
 import type { WalletsService } from "../wallets/wallets.service"
@@ -17,7 +18,8 @@ import type { WalletsService } from "../wallets/wallets.service"
 type Deps = {
   wallets: Pick<WalletsService, "list">
   plans: Pick<PlansService, "get">
-  transactions: Pick<TransactionsService, "list" | "summary" | "getHealthInputs">
+  transactions: Pick<TransactionsService, "list" | "summary">
+  investments: Pick<InvestmentsService, "totalValue">
   categories: Pick<CategoriesService, "list">
   healthScore: Pick<HealthScoreService, "get">
 }
@@ -31,19 +33,19 @@ export class DashboardService {
 
   async get(ctx: ServiceCtx, month: string): Promise<Dashboard> {
     const { from, to } = monthDateRange(month)
-    const [wallets, plan, summary, recent, cats, score, assets] = await Promise.all([
+    const [wallets, plan, summary, recent, cats, score, investments] = await Promise.all([
       this.d.wallets.list(ctx),
       this.d.plans.get(ctx, month),
       this.d.transactions.summary(ctx, from, to),
       this.d.transactions.list(ctx, { limit: RECENT }),
       this.d.categories.list(ctx, { kind: "expense" }),
       this.d.healthScore.get(ctx, month),
-      this.d.transactions.getHealthInputs(ctx, to),
+      this.d.investments.totalValue(ctx),
     ])
-    // Nilai investasi dari transaksi aset; aset (#31) menggantikan angka ini saat dirilis.
+    // Investasi = Σ nilai kini aset (BR-04, PB-06).
     const w = wealthSummary(
       wallets.wallets.map((x) => ({ type: x.type, balance: BigInt(x.balance) })),
-      assets.investments,
+      investments,
     )
     const cap = plan.spendingCap === null ? 0n : BigInt(plan.spendingCap)
     const { totalIncome } = planTotals(
