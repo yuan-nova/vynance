@@ -68,28 +68,31 @@ Aturannya:
 3. **Repository boleh memanggil repository lain.** Repository dilarang memanggil service.
 4. **Semua akses data wajib lewat repository.** Hanya file `*.repository.ts` (dan `db/` untuk client & transaksi) yang boleh mengimpor dari `@vynance/db` atau `drizzle-orm`.
 5. **Dilarang ada dependensi melingkar.** Kalau `A.service` memanggil `B.service`, maka `B.service` dilarang memanggil `A.service`, baik langsung maupun lewat service lain. Bila dua service saling butuh, pindahkan bagian bersamanya ke service ketiga atau ke `shared/rules`. Aturan yang sama berlaku untuk repository.
-6. Dependensi disuntikkan lewat constructor dan dirakit di `container.ts`. Dilarang membuat instance service atau repository di dalam fungsi lain.
+6. Dependensi disuntikkan lewat constructor dan dirakit di `container.ts`. Dilarang membuat instance service atau repository di dalam fungsi lain. `container.ts` hanya boleh diimpor oleh titik masuk app (`src/app.ts`, `src/index.ts`, `src/main.ts`). Route menerima service lewat parameter, bukan mengambilnya dari container.
 
 ### 3.2 Frontend (`apps/web`)
 
 ```
 routes ──▶ pages ──▶ features/*/components ──▶ features/*/hooks ──▶ features/*/services ──▶ lib/api-client
-                 └─▶ components (generik)
+  │              └─▶ components (generik)                ▲
+  └──────────── queryOptions untuk loader ────────────────┘
 ```
 
 | Dari \ Ke | pages | feature components | components (generik) | hooks | services | api-client |
 |---|---|---|---|---|---|---|
-| **routes** | ✅ | ❌ | ❌ | ❌ | ❌ (kecuali `queryOptions` di `loader`) | ❌ |
-| **pages** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **routes** | ✅ | ❌ | ❌ | ✅ hanya `queryOptions` untuk `loader` | ❌ | ❌ |
+| **pages** | ❌ (kecuali file di folder halaman yang sama) | ✅ | ✅ | ✅ | ❌ | ❌ |
 | **feature components** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **components (generik)** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **components (generik)** | ❌ | ❌ | ✅ | ❌ hook data; ✅ hook utilitas `lib/hooks` | ❌ | ❌ |
 | **hooks** | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
 | **services** | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 
 1. **Komponen dan halaman dilarang memanggil `fetch`, `hc`, atau service secara langsung.** Data selalu diambil lewat hook.
 2. **Service frontend dilarang memakai React** (hook, state, JSX).
 3. Fitur lain hanya boleh diimpor lewat `features/<nama>/index.ts`. Dilarang mengimpor file internal fitur lain.
-4. Komponen generik di `components/` dan `packages/ui` dilarang berisi logika bisnis atau memanggil hook data.
+4. Komponen generik di `components/` dan `packages/ui` dilarang berisi logika bisnis atau memanggil hook data. Hook utilitas tanpa data server dari `lib/hooks` (misalnya `useOnlineStatus`) boleh dipakai.
+5. **`queryOptions` untuk `loader` ditaruh di `features/<fitur>/hooks/`**, bersama `useQuery`-nya, dan diekspor lewat `features/<fitur>/index.ts`. Route hanya mengimpor `queryOptions` dari sana. Hook dan `loader` memakai `queryOptions` yang sama supaya query key dan fungsi ambilnya tidak ditulis dua kali.
+6. Hooks memanggil API hanya lewat service fitur, bukan `lib/api-client` atau `hc` langsung.
 
 ### 3.3 Paket
 
@@ -103,7 +106,7 @@ routes ──▶ pages ──▶ features/*/components ──▶ features/*/hook
 
 ### 3.4 Penegakan
 
-Aturan impor diperiksa otomatis oleh **dependency-cruiser** (`.dependency-cruiser.cjs`) dan Biome `noRestrictedImports`, di hook pre-commit dan di CI. Daftar lengkap aturan yang ditegakkan alat ada di [§13](#13-penegakan-otomatis).
+Aturan impor diperiksa otomatis oleh **dependency-cruiser** (`.dependency-cruiser.cjs`) dan Biome `noRestrictedImports` di hook pre-commit. Pemeriksaan yang sama wajib dijalankan di CI (workflow CI belum dibuat). Daftar lengkap aturan yang ditegakkan alat ada di [§13](#13-penegakan-otomatis).
 
 ---
 
@@ -276,7 +279,7 @@ Perubahan yang harus konsisten (transaksi + saldo dompet + ledger aset) wajib be
 | `routes/` | Definisi rute: path, guard, `validateSearch`, `loader`. Tanpa markup. |
 | `pages/<menu>/` | Komponen satu layar. Menyusun komponen dari fitur, menangani loading/kosong/error halaman. |
 | `features/<fitur>/components/` | Bagian layar yang bisa dipakai ulang. |
-| `features/<fitur>/hooks/` | TanStack Query/Mutation, query key, invalidasi. |
+| `features/<fitur>/hooks/` | TanStack Query/Mutation, `queryOptions` untuk `loader`, invalidasi. Query key diambil dari `lib/query-keys.ts`. |
 | `features/<fitur>/services/` | Panggilan API lewat `hc`, konversi data. |
 | `components/` | Komponen generik aplikasi (layout, form, data, feedback). |
 | `stores/` | State UI saja (ruang aktif, tema, draf). |
@@ -385,6 +388,8 @@ Semua aturan tampilan dan perilaku UI ada di **[DESIGN-SYSTEM.md](DESIGN-SYSTEM.
 | Tabel & kolom DB | snake_case, tabel jamak | `transactions.space_id` |
 | Izin | `<resource>:<aksi>` | `budget:update` |
 
+Nama variabel, fungsi, kelas, dan tipe diperiksa Biome `useNamingConvention` (camelCase, PascalCase, UPPER_SNAKE untuk konstanta). Key objek yang ditulis dalam tanda kutip, misalnya header `"Idempotency-Key"`, tidak diperiksa.
+
 Nama di kode memakai **bahasa Inggris**. Teks yang tampil ke pengguna memakai Bahasa Indonesia dan disimpan di `shared/errors` atau di komponen.
 
 ---
@@ -397,6 +402,9 @@ Nama di kode memakai **bahasa Inggris**. Teks yang tampil ke pengguna memakai Ba
 - Dilarang memakai non-null assertion (`!`) kecuali sudah dicek sebelumnya dan diberi komentar.
 - Fungsi yang diekspor wajib punya tipe kembalian eksplisit.
 - Impor memakai alias (`@/…`, `@vynance/…`), bukan `../../..` lebih dari dua tingkat.
+- Impor yang hanya dipakai sebagai tipe wajib memakai `import type`.
+- Dilarang ada impor dan variabel yang tidak dipakai.
+- Dilarang mengubah nilai parameter fungsi. Buat variabel baru.
 
 ### 9.1 Aturan `any`
 
@@ -447,7 +455,7 @@ Setiap bug yang diperbaiki wajib disertai test yang gagal sebelum perbaikan.
 
 ## 11. Keamanan
 
-- Rahasia (kunci API, `AUTH_SECRET`, URL DB) hanya ada di env server dan dibaca lewat `config/env.ts`. Dilarang menyimpannya di DB, di kode, atau di bundle frontend.
+- Rahasia (kunci API, `AUTH_SECRET`, URL DB) hanya ada di env server dan dibaca lewat `config/env.ts`. `process.env` dilarang dipakai di file lain. Dilarang menyimpannya di DB, di kode, atau di bundle frontend.
 - Variabel `VITE_*` dianggap publik. Dilarang berisi rahasia.
 - Setiap endpoint data keluarga wajib melewati `auth` → `spaceAccess` → `requirePermission`.
 - Query hanya lewat Drizzle atau `sql` template. Dilarang menyusun SQL dengan gabungan string.
@@ -461,7 +469,7 @@ Setiap bug yang diperbaiki wajib disertai test yang gagal sebelum perbaikan.
 - Branch: `feat/…`, `fix/…`, `chore/…`, `docs/…`, `refactor/…`.
 - Commit mengikuti Conventional Commits: `feat(transactions): catat transfer antar dompet`.
 - Satu PR untuk satu perubahan. Sebaiknya di bawah 400 baris diff.
-- CI wajib hijau: `biome check`, `tsc --noEmit`, dependency-cruiser, semua test.
+- CI wajib hijau: `biome check`, `tsc --noEmit`, dependency-cruiser, semua test. Workflow CI belum dibuat. Sampai ada, pemeriksaan ini hanya berjalan di hook pre-commit dan di mesin masing-masing.
 - Perubahan skema DB wajib menyertakan file migrasi.
 
 ### Checklist review
@@ -525,10 +533,13 @@ Format kode: indentasi 2 spasi, lebar baris 120, kutip ganda, tanpa titik koma k
 | Repository tidak memanggil service | §3.1 | depcruise `repository-no-service`, Biome `noRestrictedImports` |
 | `@vynance/db`/`drizzle-orm` hanya di repository, `db/`, `container.ts` | §3.1 | depcruise `db-only-in-repository` |
 | Tidak ada dependensi melingkar | §3.1 | depcruise `no-circular`, Biome `noImportCycles` |
+| `container.ts` hanya diimpor titik masuk app | §3.1 | depcruise `container-only-from-entry` |
+| Routes hanya ke pages dan `queryOptions` di hooks | §3.2 | depcruise `web-routes-only-pages`, `web-outside-feature-public-api` |
+| Pages hanya diimpor routes; halaman tidak mengimpor halaman lain | §3.2 | depcruise `web-pages-only-from-routes`, `web-pages-no-other-pages` |
 | Pages/components tidak memanggil service, `hc`, `fetch` | §3.2 | depcruise `web-view-no-service`, Biome `noRestrictedImports` + `noRestrictedGlobals` |
 | Halaman tidak mengimpor file route | §7.2 | Biome `noRestrictedImports` |
-| Komponen generik tidak mengimpor fitur/halaman/store | §3.2 | depcruise `web-generic-components-pure` |
-| Hooks tidak mengimpor komponen/halaman | §3.2 | depcruise `web-hooks-no-view` |
+| Komponen generik tidak mengimpor fitur/halaman/store (hook utilitas `lib/hooks` boleh) | §3.2 | depcruise `web-generic-components-pure` |
+| Hooks tidak mengimpor komponen/halaman, `api-client`, atau `hc` | §3.2 | depcruise `web-hooks-no-view` |
 | Service frontend tanpa React | §3.2 | depcruise `web-services-no-react`, Biome `noRestrictedImports` |
 | Fitur lain hanya lewat `features/<nama>/index.ts` | §3.2 | depcruise `web-feature-public-api`, `web-outside-feature-public-api` |
 | Aturan antar paket (shared/db/ui/apps) | §3.3 | depcruise `shared-no-workspace-deps`, `db-no-ui`, `ui-no-db`, `packages-no-apps` |
@@ -540,15 +551,45 @@ Format kode: indentasi 2 spasi, lebar baris 120, kutip ganda, tanpa titik koma k
 | `useEffect` tidak dipanggil langsung di pages/components | §7.3 | plugin `no-use-effect-in-view.grit` |
 | Dependensi hook lengkap, hook di level atas | §7.3 | Biome `useExhaustiveDependencies`, `useHookAtTopLevel` |
 | Tanpa warna hex di komponen | §7.4 | plugin `no-hex-color.grit` |
+| Query key hanya dari `lib/query-keys.ts` | §7.2 | plugin `query-keys-only-from-factory.grit` |
 | Penamaan file (kebab-case backend, PascalCase komponen, `useX` hook) | §8 | Biome `useFilenamingConvention` per folder |
+| Penamaan variabel, fungsi, kelas, tipe, konstanta | §8 | Biome `useNamingConvention` |
 | Tanpa `any`, `@ts-ignore`, non-null assertion | §9, §9.1 | Biome `noExplicitAny`, `noTsIgnore`, `noNonNullAssertion` |
 | Impor relatif maksimal dua tingkat | §9 | Biome `noRestrictedImports` |
 | `import type` untuk impor tipe | §9 | Biome `useImportType` |
+| Tanpa impor/variabel yang tidak dipakai | §9 | Biome `noUnusedImports`, `noUnusedVariables` |
+| Tanpa mengubah parameter | §9 | Biome `noParameterAssign` |
+| `process.env` hanya di `config/env.ts` | §11 | Biome `noProcessEnv` |
 | Tanpa `sql.raw()` | §11 | plugin `no-sql-raw.grit` |
 
 ### 13.4 Yang **tidak** bisa diperiksa alat
 
-Aturan berikut tetap diperiksa di review (checklist §12 dan skill `pr-code-review`): filter `spaceId` dan `deletedAt` di setiap query, uang memakai `bigint`, cakupan `withTransaction`, invalidasi query setelah mutasi, fungsi berulang yang belum dipindah ke `shared`, validasi ganda, tipe kembalian eksplisit pada fungsi yang diekspor, dan pesan error dari `shared/errors`. Pemeriksaan tipe (`tsc --noEmit`) dan test berjalan di CI, tidak di hook, supaya commit tetap cepat.
+Aturan berikut tetap diperiksa di review (checklist §12 dan skill `pr-code-review`).
+
+| Bagian | Aturan |
+|---|---|
+| §3.1 butir 6 | Instance service/repository hanya dibuat di `container.ts` |
+| §4.1 | Fungsi yang dipakai di lebih dari satu tempat sudah dipindah ke `shared` |
+| §5 | Setiap pintu masuk mem-parse input dengan skema `shared`; service tidak mem-parse ulang; `spaceId`, `createdBy`, `createdAt` tidak ada di skema input |
+| §6.2 | Route hanya memanggil satu method service, tanpa logika bisnis |
+| §6.3 | Parameter pertama service adalah `ServiceCtx`; aturan bisnis lewat `shared/rules` |
+| §6.4 | Setiap query difilter `spaceId` dan `deletedAt IS NULL`; repository tanpa aturan bisnis; mengembalikan tipe domain |
+| §6.5 | Perubahan yang harus konsisten ada dalam satu `withTransaction` |
+| §6.6 | Kode error dari `shared/errors` |
+| §6.7 | Konvensi URL, bentuk respons, cursor, `Idempotency-Key` |
+| §6.8 | Uang memakai `bigint`, bukan `number` |
+| §7.2 | Data server tidak disalin ke `useState`/store; mutasi meng-invalidate semua query terkait; filter di URL; form memakai TanStack Form; aksi disembunyikan dengan `can()`; error `field` tampil di field |
+| §7.3 | Syarat `useEffect` butir 2 dan 4–7: cleanup, aman dijalankan dua kali, tanpa `setState` tanpa syarat, pembatalan kerja asinkron, komentar sistem luar |
+| §9 | Tipe kembalian eksplisit pada fungsi yang diekspor. Biome `useExplicitType` masih *nursery* dan ikut menandai konstanta biasa, jadi belum dipakai. |
+| §10 | Test untuk aturan bisnis dan query |
+| §11 | Variabel `VITE_*` tanpa rahasia; endpoint melewati `auth` → `spaceAccess` → `requirePermission`; keluaran OCR/LLM divalidasi; tidak mencatat data pribadi |
+
+Batas yang perlu diingat:
+
+- Aturan lapisan dikenali dari nama file (`*.route.ts`, `*.service.ts`, `*.repository.ts`) dan folder. File yang salah nama tidak dianggap route atau service.
+- Route dan fitur lain mengimpor lewat `features/<nama>/index.ts`. Alat hanya memeriksa bahwa impornya lewat `index.ts`, bukan apa yang diambil dari sana. Karena itu `index.ts` hanya mengekspor API publik fitur (komponen, hook, `queryOptions`), dan reviewer memeriksa bahwa route tidak mengambil komponen fitur.
+
+Pemeriksaan tipe (`tsc --noEmit`) dan test berjalan di CI, tidak di hook, supaya commit tetap cepat.
 
 ### 13.5 Menonaktifkan aturan
 

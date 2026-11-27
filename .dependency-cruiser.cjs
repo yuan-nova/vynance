@@ -72,6 +72,16 @@ module.exports = {
       to: { path: DB_DIRECT },
     },
     {
+      name: "container-only-from-entry",
+      severity: "error",
+      comment: `container.ts (composition root) hanya diimpor oleh titik masuk app; route dan service menerima dependensi lewat parameter/constructor (${ref("§3.1 butir 6")}).`,
+      from: {
+        path: "^apps/(api|worker)/",
+        pathNot: ["^apps/(api|worker)/src/(app|index|main)\\.ts$", COMPOSITION_ROOT],
+      },
+      to: { path: COMPOSITION_ROOT },
+    },
+    {
       name: "api-no-ui",
       severity: "error",
       comment: `Backend dilarang memakai packages/ui atau React (${ref("§3.3")}).`,
@@ -90,18 +100,30 @@ module.exports = {
     {
       name: "web-routes-only-pages",
       severity: "error",
-      comment: `routes/ hanya mengimpor pages (dan queryOptions dari hooks untuk loader) (${ref("§3.2")}).`,
+      comment: `routes/ hanya mengimpor pages dan queryOptions dari hooks (lewat features/<nama>/index.ts) untuk loader (${ref("§3.2, §7.1")}).`,
       from: { path: "^apps/web/src/routes/" },
       to: {
-        path: "^apps/web/src/(components|features/[^/]+/(components|services))/",
+        path: [
+          "^apps/web/src/components/",
+          "^apps/web/src/features/[^/]+/(components|services)/",
+          "^apps/web/src/lib/api-client",
+          "^node_modules/hono/",
+        ],
       },
     },
     {
-      name: "web-pages-not-imported",
+      name: "web-pages-only-from-routes",
       severity: "error",
       comment: `pages hanya diimpor oleh routes (${ref("§3.2")}).`,
       from: { path: "^apps/web/src/", pathNot: "^apps/web/src/(routes|pages)/" },
       to: { path: "^apps/web/src/pages/" },
+    },
+    {
+      name: "web-pages-no-other-pages",
+      severity: "error",
+      comment: `Halaman dilarang mengimpor halaman lain; bagian yang dipakai bersama dipindah ke features/ atau components/ (${ref("§3.2")}).`,
+      from: { path: "^apps/web/src/pages/([^/]+)/" },
+      to: { path: "^apps/web/src/pages/", pathNot: "^apps/web/src/pages/$1/" },
     },
     {
       name: "web-view-no-service",
@@ -113,16 +135,23 @@ module.exports = {
     {
       name: "web-generic-components-pure",
       severity: "error",
-      comment: `Komponen generik di components/ hanya boleh mengimpor komponen generik, ui, dan shared (${ref("§3.2 butir 4")}).`,
+      comment: `Komponen generik di components/ hanya boleh mengimpor komponen generik, hook utilitas lib/hooks, ui, dan shared; tanpa hook data (${ref("§3.2 butir 4")}).`,
       from: { path: "^apps/web/src/components/" },
       to: { path: "^apps/web/src/(features|pages|routes|stores)/" },
     },
     {
       name: "web-hooks-no-view",
       severity: "error",
-      comment: `Hooks hanya boleh memanggil hooks lain dan services (${ref("§3.2")}).`,
+      comment: `Hooks hanya boleh memanggil hooks lain dan services, bukan api-client atau hc langsung (${ref("§3.2")}).`,
       from: { path: ["^apps/web/src/lib/hooks/", "^apps/web/src/features/[^/]+/hooks/"] },
-      to: { path: ["^apps/web/src/(pages|components|routes)/", "^apps/web/src/features/[^/]+/components/"] },
+      to: {
+        path: [
+          "^apps/web/src/(pages|components|routes)/",
+          "^apps/web/src/features/[^/]+/components/",
+          "^apps/web/src/lib/api-client",
+          "^node_modules/hono/",
+        ],
+      },
     },
     {
       name: "web-services-no-react",
@@ -161,7 +190,7 @@ module.exports = {
       severity: "error",
       comment: `packages/shared wajib TypeScript murni; dependensi luar hanya zod (${ref("§4.1 butir 4")}).`,
       from: { path: "^packages/shared/" },
-      to: { pathNot: ["^packages/shared/", "^node_modules/zod/"] },
+      to: { pathNot: ["^packages/shared/", "^node_modules/zod/", "^zod$"] },
     },
     {
       name: "shared-no-workspace-deps",

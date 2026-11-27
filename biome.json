@@ -22,6 +22,10 @@
   },
   "assist": { "enabled": true, "actions": { "source": { "organizeImports": "on" } } },
   "plugins": [
+    {
+      "path": "./tooling/biome-plugins/query-keys-only-from-factory.grit",
+      "includes": ["apps/web/src/**", "!apps/web/src/lib/query-keys.ts", "!**/*.test.*"]
+    },
     { "path": "./tooling/biome-plugins/no-sql-raw.grit", "includes": ["apps/**", "packages/**"] },
     {
       "path": "./tooling/biome-plugins/shared-deterministic.grit",
@@ -67,6 +71,8 @@
         "useConsistentTypeDefinitions": { "level": "error", "options": { "style": "type" } },
         "useImportType": "error",
         "noParameterAssign": "error",
+        "noProcessEnv": "error",
+        "useNamingConvention": { "level": "error", "options": { "strictCase": false } },
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -82,6 +88,16 @@
     }
   },
   "overrides": [
+    {
+      "includes": [
+        "apps/api/src/config/env.ts",
+        "apps/worker/src/config/env.ts",
+        "tooling/**",
+        "**/*.config.ts",
+        "**/*.config.mjs"
+      ],
+      "linter": { "rules": { "style": { "noProcessEnv": "off" } } }
+    },
     {
       "includes": ["packages/shared/**"],
       "linter": {

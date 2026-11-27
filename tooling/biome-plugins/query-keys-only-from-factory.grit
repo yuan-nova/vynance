@@ -1,0 +1,10 @@
+language js
+
+// CODING-GUIDELINES §7.2 butir 2: query key hanya dibuat lewat lib/query-keys.ts.
+JsPropertyObjectMember(name=$name, value=JsArrayExpression()) as $member where {
+  $name <: or {
+    `queryKey`,
+    `mutationKey`
+  },
+  register_diagnostic(span=$member, message="Query key dilarang ditulis langsung (CODING-GUIDELINES §7.2). Pakai factory dari lib/query-keys.ts, misalnya queryKey: qk.transactions.list(spaceId, filter).", severity="error")
+}
