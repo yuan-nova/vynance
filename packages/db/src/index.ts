@@ -1,1 +1,1 @@
-export { createDb, type Db } from "./client"
+export { createDb, type Db, type Executor, type Tx } from "./client"

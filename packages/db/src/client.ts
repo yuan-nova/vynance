@@ -14,3 +14,9 @@ export function createDb(url: string) {
 }
 
 export type Db = ReturnType<typeof createDb>
+
+/** Transaksi Drizzle yang dibuka dari Db. */
+export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0]
+
+/** `db` atau `tx`: diterima repository di constructor (CODING-GUIDELINES §6.4). */
+export type Executor = Db | Tx
