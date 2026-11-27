@@ -41,6 +41,8 @@ import { transactionRoutes } from "./modules/transactions/transactions.route"
 import type { TransactionsService } from "./modules/transactions/transactions.service"
 import { walletRoutes } from "./modules/wallets/wallets.route"
 import type { WalletsService } from "./modules/wallets/wallets.service"
+import { zakatRoutes } from "./modules/zakat/zakat.route"
+import type { ZakatService } from "./modules/zakat/zakat.service"
 
 type Deps = {
   healthService: HealthService
@@ -62,6 +64,7 @@ type Deps = {
   subscriptionsService: SubscriptionsService
   bookEvents: BookEvents
   notificationsService: NotificationsService
+  zakatService: ZakatService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -98,7 +101,8 @@ export const createApp = (deps: Deps) => {
         .route("/health-score", healthScoreRoutes(deps.healthScoreService))
         .route("/goals", goalRoutes(deps.goalsService))
         .route("/invitations", bookInvitationRoutes(deps.invitationsService))
-        .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService)),
+        .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService))
+        .route("/zakat", zakatRoutes(deps.zakatService)),
     )
 }
 

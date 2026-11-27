@@ -22,7 +22,7 @@ export const MORE_MENU: MoreMenuGroup[] = [
     title: "Perencanaan",
     items: [
       { key: "goals", label: "Target tabungan", icon: "target", path: "/lainnya/target" },
-      { key: "zakat", label: "Zakat", icon: "moon", path: null },
+      { key: "zakat", label: "Zakat", icon: "moon", path: "/lainnya/zakat" },
       { key: "education", label: "Dana pendidikan", icon: "school", path: null },
       { key: "advisor", label: "AI advisor", icon: "spark", path: null },
     ],

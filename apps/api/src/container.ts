@@ -45,6 +45,8 @@ import { TransactionsRepository } from "./modules/transactions/transactions.repo
 import { TransactionsService } from "./modules/transactions/transactions.service"
 import { WalletsRepository } from "./modules/wallets/wallets.repository"
 import { WalletsService } from "./modules/wallets/wallets.service"
+import { ZakatRepository } from "./modules/zakat/zakat.repository"
+import { ZakatService } from "./modules/zakat/zakat.service"
 
 // Composition root: satu-satunya tempat membuat instance repository dan service (CODING-GUIDELINES §3.1 butir 6).
 const isProduction = env.NODE_ENV === "production"
@@ -208,9 +210,29 @@ const healthScoreService = new HealthScoreService({
   investments: services.investmentsService,
 })
 
+/** Harga emas live (TSD §9). Respons diharapkan `{ "price": <rupiah per gram> }`. */
+async function fetchGoldPrice(): Promise<bigint | null> {
+  if (!env.GOLD_PRICE_URL) return null
+  const res = await fetch(env.GOLD_PRICE_URL, { signal: AbortSignal.timeout(10_000) })
+  if (!res.ok) return null
+  const body = (await res.json()) as { price?: unknown }
+  const n = Number(body.price)
+  return Number.isFinite(n) && n > 0 ? BigInt(Math.round(n)) : null
+}
+
 export const container = {
   ...services,
   notificationsService,
+  zakatService: new ZakatService({
+    zakat: new ZakatRepository(db),
+    wallets: services.walletsService,
+    investments: services.investmentsService,
+    categories: services.categoriesService,
+    transactions: services.transactionsService,
+    newId: () => newId(),
+    now: () => new Date(),
+    fetchGoldPrice,
+  }),
   billingService: new BillingService({
     billing: new BillingRepository(db),
     newId: () => newId(),

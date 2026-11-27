@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { boolean, char, index, int, json, mysqlTable, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
+import { boolean, char, date, index, int, json, mysqlTable, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
 import { users } from "./auth"
 import { audit, basisPoints, id, ref, timestamp, timestamps } from "./columns"
 
@@ -44,6 +44,8 @@ export const bookSettings = mysqlTable("book_settings", {
   passiveIncomeTargetBp: basisPoints("passive_income_target_bp").notNull().default(3000),
   educationInflationBp: basisPoints("education_inflation_bp").notNull().default(1200),
   budgetAlertEnabled: boolean("budget_alert_enabled").notNull().default(true),
+  /** Mulai haul zakat maal (PB-08, BRD §9 no. 11). Diperbarui saat pembayaran dicatat. */
+  zakatHaulStart: date("zakat_haul_start", { mode: "string" }),
   ...audit,
 })
 
