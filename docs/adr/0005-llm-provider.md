@@ -1,6 +1,6 @@
 # ADR 0005 — Penyedia LLM untuk AI advisor: Anthropic Claude
 
-- Status: diterima
+- Status: digantikan oleh [ADR 0006](0006-openrouter-langfuse.md)
 - Tanggal: 2026-11-28
 - Tiket: #40 (PB-11, FR-100, TSD §14 no. 2)
 

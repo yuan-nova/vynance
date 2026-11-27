@@ -6,7 +6,8 @@ import { UnitOfWork } from "./db/unit-of-work"
 import { generateBookCode } from "./lib/book-code"
 import { bookEvents } from "./lib/book-events"
 import { newId } from "./lib/id"
-import { createClaudeAsk } from "./lib/llm"
+import { createLangfuse } from "./lib/langfuse"
+import { createOpenRouterAsk } from "./lib/llm"
 import { createMailer } from "./lib/mailer"
 import { ActivityRepository } from "./modules/activity/activity.repository"
 import { AdvisorRepository } from "./modules/advisor/advisor.repository"
@@ -262,7 +263,16 @@ export const container = {
     dashboard: dashboardService,
     goals: services.goalsService,
     investments: services.investmentsService,
-    llm: createClaudeAsk(env.LLM_API_KEY),
+    llm: createOpenRouterAsk({
+      apiKey: env.LLM_API_KEY,
+      model: env.LLM_MODEL,
+      tracer: createLangfuse({
+        publicKey: env.LANGFUSE_PUBLIC_KEY,
+        secretKey: env.LANGFUSE_SECRET_KEY,
+        baseUrl: env.LANGFUSE_BASE_URL,
+        captureContent: env.LANGFUSE_CAPTURE_CONTENT,
+      }),
+    }),
     now: () => new Date(),
   }),
 }

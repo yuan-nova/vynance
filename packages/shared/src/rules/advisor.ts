@@ -19,6 +19,21 @@ export type AdvisorInput = {
 /** Klien LLM: system + pesan pengguna → potongan teks yang di-stream. */
 export type AskLlm = (system: string, user: string) => AsyncIterable<string>
 
+/** Satu panggilan LLM untuk observabilitas (ADR 0006). */
+export type LlmGeneration = {
+  name: string
+  model: string
+  startTime: Date
+  endTime: Date
+  input: unknown
+  output: string
+  usage?: { input?: number; output?: number; totalCost?: number }
+  level: "DEFAULT" | "ERROR"
+  statusMessage?: string
+}
+
+export type LlmTracer = { generation(g: LlmGeneration): void }
+
 export const MAX_ADVISOR_QUESTION = 500
 export const advisorQuestionSchema = z
   .object({ question: z.string().trim().min(3, "Pertanyaan terlalu pendek").max(MAX_ADVISOR_QUESTION) })

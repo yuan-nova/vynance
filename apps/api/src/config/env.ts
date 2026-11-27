@@ -14,14 +14,26 @@ const envSchema = z
     GOOGLE_CLIENT_SECRET: optional,
     EMAIL_FROM: z.string().min(3).default("Vynance <noreply@vynance.local>"),
     EMAIL_API_KEY: optional,
-    /** Kunci penyedia AI advisor (TSD §3). Kosong = fitur AI mati (503). */
+    /** Kunci OpenRouter untuk AI advisor (ADR 0006). Kosong = fitur AI mati (503). */
     LLM_API_KEY: optional,
+    /** Slug model OpenRouter, mis. `anthropic/claude-opus-5.5`. */
+    LLM_MODEL: z.string().min(1).default("anthropic/claude-opus-5.5"),
+    /** Langfuse (observabilitas LLM). Kosong = tidak dicatat. */
+    LANGFUSE_PUBLIC_KEY: optional,
+    LANGFUSE_SECRET_KEY: optional,
+    LANGFUSE_BASE_URL: z.url().default("https://cloud.langfuse.com"),
+    /** "1" = isi prompt dan jawaban ikut direkam. Bawaan mati karena berisi data keuangan pengguna. */
+    LANGFUSE_CAPTURE_CONTENT: z.preprocess((v) => v === "1" || v === "true", z.boolean()),
     /** Sumber harga emas per gram (JSON berisi `price` dalam rupiah). Kosong = pakai cache/bawaan. */
     GOLD_PRICE_URL: optional,
   })
   .refine((e) => e.NODE_ENV !== "production" || e.EMAIL_API_KEY, {
     message: "EMAIL_API_KEY wajib di produksi",
     path: ["EMAIL_API_KEY"],
+  })
+  .refine((e) => Boolean(e.LANGFUSE_PUBLIC_KEY) === Boolean(e.LANGFUSE_SECRET_KEY), {
+    message: "LANGFUSE_PUBLIC_KEY dan LANGFUSE_SECRET_KEY diisi bersama",
+    path: ["LANGFUSE_PUBLIC_KEY"],
   })
   .refine((e) => Boolean(e.GOOGLE_CLIENT_ID) === Boolean(e.GOOGLE_CLIENT_SECRET), {
     message: "GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET diisi bersama",
