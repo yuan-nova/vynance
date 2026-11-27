@@ -10,11 +10,13 @@ import type {
   CategoryKind,
   CategoryUsage,
   CreateTransactionInput,
+  ScanCommitInput,
   TransactionDetail,
   TransactionSummary,
 } from "@vynance/shared"
 import { qk } from "@/lib/query-keys"
 import {
+  commitScan,
   createTransaction,
   deleteTransaction,
   fetchCategoryUsage,
@@ -37,6 +39,14 @@ export function useCreateTransaction(bookId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (v: { input: CreateTransactionInput; key: string }) => createTransaction(bookId, v.input, v.key),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.book(bookId) }),
+  })
+}
+
+export function useCommitScan(bookId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { items: ScanCommitInput["items"]; key: string }) => commitScan(bookId, v.items, v.key),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.book(bookId) }),
   })
 }

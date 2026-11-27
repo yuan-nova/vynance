@@ -4,6 +4,7 @@ import {
   type CreateTransactionInput,
   categoryUsageSchema,
   moneyToJson,
+  type ScanCommitInput,
   type Transaction,
   type TransactionDetail,
   type TransactionPage,
@@ -32,6 +33,21 @@ export async function createTransaction(
   })
   await ensureOk(res)
   return transactionSchema.parse((await res.json()).data)
+}
+
+/** Simpan semua baris scan yang dipilih (PB-03 langkah 5). */
+export async function commitScan(
+  bookId: string,
+  items: ScanCommitInput["items"],
+  idempotencyKey: string,
+): Promise<number> {
+  const res = await t.scan.$post({
+    param: { bookId },
+    header: { "idempotency-key": idempotencyKey },
+    json: { items: items.map((x) => ({ ...x, amount: moneyToJson(x.amount) })) },
+  })
+  await ensureOk(res)
+  return (await res.json()).data.length
 }
 
 export async function fetchCategoryUsage(bookId: string, kind: CategoryKind): Promise<CategoryUsage> {

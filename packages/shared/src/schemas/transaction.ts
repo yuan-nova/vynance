@@ -67,6 +67,17 @@ const assetTrade = z
   .strict()
 
 export const createTransactionSchema = z.union([incomeExpense, transfer, assetTrade])
+
+/** Simpan hasil scan sekaligus (PB-03 langkah 5). Beli/jual aset tidak lewat scan. */
+export const scanCommitSchema = z
+  .object({
+    items: z
+      .array(z.union([incomeExpense, transfer]))
+      .min(1)
+      .max(50),
+  })
+  .strict()
+export type ScanCommitInput = z.infer<typeof scanCommitSchema>
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
 
 /** Header `Idempotency-Key` (CODING-GUIDELINES §6.7). */

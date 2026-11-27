@@ -160,4 +160,22 @@ describe("catat transaksi", () => {
     )
     expect(usage[0]).toEqual({ categoryId: makan, count: 1 })
   })
+
+  test("scan: simpan banyak baris sebagai source=scan, kirim ulang tidak menggandakan (PB-03)", async () => {
+    const items = [
+      { type: "expense", amount: "50300", txDate: "2026-11-27", walletId: tunai, categoryId: makan, note: "INDOMARET" },
+      { type: "income", amount: "15000000", txDate: "2026-11-25", walletId: bank, categoryId: gaji, note: "GAJI" },
+    ]
+    const send = () =>
+      app(U).request(`/api/v1/books/${bookId}/transactions/scan`, {
+        ...jsonRequest("POST", { items }),
+        headers: { "content-type": "application/json", "idempotency-key": "scan-uji-12345" },
+      })
+    const a = await dataOf<Transaction[]>(await send())
+    const b = await dataOf<Transaction[]>(await send())
+    expect(a.map((t) => t.source)).toEqual(["scan", "scan"])
+    expect(b.map((t) => t.id)).toEqual(a.map((t) => t.id))
+    const bad = await app(U).request(`/api/v1/books/${bookId}/transactions/scan`, jsonRequest("POST", { items: [] }))
+    expect(bad.status).toBe(422)
+  })
 })

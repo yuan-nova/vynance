@@ -4,6 +4,7 @@ import {
   createTransactionSchema,
   idempotencyKeySchema,
   idSchema,
+  scanCommitSchema,
   transactionListQuerySchema,
   transactionSummaryQuerySchema,
   updateTransactionSchema,
@@ -34,6 +35,16 @@ export const transactionRoutes = (svc: TransactionsService) =>
       zValidator("json", createTransactionSchema, validationHook),
       async (c) =>
         created(c, await svc.create(c.var.ctx, c.req.valid("json"), c.req.valid("header")["idempotency-key"])),
+    )
+    .post(
+      "/scan",
+      zValidator("header", idemHeader, validationHook),
+      zValidator("json", scanCommitSchema, validationHook),
+      async (c) =>
+        created(
+          c,
+          await svc.createFromScan(c.var.ctx, c.req.valid("json").items, c.req.valid("header")["idempotency-key"]),
+        ),
     )
     .get("/category-usage", zValidator("query", z.object({ kind: categoryKindSchema }), validationHook), async (c) =>
       ok(c, await svc.categoryUsage(c.var.ctx, c.req.valid("query").kind)),
