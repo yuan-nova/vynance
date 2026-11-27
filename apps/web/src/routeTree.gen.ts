@@ -17,6 +17,7 @@ import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
 import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
 import { Route as TabsSkorKesehatanRouteImport } from './routes/_tabs/skor-kesehatan'
 import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
+import { Route as UndanganTokenRouteImport } from './routes/undangan.$token'
 import { Route as TabsLainnyaIndexRouteImport } from './routes/_tabs/lainnya/index'
 import { Route as TabsLainnyaBukuRouteImport } from './routes/_tabs/lainnya/buku'
 import { Route as TabsLainnyaKategoriRouteImport } from './routes/_tabs/lainnya/kategori'
@@ -64,6 +65,11 @@ const TabsTransaksiRoute = TabsTransaksiRouteImport.update({
   id: '/transaksi',
   path: '/transaksi',
   getParentRoute: () => TabsRoute,
+} as any)
+const UndanganTokenRoute = UndanganTokenRouteImport.update({
+  id: '/undangan/$token',
+  path: '/undangan/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TabsLainnyaIndexRoute = TabsLainnyaIndexRouteImport.update({
   id: '/lainnya/',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/anggaran': typeof TabsAnggaranRoute
   '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
+  '/undangan/$token': typeof UndanganTokenRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
   '/lainnya/pengaturan': typeof TabsLainnyaPengaturanRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/anggaran': typeof TabsAnggaranRoute
   '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
+  '/undangan/$token': typeof UndanganTokenRoute
   '/': typeof TabsIndexRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_tabs/anggaran': typeof TabsAnggaranRoute
   '/_tabs/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/_tabs/transaksi': typeof TabsTransaksiRoute
+  '/undangan/$token': typeof UndanganTokenRoute
   '/_tabs/': typeof TabsIndexRoute
   '/_tabs/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/_tabs/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/anggaran'
     | '/skor-kesehatan'
     | '/transaksi'
+    | '/undangan/$token'
     | '/lainnya/buku'
     | '/lainnya/kategori'
     | '/lainnya/pengaturan'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/anggaran'
     | '/skor-kesehatan'
     | '/transaksi'
+    | '/undangan/$token'
     | '/'
     | '/lainnya/buku'
     | '/lainnya/kategori'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/_tabs/anggaran'
     | '/_tabs/skor-kesehatan'
     | '/_tabs/transaksi'
+    | '/undangan/$token'
     | '/_tabs/'
     | '/_tabs/lainnya/buku'
     | '/_tabs/lainnya/kategori'
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   BukuBaruRoute: typeof BukuBaruRoute
   MasukRoute: typeof MasukRoute
   MulaiRoute: typeof MulaiRoute
+  UndanganTokenRoute: typeof UndanganTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/transaksi'
       preLoaderRoute: typeof TabsTransaksiRouteImport
       parentRoute: typeof TabsRoute
+    }
+    '/undangan/$token': {
+      id: '/undangan/$token'
+      path: '/undangan/$token'
+      fullPath: '/undangan/$token'
+      preLoaderRoute: typeof UndanganTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_tabs/lainnya/': {
       id: '/_tabs/lainnya/'
@@ -375,6 +395,7 @@ const rootRouteChildren: RootRouteChildren = {
   BukuBaruRoute: BukuBaruRoute,
   MasukRoute: MasukRoute,
   MulaiRoute: MulaiRoute,
+  UndanganTokenRoute: UndanganTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

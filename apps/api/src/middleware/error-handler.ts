@@ -17,12 +17,22 @@ export function errorHandler(err: Error, c: Context): Response {
     const status = err.status === 401 || err.status === 404 ? err.status : 422
     return c.json({ error: { code, message: errorMessage(code) } } satisfies ApiError, status)
   }
-  logger.error("unhandled", { path: c.req.path, method: c.req.method, err: err.name, detail: safeDetail(err.message) })
+  logger.error("unhandled", {
+    path: safePath(c.req.path),
+    method: c.req.method,
+    err: err.name,
+    detail: safeDetail(err.message),
+  })
   return c.json({ error: { code: "INTERNAL", message: errorMessage("INTERNAL") } } satisfies ApiError, 500)
 }
 
 export function notFoundHandler(c: Context): Response {
   return c.json({ error: { code: "NOT_FOUND", message: errorMessage("NOT_FOUND") } } satisfies ApiError, 404)
+}
+
+/** Token undangan ada di path; jangan pernah tercatat di log (TSD §5.4). */
+export function safePath(path: string): string {
+  return path.replace(/\/invitations\/[A-Za-z0-9_-]{20,}/, "/invitations/[token]")
 }
 
 // Pesan error Drizzle memuat parameter query (bisa berisi nominal/email). Potong sebelum dicatat.

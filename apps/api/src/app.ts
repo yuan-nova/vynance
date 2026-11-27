@@ -19,6 +19,8 @@ import { healthScoreRoutes } from "./modules/health-score/health-score.route"
 import type { HealthScoreService } from "./modules/health-score/health-score.service"
 import { investmentTypeRoutes } from "./modules/investments/investments.route"
 import type { InvestmentsService } from "./modules/investments/investments.service"
+import { bookInvitationRoutes, invitationRoutes } from "./modules/invitations/invitations.route"
+import type { InvitationsService } from "./modules/invitations/invitations.service"
 import type { AccountService } from "./modules/me/account.service"
 import { meRoutes } from "./modules/me/me.route"
 import type { MeService } from "./modules/me/me.service"
@@ -46,6 +48,7 @@ type Deps = {
   dashboardService: DashboardService
   healthScoreService: HealthScoreService
   goalsService: GoalsService
+  invitationsService: InvitationsService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -60,6 +63,7 @@ export const createApp = (deps: Deps) => {
     .route("/health", healthRoutes(deps.healthService))
     .route("/auth", authRoutes(deps.authService))
     .route("/me", new Hono<AppEnv>().use(authed).route("/", meRoutes(deps.meService, deps.accountService)))
+    .route("/invitations", invitationRoutes(deps.invitationsService, authed))
     .route("/books", new Hono<AppEnv>().use(authed).route("/", booksRoutes(deps.booksService)))
     .route(
       "/books/:bookId",
@@ -74,7 +78,8 @@ export const createApp = (deps: Deps) => {
         .route("/investment-types", investmentTypeRoutes(deps.investmentsService))
         .route("/dashboard", dashboardRoutes(deps.dashboardService))
         .route("/health-score", healthScoreRoutes(deps.healthScoreService))
-        .route("/goals", goalRoutes(deps.goalsService)),
+        .route("/goals", goalRoutes(deps.goalsService))
+        .route("/invitations", bookInvitationRoutes(deps.invitationsService)),
     )
 }
 

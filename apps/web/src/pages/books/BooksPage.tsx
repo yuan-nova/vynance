@@ -19,6 +19,7 @@ import {
   useRenameBook,
   useSwitchBook,
 } from "@/features/books"
+import { InvitePanel } from "@/features/invitations"
 import { showSnackbar } from "@/lib/snackbar"
 
 /** Layar Buku (design/17-books.svg): buku aktif, buku lain, buat buku baru. Anggota & undangan di #25–#26. */
@@ -29,7 +30,7 @@ export function BooksPage() {
   const switchBook = useSwitchBook()
   const create = useCreateBook()
   const rename = useRenameBook(active?.id ?? "")
-  const [sheet, setSheet] = useState<"create" | "rename" | "delete" | null>(null)
+  const [sheet, setSheet] = useState<"create" | "rename" | "delete" | "invite" | null>(null)
   const remove = useDeleteBook()
   const deletionInfo = useBookDeletionInfo(active?.id ?? "", sheet === "delete")
 
@@ -58,6 +59,9 @@ export function BooksPage() {
             Kode <BookCode code={active.code} /> · {active.memberCount} anggota
           </p>
           <div className="section-sm book-actions">
+            <Button icon="users" onClick={() => setSheet("invite")}>
+              Undang anggota
+            </Button>
             <Button variant="soft" icon="edit" onClick={() => setSheet("rename")}>
               Ubah nama
             </Button>
@@ -151,6 +155,10 @@ export function BooksPage() {
             }
           />
         ) : null}
+      </Sheet>
+
+      <Sheet open={sheet === "invite"} title="Undang anggota" onClose={() => setSheet(null)}>
+        {active && sheet === "invite" ? <InvitePanel bookId={active.id} bookName={active.name} /> : null}
       </Sheet>
 
       <Sheet open={sheet === "create"} title="Buat buku baru" onClose={() => setSheet(null)}>

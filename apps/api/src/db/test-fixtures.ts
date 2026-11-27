@@ -1,5 +1,6 @@
 import {
   activityLogs,
+  bookInvitations,
   bookMembers,
   bookSettings,
   books,
@@ -50,6 +51,7 @@ export async function cleanupUsers(userIds: string[]): Promise<void> {
     (r) => r.id,
   )
   if (ids.length) {
+    await testDb.delete(bookInvitations).where(inArray(bookInvitations.bookId, ids))
     await testDb.delete(goalContributions).where(inArray(goalContributions.bookId, ids))
     await testDb.delete(savingsGoals).where(inArray(savingsGoals.bookId, ids))
     await testDb.delete(planAllocations).where(inArray(planAllocations.bookId, ids))
