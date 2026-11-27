@@ -18,7 +18,8 @@
     "typecheck": "bun run --filter '*' typecheck",
     "test": "bun run --filter '*' test",
     "db:generate": "bun run --cwd packages/db db:generate",
-    "db:migrate": "bun run --cwd packages/db db:migrate"
+    "db:migrate": "bun run --cwd packages/db db:migrate",
+    "db:seed": "bun run --cwd packages/db db:seed"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.9",
