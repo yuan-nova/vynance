@@ -8,6 +8,7 @@ import {
   formatDateShort,
   formatDateWeekdayShort,
   formatMonth,
+  formatRelative,
   formatTime,
   monthDateRange,
   monthOf,
@@ -60,4 +61,12 @@ describe("skema", () => {
     expect(dateOnlySchema.safeParse("2026-02-29").success).toBe(false)
     expect(dateOnlySchema.safeParse("2028-02-29").success).toBe(true)
   })
+})
+
+test("formatRelative", () => {
+  const now = new Date("2026-11-27T10:00:00Z")
+  expect(formatRelative(new Date("2026-11-27T09:59:40Z"), now)).toBe("baru saja")
+  expect(formatRelative(new Date("2026-11-27T09:50:00Z"), now)).toBe("10 mnt lalu")
+  expect(formatRelative(new Date("2026-11-27T07:00:00Z"), now)).toBe("3 jam lalu")
+  expect(formatRelative(new Date("2026-11-23T03:00:00Z"), now)).toBe(formatDateShort("2026-11-23"))
 })

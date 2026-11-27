@@ -157,3 +157,13 @@ export function formatTime(instant: Date): string {
   const p = jakartaParts(instant)
   return `${pad(p.hour)}.${pad(p.minute)}`
 }
+
+/** Waktu relatif singkat untuk daftar aktivitas: "baru saja", "10 mnt lalu", "3 jam lalu", lalu tanggal. */
+export function formatRelative(instant: Date, now: Date): string {
+  const mins = Math.floor((now.getTime() - instant.getTime()) / 60_000)
+  if (mins < 1) return "baru saja"
+  if (mins < 60) return `${mins} mnt lalu`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours} jam lalu`
+  return formatDateShort(dateOnlyOf(instant))
+}

@@ -12,6 +12,8 @@ export const ERROR_MESSAGES = {
   BOOK_NOT_FOUND: "Buku tidak ditemukan atau kamu bukan anggotanya.",
   BOOK_CODE_EXHAUSTED: "Gagal membuat kode buku. Coba lagi.",
   BOOK_NAME_MISMATCH: "Nama yang diketik tidak sama dengan nama buku.",
+  BOOK_LAST_MEMBER: "Kamu anggota terakhir buku ini, jadi tidak bisa keluar. Hapus bukunya bila tidak dipakai lagi.",
+  MEMBER_NOT_FOUND: "Anggota tidak ditemukan di buku ini.",
   INVITATION_NOT_FOUND: "Tautan undangan tidak dikenali. Minta tautan baru ke anggota buku.",
   INVITATION_EXPIRED: "Tautan undangan sudah kedaluwarsa (lebih dari 7 hari). Minta tautan baru.",
   INVITATION_USED: "Tautan undangan ini sudah dipakai. Setiap tautan hanya berlaku sekali.",
