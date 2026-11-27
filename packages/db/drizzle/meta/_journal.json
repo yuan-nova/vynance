@@ -99,6 +99,13 @@
       "when": 1795788179814,
       "tag": "0013_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1795803108965,
+      "tag": "0014_zakat_haul",
+      "breakpoints": true
     }
   ]
 }

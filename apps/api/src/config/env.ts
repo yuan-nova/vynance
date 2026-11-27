@@ -14,6 +14,8 @@ const envSchema = z
     GOOGLE_CLIENT_SECRET: optional,
     EMAIL_FROM: z.string().min(3).default("Vynance <noreply@vynance.local>"),
     EMAIL_API_KEY: optional,
+    /** Sumber harga emas per gram (JSON berisi `price` dalam rupiah). Kosong = pakai cache/bawaan. */
+    GOLD_PRICE_URL: optional,
   })
   .refine((e) => e.NODE_ENV !== "production" || e.EMAIL_API_KEY, {
     message: "EMAIL_API_KEY wajib di produksi",

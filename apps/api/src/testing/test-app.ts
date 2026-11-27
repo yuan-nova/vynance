@@ -33,6 +33,7 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
     membersService: empty,
     subscriptionsService: empty,
     notificationsService: empty,
+    zakatService: empty,
     bookEvents: new BookEvents(),
     ...deps,
     authService: deps.authService ?? fakeAuth(userId),

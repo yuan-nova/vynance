@@ -1873,3 +1873,39 @@ p {
   display: grid;
   gap: 8px;
 }
+
+/* ---------- Zakat (#37) ---------- */
+
+.zakat-gold {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zakat-result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.zakat-due {
+  background: color-mix(in srgb, var(--inc) 10%, var(--card));
+}
+
+.zakat-amount {
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.zakat-note {
+  margin: 12px 0;
+}
+
+.zakat-result .text-warn {
+  color: var(--warn);
+  font-weight: 700;
+}

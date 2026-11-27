@@ -1,0 +1,1 @@
+ALTER TABLE `book_settings` ADD `zakat_haul_start` date;
