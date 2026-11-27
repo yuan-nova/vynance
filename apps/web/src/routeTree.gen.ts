@@ -18,6 +18,7 @@ import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
 import { Route as TabsSkorKesehatanRouteImport } from './routes/_tabs/skor-kesehatan'
 import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
 import { Route as UndanganTokenRouteImport } from './routes/undangan.$token'
+import { Route as TabsAnggaranWizardRouteImport } from './routes/_tabs/anggaran_.wizard'
 import { Route as TabsLainnyaIndexRouteImport } from './routes/_tabs/lainnya/index'
 import { Route as TabsLainnyaBukuRouteImport } from './routes/_tabs/lainnya/buku'
 import { Route as TabsLainnyaInvestasiRouteImport } from './routes/_tabs/lainnya/investasi'
@@ -72,6 +73,11 @@ const UndanganTokenRoute = UndanganTokenRouteImport.update({
   id: '/undangan/$token',
   path: '/undangan/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TabsAnggaranWizardRoute = TabsAnggaranWizardRouteImport.update({
+  id: '/anggaran_/wizard',
+  path: '/anggaran/wizard',
+  getParentRoute: () => TabsRoute,
 } as any)
 const TabsLainnyaIndexRoute = TabsLainnyaIndexRouteImport.update({
   id: '/lainnya/',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
+  '/anggaran/wizard': typeof TabsAnggaranWizardRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/investasi': typeof TabsLainnyaInvestasiRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
   '/': typeof TabsIndexRoute
+  '/anggaran/wizard': typeof TabsAnggaranWizardRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/investasi': typeof TabsLainnyaInvestasiRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_tabs/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
   '/_tabs/': typeof TabsIndexRoute
+  '/_tabs/anggaran_/wizard': typeof TabsAnggaranWizardRoute
   '/_tabs/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/_tabs/lainnya/investasi': typeof TabsLainnyaInvestasiRoute
   '/_tabs/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/skor-kesehatan'
     | '/transaksi'
     | '/undangan/$token'
+    | '/anggaran/wizard'
     | '/lainnya/buku'
     | '/lainnya/investasi'
     | '/lainnya/kategori'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/transaksi'
     | '/undangan/$token'
     | '/'
+    | '/anggaran/wizard'
     | '/lainnya/buku'
     | '/lainnya/investasi'
     | '/lainnya/kategori'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/_tabs/transaksi'
     | '/undangan/$token'
     | '/_tabs/'
+    | '/_tabs/anggaran_/wizard'
     | '/_tabs/lainnya/buku'
     | '/_tabs/lainnya/investasi'
     | '/_tabs/lainnya/kategori'
@@ -323,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UndanganTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_tabs/anggaran_/wizard': {
+      id: '/_tabs/anggaran_/wizard'
+      path: '/anggaran/wizard'
+      fullPath: '/anggaran/wizard'
+      preLoaderRoute: typeof TabsAnggaranWizardRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/lainnya/': {
       id: '/_tabs/lainnya/'
       path: '/lainnya'
@@ -401,6 +420,7 @@ interface TabsRouteChildren {
   TabsSkorKesehatanRoute: typeof TabsSkorKesehatanRoute
   TabsTransaksiRoute: typeof TabsTransaksiRoute
   TabsIndexRoute: typeof TabsIndexRoute
+  TabsAnggaranWizardRoute: typeof TabsAnggaranWizardRoute
   TabsLainnyaBukuRoute: typeof TabsLainnyaBukuRoute
   TabsLainnyaInvestasiRoute: typeof TabsLainnyaInvestasiRoute
   TabsLainnyaKategoriRoute: typeof TabsLainnyaKategoriRoute
@@ -418,6 +438,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsSkorKesehatanRoute: TabsSkorKesehatanRoute,
   TabsTransaksiRoute: TabsTransaksiRoute,
   TabsIndexRoute: TabsIndexRoute,
+  TabsAnggaranWizardRoute: TabsAnggaranWizardRoute,
   TabsLainnyaBukuRoute: TabsLainnyaBukuRoute,
   TabsLainnyaInvestasiRoute: TabsLainnyaInvestasiRoute,
   TabsLainnyaKategoriRoute: TabsLainnyaKategoriRoute,

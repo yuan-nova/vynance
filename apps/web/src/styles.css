@@ -1700,3 +1700,86 @@ p {
 .text-exp {
   color: var(--exp);
 }
+
+/* ---------- Wizard anggaran (design/08) ---------- */
+
+.wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 96px;
+}
+
+.wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wizard-steps li {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surf3);
+}
+
+.wizard-steps .wizard-step-done {
+  background: var(--pri);
+}
+
+.wizard-options {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wizard-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 56px;
+  padding: 12px 14px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--surf);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wizard-option:focus-within {
+  outline: 3px solid var(--pri);
+  outline-offset: 2px;
+}
+
+.wizard-option-on {
+  border-color: var(--pri);
+  background: var(--pri-s);
+}
+
+.wizard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.wizard-group {
+  margin-bottom: 12px;
+}
+
+.wizard-actions {
+  position: sticky;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+  padding: 12px 0;
+  background: var(--bg);
+}
