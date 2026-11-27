@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./app": "./src/app.ts"
+    "./app": "./src/app.ts",
+    "./container": "./src/container.ts",
+    "./jobs": "./src/jobs.ts"
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",

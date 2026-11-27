@@ -23,6 +23,8 @@ import { InvestmentTypesRepository } from "./modules/investments/investment-type
 import { InvestmentsService } from "./modules/investments/investments.service"
 import { InvitationsRepository } from "./modules/invitations/invitations.repository"
 import { InvitationsService } from "./modules/invitations/invitations.service"
+import { MaintenanceRepository } from "./modules/maintenance/maintenance.repository"
+import { MaintenanceService } from "./modules/maintenance/maintenance.service"
 import { AccountRepository } from "./modules/me/account.repository"
 import { AccountService } from "./modules/me/account.service"
 import { MeRepository } from "./modules/me/me.repository"
@@ -164,6 +166,10 @@ const healthScoreService = new HealthScoreService({
 
 export const container = {
   ...services,
+  maintenanceService: new MaintenanceService({
+    maintenance: new MaintenanceRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({ maintenance: new MaintenanceRepository(exec) })),
+  }),
   bookEvents,
   healthScoreService,
   dashboardService: new DashboardService({
