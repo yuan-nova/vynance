@@ -17,7 +17,7 @@ type Repos = {
 }
 type Deps = {
   plans: Pick<PlansRepository, "findByMonth">
-  transactions: Pick<TransactionsRepository, "sumIncomeExpense">
+  transactions: Pick<TransactionsRepository, "sumIncomeExpense" | "sumExpenseByCategory">
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
 }
@@ -28,9 +28,10 @@ export class PlansService {
   /** Rencana bulan (PB-04) + pemasukan tercatat sebagai realisasi terpisah. Belum ada → dokumen kosong versi 0. */
   async get(ctx: ServiceCtx, month: string): Promise<Plan> {
     const { from, to } = monthDateRange(month)
-    const [p, sums] = await Promise.all([
+    const [p, sums, spent] = await Promise.all([
       this.d.plans.findByMonth(ctx.bookId, month),
       this.d.transactions.sumIncomeExpense(ctx.bookId, from, to),
+      this.d.transactions.sumExpenseByCategory(ctx.bookId, from, to),
     ])
     return {
       month,
@@ -49,6 +50,7 @@ export class PlansService {
         carriedOver: a.carriedOver.toString(),
       })),
       recordedIncome: sums.income.toString(),
+      spentByCategory: Object.fromEntries(Object.entries(spent).map(([k, v]) => [k, v.toString()])),
       updatedByName: p ? (p.updatedByName ?? "") : null,
       updatedAt: p?.updatedAt.toISOString() ?? null,
     }

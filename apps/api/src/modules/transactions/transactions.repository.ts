@@ -198,6 +198,25 @@ export class TransactionsRepository {
     return { income: get("income"), expense: get("expense") }
   }
 
+  /** BR-10: Σ uang keluar per kategori dalam rentang tanggal. */
+  async sumExpenseByCategory(bookId: string, from: string, to: string): Promise<Record<string, bigint>> {
+    const rows = await this.db
+      .select({ categoryId: transactions.categoryId, total: sum(transactions.amount) })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.bookId, bookId),
+          isNull(transactions.deletedAt),
+          eq(transactions.type, "expense"),
+          isNotNull(transactions.categoryId),
+          gte(transactions.txDate, from),
+          lte(transactions.txDate, to),
+        ),
+      )
+      .groupBy(transactions.categoryId)
+    return Object.fromEntries(rows.map((r) => [r.categoryId ?? "", BigInt(r.total ?? "0")]))
+  }
+
   /** Kategori paling sering dipakai sejak tanggal tertentu (chip "sering dipakai"). */
   async categoryUsage(bookId: string, kind: CategoryKind, since: string): Promise<CategoryUsage> {
     const rows = await this.db

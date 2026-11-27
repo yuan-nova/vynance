@@ -1,16 +1,24 @@
 import {
   type AllocationMode,
+  allocationAmount,
+  BUDGET_STATUS_LABEL,
+  BUDGET_STATUS_TONE,
+  budgetStatus,
+  budgetTone,
   type Category,
   type InvestmentType,
   type Plan,
   type PutPlanInput,
   planTotals,
+  usageBp,
 } from "@vynance/shared"
 import { useRef, useState } from "react"
 import { Button, IconButton } from "@/components/Button"
 import { ChipGroup } from "@/components/ChipGroup"
 import { Money } from "@/components/Money"
 import { MoneyInput } from "@/components/MoneyInput"
+import { Pill } from "@/components/Pill"
+import { ProgressBar } from "@/components/ProgressBar"
 import { TextField } from "@/components/TextField"
 import { ApiRequestError } from "@/lib/api-error"
 import { useDebouncedCallback } from "@/lib/hooks/useDebouncedCallback"
@@ -134,9 +142,38 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
         ...d,
         [kind]: { ...(kind === "expense" ? d.expense : d.investment), [id]: { ...a, ...patch } },
       }))
+    const budget = (() => {
+      if (kind !== "expense") return null
+      const allocated = allocationAmount(
+        { kind, mode: a.mode, amount: a.amount ?? 0n, percentBp: a.percentBp },
+        draft.spendingCap ?? 0n,
+        totals.totalIncome,
+      )
+      const spent = BigInt(plan.spentByCategory[id] ?? "0")
+      const status = budgetStatus(allocated, spent)
+      const bp = usageBp(allocated, spent)
+      return { allocated, spent, status, bp, tone: budgetTone(allocated, spent) }
+    })()
     return (
       <div key={id} className="alloc-row">
-        <p className="row-title truncate">{name}</p>
+        <div className="alloc-head">
+          <p className="row-title truncate">{name}</p>
+          {budget ? <Pill tone={BUDGET_STATUS_TONE[budget.status]}>{BUDGET_STATUS_LABEL[budget.status]}</Pill> : null}
+        </div>
+        {budget && budget.status !== "unset" ? (
+          <>
+            <ProgressBar valueBp={budget.bp} tone={budget.tone} label={`Realisasi ${name}`} />
+            <p className={`row-sub${budget.tone === "inc" ? "" : ` text-${budget.tone}`}`}>
+              Terpakai <Money value={budget.spent} /> dari <Money value={budget.allocated} /> ·{" "}
+              {Math.round(budget.bp / 100)}%
+              {budget.tone === "warn" && budget.status === "safe" ? " · hampir habis" : ""}
+            </p>
+          </>
+        ) : budget && budget.spent > 0n ? (
+          <p className="row-sub">
+            Terpakai <Money value={budget.spent} />
+          </p>
+        ) : null}
         <div className="alloc-inputs">
           <ChipGroup
             label={`Satuan ${name}`}

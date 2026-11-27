@@ -66,6 +66,8 @@ export const planSchema = z.object({
   allocations: z.array(allocationOut),
   /** Pemasukan tercatat bulan itu (realisasi), ditampilkan terpisah dari rencana (temuan BRD §9 no. 8). */
   recordedIncome: z.string(),
+  /** BR-10: realisasi pengeluaran per categoryId bulan ini (rupiah string). */
+  spentByCategory: z.record(z.string(), z.string()),
   updatedByName: z.string().nullable(),
   updatedAt: z.string().nullable(),
 })

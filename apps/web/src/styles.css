@@ -1165,6 +1165,25 @@ p {
   border-bottom: 0;
 }
 
+.alloc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.alloc-row .bar {
+  margin: 8px 0 4px;
+}
+
+.alloc-row .text-warn {
+  color: var(--warn);
+}
+
+.alloc-row .text-exp {
+  color: var(--exp);
+}
+
 .alloc-inputs .field {
   margin-bottom: 8px;
 }
