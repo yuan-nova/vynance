@@ -5,6 +5,8 @@ import { requireAuth } from "./middleware/auth"
 import { bookAccess } from "./middleware/book-access"
 import { errorHandler, notFoundHandler } from "./middleware/error-handler"
 import { publishChanges } from "./middleware/publish-changes"
+import { advisorRoutes } from "./modules/advisor/advisor.route"
+import type { AdvisorService } from "./modules/advisor/advisor.service"
 import { authRoutes } from "./modules/auth/auth.route"
 import type { AuthService } from "./modules/auth/auth.service"
 import { bookRoutes, booksRoutes } from "./modules/books/books.route"
@@ -65,6 +67,7 @@ type Deps = {
   bookEvents: BookEvents
   notificationsService: NotificationsService
   zakatService: ZakatService
+  advisorService: AdvisorService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -103,7 +106,8 @@ export const createApp = (deps: Deps) => {
         .route("/goals", goalRoutes(deps.goalsService))
         .route("/invitations", bookInvitationRoutes(deps.invitationsService))
         .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService))
-        .route("/zakat", zakatRoutes(deps.zakatService)),
+        .route("/zakat", zakatRoutes(deps.zakatService))
+        .route("/advisor", advisorRoutes(deps.advisorService)),
     )
 }
 

@@ -16,6 +16,8 @@ export const users = mysqlTable(
     privacyMode: boolean("privacy_mode").notNull().default(false),
     lastBookId: ref("last_book_id"),
     onboardedAt: timestamp("onboarded_at"),
+    /** Persetujuan eksplisit kirim ringkasan ke penyedia AI (PB-11, FR-100). null = belum setuju. */
+    aiConsentAt: timestamp("ai_consent_at"),
     createdAt: timestamps.createdAt,
     updatedAt: timestamps.updatedAt,
   },

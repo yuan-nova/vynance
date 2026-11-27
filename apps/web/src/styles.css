@@ -2025,3 +2025,66 @@ p {
 .bar-prev {
   background: var(--surf3);
 }
+
+/* ---------- AI advisor (#40) ---------- */
+
+.advisor-sub {
+  margin: -8px 0 12px;
+}
+
+.advisor-consent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.advisor-context {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surf2);
+  font:
+    12px / 1.5 ui-monospace,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.advisor-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.advisor-q {
+  align-self: flex-end;
+  margin-left: auto;
+  max-width: 85%;
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 16px 16px 4px;
+  background: var(--pri);
+  color: var(--onp);
+  overflow-wrap: anywhere;
+}
+
+.advisor-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.advisor-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.advisor-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin: 12px 0;
+}
