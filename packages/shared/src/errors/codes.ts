@@ -23,6 +23,7 @@ export const ERROR_MESSAGES = {
   WALLET_ARCHIVED: "Rekening ini sudah diarsipkan. Pilih rekening lain.",
   TRANSACTION_NOT_FOUND: "Transaksi tidak ditemukan.",
   IDEMPOTENCY_KEY_INVALID: "Permintaan tidak valid. Muat ulang lalu coba lagi.",
+  TRANSACTION_ASSET_EDIT: "Transaksi beli/jual aset diubah dari layar Investasi.",
   AUTH_FAILED: "Gagal masuk. Coba lagi sebentar lagi.",
   OTP_INVALID: "Kode salah. Periksa lagi email kamu.",
   OTP_EXPIRED: "Kode sudah kedaluwarsa. Minta kode baru.",

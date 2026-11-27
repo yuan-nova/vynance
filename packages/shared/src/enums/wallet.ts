@@ -59,3 +59,13 @@ export const TX_TYPE_TONE: Record<TxType, "inc" | "exp" | "trf" | "inv"> = {
   // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
   asset_sell: "inv",
 }
+
+export const TX_TYPE_LABEL: Record<TxType, string> = {
+  income: "Uang masuk",
+  expense: "Uang keluar",
+  transfer: "Transfer",
+  // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
+  asset_buy: "Beli aset",
+  // biome-ignore lint/style/useNamingConvention: kunci mengikuti nilai enum DB
+  asset_sell: "Jual aset",
+}

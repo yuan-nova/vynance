@@ -12,6 +12,7 @@ export const qk = {
   transactions: (bookId: string) => ["book", bookId, "transactions"] as const,
   transactionList: (bookId: string, filter: Record<string, string | undefined>) =>
     ["book", bookId, "transactions", "list", filter] as const,
+  transactionDetail: (bookId: string, id: string) => ["book", bookId, "transactions", "detail", id] as const,
   transactionSummary: (bookId: string, from: string, to: string) =>
     ["book", bookId, "transactions", "summary", from, to] as const,
   categories: (bookId: string, kind?: string) =>

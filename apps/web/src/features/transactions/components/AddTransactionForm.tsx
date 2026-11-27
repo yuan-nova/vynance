@@ -5,6 +5,7 @@ import {
   dateOnlyOf,
   formatDateShort,
   formatMoney,
+  type TransactionDetail,
 } from "@vynance/shared"
 import { type FormEvent, useState } from "react"
 import { Button } from "@/components/Button"
@@ -15,7 +16,7 @@ import { useCategories } from "@/features/categories"
 import { useWallets } from "@/features/wallets"
 import { splitApiError } from "@/lib/api-error"
 import { usePrivacyMode } from "@/lib/hooks/usePrivacyMode"
-import { useCategoryUsage, useCreateTransaction } from "../hooks/useTransactions"
+import { useCategoryUsage, useCreateTransaction, useUpdateTransaction } from "../hooks/useTransactions"
 
 type TxKind = "expense" | "income" | "transfer"
 type Field = "amount" | "categoryId" | "walletId" | "toWalletId" | "txDate" | "note"
@@ -40,30 +41,34 @@ function shiftDate(date: string, days: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-type AddTransactionFormProps = { bookId: string; onSaved: () => void }
+type AddTransactionFormProps = { bookId: string; onSaved: () => void; initial?: TransactionDetail }
 
 /**
  * Catat transaksi (design/04-add-transaction.svg, PB-02): tipe → jumlah → kategori → rekening → tanggal → catatan.
  * 6 kolom isian → bottom sheet (DS-SHEET-01). Satu tombol primer di bawah (DS-ACTION-01).
  */
-export function AddTransactionForm({ bookId, onSaved }: AddTransactionFormProps) {
+export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionFormProps) {
   const privacy = usePrivacyMode()
-  const [type, setType] = useState<TxKind>("expense")
+  const [type, setType] = useState<TxKind>(
+    initial && (initial.type === "income" || initial.type === "transfer") ? initial.type : "expense",
+  )
   const kind: CategoryKind = type === "income" ? "income" : "expense"
   const wallets = useWallets(bookId)
   const categories = useCategories(bookId, kind)
   const usage = useCategoryUsage(bookId, kind)
   const create = useCreateTransaction(bookId)
+  const update = useUpdateTransaction(bookId)
+  const saving = initial ? update : create
   // Kunci idempotensi dibuat sekali per sheet; simpan ganda memakai kunci yang sama.
   const [key] = useState(() => crypto.randomUUID().replaceAll("-", ""))
   const today = dateOnlyOf(new Date())
 
-  const [amount, setAmount] = useState<bigint | null>(null)
-  const [categoryId, setCategoryId] = useState<string | null>(null)
-  const [walletId, setWalletId] = useState<string | null>(null)
-  const [toWalletId, setToWalletId] = useState<string | null>(null)
-  const [txDate, setTxDate] = useState(today)
-  const [note, setNote] = useState("")
+  const [amount, setAmount] = useState<bigint | null>(initial ? BigInt(initial.amount) : null)
+  const [categoryId, setCategoryId] = useState<string | null>(initial?.categoryId ?? null)
+  const [walletId, setWalletId] = useState<string | null>(initial?.walletId ?? null)
+  const [toWalletId, setToWalletId] = useState<string | null>(initial?.toWalletId ?? null)
+  const [txDate, setTxDate] = useState(initial?.txDate ?? today)
+  const [note, setNote] = useState(initial?.note ?? "")
   const [showAll, setShowAll] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<Field | "form", string>>>({})
 
@@ -97,23 +102,22 @@ export function AddTransactionForm({ bookId, onSaved }: AddTransactionFormProps)
       return
     }
     setErrors({})
-    create.mutate(
-      { input: parsed.data, key },
-      {
-        onSuccess: onSaved,
-        onError: (err) => {
-          const { fields, formError } = splitApiError(err, [
-            "amount",
-            "categoryId",
-            "walletId",
-            "toWalletId",
-            "txDate",
-            "note",
-          ] as const)
-          setErrors({ ...fields, form: formError ?? undefined })
-        },
+    const handlers = {
+      onSuccess: onSaved,
+      onError: (err: unknown) => {
+        const { fields, formError } = splitApiError(err, [
+          "amount",
+          "categoryId",
+          "walletId",
+          "toWalletId",
+          "txDate",
+          "note",
+        ] as const)
+        setErrors({ ...fields, form: formError ?? undefined })
       },
-    )
+    }
+    if (initial) update.mutate({ id: initial.id, input: parsed.data }, handlers)
+    else create.mutate({ input: parsed.data, key }, handlers)
   }
 
   return (
@@ -128,7 +132,7 @@ export function AddTransactionForm({ bookId, onSaved }: AddTransactionFormProps)
           setErrors({})
         }}
       />
-      <MoneyInput label="Jumlah" value={amount} onChange={setAmount} error={errors.amount} large autoFocus />
+      <MoneyInput label="Jumlah" value={amount} onChange={setAmount} error={errors.amount} large autoFocus={!initial} />
 
       {type !== "transfer" ? (
         <div className="field">
@@ -202,7 +206,7 @@ export function AddTransactionForm({ bookId, onSaved }: AddTransactionFormProps)
           {errors.form}
         </p>
       ) : null}
-      <Button type="submit" full loading={create.isPending}>
+      <Button type="submit" full loading={saving.isPending}>
         Simpan
       </Button>
     </form>

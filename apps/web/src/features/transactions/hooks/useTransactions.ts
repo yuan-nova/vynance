@@ -6,13 +6,23 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
-import type { CategoryKind, CategoryUsage, CreateTransactionInput, TransactionSummary } from "@vynance/shared"
+import type {
+  CategoryKind,
+  CategoryUsage,
+  CreateTransactionInput,
+  TransactionDetail,
+  TransactionSummary,
+} from "@vynance/shared"
 import { qk } from "@/lib/query-keys"
 import {
   createTransaction,
+  deleteTransaction,
   fetchCategoryUsage,
+  fetchTransaction,
   fetchTransactionSummary,
   fetchTransactions,
+  restoreTransaction,
+  updateTransaction,
 } from "../services/transactions.service"
 
 export const categoryUsageQueryOptions = (bookId: string, kind: CategoryKind) =>
@@ -48,4 +58,46 @@ export function useTransactionSummary(bookId: string, from: string, to: string):
     queryKey: qk.transactionSummary(bookId, from, to),
     queryFn: () => fetchTransactionSummary(bookId, from, to),
   })
+}
+
+export const transactionQueryOptions = (bookId: string, id: string) =>
+  queryOptions({ queryKey: qk.transactionDetail(bookId, id), queryFn: () => fetchTransaction(bookId, id) })
+
+export function useTransaction(bookId: string, id: string): UseQueryResult<TransactionDetail> {
+  return useQuery(transactionQueryOptions(bookId, id))
+}
+
+/** Ubah/hapus/urungkan memengaruhi saldo, anggaran, daftar, Beranda: invalidasi seluruh data buku. */
+function useBookInvalidate(bookId: string) {
+  const qc = useQueryClient()
+  // Tidak ditunggu: umpan balik (snackbar) tampil segera, data menyusul.
+  return () => {
+    void qc.invalidateQueries({ queryKey: qk.book(bookId) })
+  }
+}
+
+export function useUpdateTransaction(bookId: string) {
+  const onSuccess = useBookInvalidate(bookId)
+  return useMutation({
+    mutationFn: (v: { id: string; input: CreateTransactionInput }) => updateTransaction(bookId, v.id, v.input),
+    onSuccess,
+  })
+}
+
+export function useDeleteTransaction(bookId: string) {
+  const qc = useQueryClient()
+  const invalidate = useBookInvalidate(bookId)
+  return useMutation({
+    mutationFn: (id: string) => deleteTransaction(bookId, id),
+    onSuccess: (_v, id) => {
+      // Detail transaksi yang dihapus tidak perlu dimuat ulang (akan 404).
+      qc.removeQueries({ queryKey: qk.transactionDetail(bookId, id) })
+      invalidate()
+    },
+  })
+}
+
+export function useRestoreTransaction(bookId: string) {
+  const onSuccess = useBookInvalidate(bookId)
+  return useMutation({ mutationFn: (id: string) => restoreTransaction(bookId, id), onSuccess })
 }

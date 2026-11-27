@@ -5,9 +5,11 @@ import {
   categoryUsageSchema,
   moneyToJson,
   type Transaction,
+  type TransactionDetail,
   type TransactionPage,
   type TransactionSummary,
   type TxType,
+  transactionDetailSchema,
   transactionPageSchema,
   transactionSchema,
   transactionSummarySchema,
@@ -50,4 +52,30 @@ export async function fetchTransactionSummary(bookId: string, from: string, to: 
   const res = await t.summary.$get({ param: { bookId }, query: { from, to } })
   await ensureOk(res)
   return transactionSummarySchema.parse((await res.json()).data)
+}
+
+export async function fetchTransaction(bookId: string, id: string): Promise<TransactionDetail> {
+  const res = await t[":id"].$get({ param: { bookId, id } })
+  await ensureOk(res)
+  return transactionDetailSchema.parse((await res.json()).data)
+}
+
+export async function updateTransaction(
+  bookId: string,
+  id: string,
+  input: CreateTransactionInput,
+): Promise<TransactionDetail> {
+  const res = await t[":id"].$patch({ param: { bookId, id }, json: { ...input, amount: moneyToJson(input.amount) } })
+  await ensureOk(res)
+  return transactionDetailSchema.parse((await res.json()).data)
+}
+
+export async function deleteTransaction(bookId: string, id: string): Promise<void> {
+  const res = await t[":id"].$delete({ param: { bookId, id } })
+  await ensureOk(res)
+}
+
+export async function restoreTransaction(bookId: string, id: string): Promise<void> {
+  const res = await t[":id"].restore.$post({ param: { bookId, id } })
+  await ensureOk(res)
 }
