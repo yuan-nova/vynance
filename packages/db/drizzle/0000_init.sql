@@ -1,0 +1,1 @@
+-- Migrasi awal kosong: menandai titik nol riwayat migrasi (tiket #3).

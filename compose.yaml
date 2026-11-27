@@ -60,6 +60,21 @@ services:
       install:
         condition: service_completed_successfully
 
+  # Opsional, dijalankan manual: docker compose run --rm migrate
+  migrate:
+    <<: *bun
+    container_name: vynance-migrate
+    restart: "no"
+    profiles: [tools]
+    command: ["bun", "run", "--cwd", "packages/db", "db:migrate"]
+    environment:
+      DATABASE_URL: mysql://vynance:${DB_PASSWORD:-vynance_dev}@db:3306/vynance
+    depends_on:
+      db:
+        condition: service_healthy
+      install:
+        condition: service_completed_successfully
+
   web:
     <<: *bun
     container_name: vynance-web

@@ -189,6 +189,8 @@ apps/api/src/
 | Audit | `created_by`, `created_at`, `updated_at` di setiap tabel data |
 | Charset | `utf8mb4`, collation `utf8mb4_0900_ai_ci` |
 
+Konvensi ini ditulis sebagai helper di `packages/db/src/schema/columns.ts`: `id()`, `ref()`, `money()` (bigint), `units()`, `basisPoints()`, `month()`, `timestamp()`, `timestamps`, dan `audit` (`created_by` + `timestamps`). Tabel baru wajib memakai helper ini.
+
 ### 6.2 Diagram
 
 Kolom audit (`created_at`, `updated_at`, `deleted_at`, `created_by`) ada di semua tabel data dan tidak digambar ulang.

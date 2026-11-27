@@ -19,6 +19,18 @@ bun run db:migrate # migrasi DB (setelah ada tabel)
 | Frontend (Vite) | http://localhost:12082 |
 | MySQL | `localhost:12306`, user `vynance`, DB `vynance`, sandi bawaan `vynance_dev` |
 
+### Migrasi dan seed
+
+```bash
+# 1. Ubah/tambah tabel di packages/db/src/schema/ (pakai helper di schema/columns.ts)
+bun run db:generate                 # buat file migrasi SQL di packages/db/drizzle/
+bun run db:migrate                  # jalankan ke localhost:12306 dari host
+docker compose run --rm migrate     # atau jalankan dari container
+bun run db:seed                     # data contoh development (ditolak bila NODE_ENV=production)
+```
+
+File migrasi wajib ikut di-commit bersama perubahan skema. DB produksi tidak boleh diubah manual.
+
 Log: `bun run dev:logs`. Berhenti: `bun run dev:down`. Detail lingkungan ada di [TSD §3](docs/TSD-Vynance.md#3-lingkungan-dan-port).
 
 ## Dokumen
