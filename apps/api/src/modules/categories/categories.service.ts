@@ -51,6 +51,9 @@ export class CategoriesService {
     if (current.kind === "income" && input.budgetGroup != null) {
       throw new BusinessError("CATEGORY_GROUP_EXPENSE_ONLY", "budgetGroup")
     }
+    if (current.kind === "income" && input.monthlyBudget != null) {
+      throw new BusinessError("CATEGORY_GROUP_EXPENSE_ONLY", "monthlyBudget")
+    }
     await this.d.uow.withTransaction(async (r) => {
       await r.categories.update(ctx.bookId, id, input)
       await this.log(r, ctx, "category.updated", id, input.name ?? current.name)

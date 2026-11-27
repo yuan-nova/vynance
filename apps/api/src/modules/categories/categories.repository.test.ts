@@ -76,6 +76,13 @@ describe("kategori", () => {
     expect(res.status).toBe(422)
   })
 
+  test("kategori uang masuk tidak boleh diberi anggaran → 422 field monthlyBudget", async () => {
+    const gaji = await add("Gaji", "income")
+    const res = await app(U).request(`${base()}/${gaji.id}`, jsonRequest("PATCH", { monthlyBudget: "1000" }))
+    expect(res.status).toBe(422)
+    expect(((await res.json()) as { error: { field: string } }).error.field).toBe("monthlyBudget")
+  })
+
   test("BR-36: ganti nama mempertahankan ID yang dipakai transaksi", async () => {
     const c = await add("Transpor")
     const walletId = newId()
