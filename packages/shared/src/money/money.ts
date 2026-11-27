@@ -3,7 +3,10 @@ import { z } from "zod"
 // Uang selalu bigint rupiah utuh (CODING-GUIDELINES §6.8, NFR-07). Tidak ada float.
 
 const MINUS = "−"
-const DIGITS = /^-?\d+$/
+const DIGITS = /^-?\d{1,19}$/
+// Rentang kolom BIGINT signed MySQL.
+const BIGINT_MAX = 9_223_372_036_854_775_807n
+const BIGINT_MIN = -9_223_372_036_854_775_808n
 
 export const MONEY_PRIVACY_MASK = "Rp ••••••"
 
@@ -12,6 +15,7 @@ export const moneySchema = z
   .string()
   .regex(DIGITS, "Nominal harus angka bulat")
   .transform((s) => BigInt(s))
+  .refine((v) => v >= BIGINT_MIN && v <= BIGINT_MAX, "Nominal terlalu besar")
 
 /** Sama seperti moneySchema tetapi wajib > 0 (BR-30). */
 export const positiveMoneySchema = moneySchema.refine((v) => v > 0n, "Nominal harus lebih dari 0")

@@ -43,6 +43,11 @@ describe("parseMoney", () => {
 describe("moneySchema", () => {
   test("string → bigint", () => expect(moneySchema.parse("287500")).toBe(287_500n))
   test("menolak desimal", () => expect(moneySchema.safeParse("1.5").success).toBe(false))
+  test("menolak di luar BIGINT", () => {
+    expect(moneySchema.safeParse("9223372036854775807").success).toBe(true)
+    expect(moneySchema.safeParse("9223372036854775808").success).toBe(false)
+    expect(moneySchema.safeParse("123456789012345678901").success).toBe(false)
+  })
   test("positif", () => {
     expect(positiveMoneySchema.safeParse("0").success).toBe(false)
     expect(positiveMoneySchema.parse("1")).toBe(1n)
