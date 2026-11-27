@@ -31,7 +31,7 @@ type Repos = {
 type Deps = {
   transactions: Pick<
     TransactionsRepository,
-    "findById" | "findByIdempotencyKey" | "categoryUsage" | "list" | "sumIncomeExpense" | "detail"
+    "findById" | "findByIdempotencyKey" | "categoryUsage" | "list" | "sumIncomeExpense" | "detail" | "sumAssetNet"
   >
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
@@ -153,6 +153,11 @@ export class TransactionsService {
   async summary(ctx: ServiceCtx, from: string, to: string): Promise<TransactionSummary> {
     const s = await this.d.transactions.sumIncomeExpense(ctx.bookId, from, to)
     return { income: s.income.toString(), expense: s.expense.toString() }
+  }
+
+  /** Pilar investasi skor kesehatan (BRD §8.2): nilai aset bersih sampai akhir bulan yang dipilih. */
+  async getHealthInputs(ctx: ServiceCtx, to: string): Promise<{ investments: bigint }> {
+    return { investments: await this.d.transactions.sumAssetNet(ctx.bookId, to) }
   }
 
   /** Kategori sering dipakai dalam 3 bulan terakhir (zona Asia/Jakarta). */

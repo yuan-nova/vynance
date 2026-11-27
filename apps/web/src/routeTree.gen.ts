@@ -15,6 +15,7 @@ import { Route as MasukRouteImport } from './routes/masuk'
 import { Route as MulaiRouteImport } from './routes/mulai'
 import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
 import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
+import { Route as TabsSkorKesehatanRouteImport } from './routes/_tabs/skor-kesehatan'
 import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
 import { Route as TabsLainnyaIndexRouteImport } from './routes/_tabs/lainnya/index'
 import { Route as TabsLainnyaBukuRouteImport } from './routes/_tabs/lainnya/buku'
@@ -49,6 +50,11 @@ const TabsIndexRoute = TabsIndexRouteImport.update({
 const TabsAnggaranRoute = TabsAnggaranRouteImport.update({
   id: '/anggaran',
   path: '/anggaran',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsSkorKesehatanRoute = TabsSkorKesehatanRouteImport.update({
+  id: '/skor-kesehatan',
+  path: '/skor-kesehatan',
   getParentRoute: () => TabsRoute,
 } as any)
 const TabsTransaksiRoute = TabsTransaksiRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
+  '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
   '/lainnya/kategori': typeof TabsLainnyaKategoriRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
+  '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/': typeof TabsIndexRoute
   '/lainnya/buku': typeof TabsLainnyaBukuRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/_tabs/anggaran': typeof TabsAnggaranRoute
+  '/_tabs/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/_tabs/transaksi': typeof TabsTransaksiRoute
   '/_tabs/': typeof TabsIndexRoute
   '/_tabs/lainnya/buku': typeof TabsLainnyaBukuRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/masuk'
     | '/mulai'
     | '/anggaran'
+    | '/skor-kesehatan'
     | '/transaksi'
     | '/lainnya/buku'
     | '/lainnya/kategori'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/masuk'
     | '/mulai'
     | '/anggaran'
+    | '/skor-kesehatan'
     | '/transaksi'
     | '/'
     | '/lainnya/buku'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/masuk'
     | '/mulai'
     | '/_tabs/anggaran'
+    | '/_tabs/skor-kesehatan'
     | '/_tabs/transaksi'
     | '/_tabs/'
     | '/_tabs/lainnya/buku'
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsAnggaranRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/skor-kesehatan': {
+      id: '/_tabs/skor-kesehatan'
+      path: '/skor-kesehatan'
+      fullPath: '/skor-kesehatan'
+      preLoaderRoute: typeof TabsSkorKesehatanRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/transaksi': {
       id: '/_tabs/transaksi'
       path: '/transaksi'
@@ -264,6 +283,7 @@ declare module '@tanstack/react-router' {
 
 interface TabsRouteChildren {
   TabsAnggaranRoute: typeof TabsAnggaranRoute
+  TabsSkorKesehatanRoute: typeof TabsSkorKesehatanRoute
   TabsTransaksiRoute: typeof TabsTransaksiRoute
   TabsIndexRoute: typeof TabsIndexRoute
   TabsLainnyaBukuRoute: typeof TabsLainnyaBukuRoute
@@ -275,6 +295,7 @@ interface TabsRouteChildren {
 
 const TabsRouteChildren: TabsRouteChildren = {
   TabsAnggaranRoute: TabsAnggaranRoute,
+  TabsSkorKesehatanRoute: TabsSkorKesehatanRoute,
   TabsTransaksiRoute: TabsTransaksiRoute,
   TabsIndexRoute: TabsIndexRoute,
   TabsLainnyaBukuRoute: TabsLainnyaBukuRoute,

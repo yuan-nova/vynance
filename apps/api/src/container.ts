@@ -15,6 +15,7 @@ import { CategoriesService } from "./modules/categories/categories.service"
 import { DashboardService } from "./modules/dashboard/dashboard.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
+import { HealthScoreService } from "./modules/health-score/health-score.service"
 import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
 import { InvestmentsService } from "./modules/investments/investments.service"
 import { MeRepository } from "./modules/me/me.repository"
@@ -111,12 +112,21 @@ const services = {
   }),
 }
 
+const healthScoreService = new HealthScoreService({
+  wallets: services.walletsService,
+  plans: services.plansService,
+  transactions: services.transactionsService,
+  categories: services.categoriesService,
+})
+
 export const container = {
   ...services,
+  healthScoreService,
   dashboardService: new DashboardService({
     wallets: services.walletsService,
     plans: services.plansService,
     transactions: services.transactionsService,
     categories: services.categoriesService,
+    healthScore: healthScoreService,
   }),
 }

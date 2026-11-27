@@ -1248,3 +1248,168 @@ p {
   font-weight: 700;
   text-decoration: none;
 }
+
+/* ---------- Kartu skor kesehatan (FR-51, design/03-dashboard.svg) ---------- */
+
+.score-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 120px;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.score-ring {
+  flex: 0 0 84px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.score-ring svg {
+  position: absolute;
+  inset: 0;
+}
+
+.score-ring-track {
+  stroke: var(--surf2);
+}
+
+.score-ring-fill.ring-inc {
+  stroke: var(--inc);
+}
+
+.score-ring-fill.ring-warn {
+  stroke: var(--warn);
+}
+
+.score-ring-fill.ring-exp {
+  stroke: var(--exp);
+}
+
+.score-ring-num {
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-level {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.score-level.level-inc {
+  color: var(--inc);
+}
+
+.score-level.level-warn {
+  color: var(--warn);
+}
+
+.score-level.level-exp {
+  color: var(--exp);
+}
+
+.score-pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-top: 4px;
+}
+
+.score-pillar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.score-pillar .row-sub {
+  font-size: 11px;
+}
+
+.score-na {
+  color: var(--faint);
+}
+
+.score-chev {
+  flex: 0 0 18px;
+  color: var(--faint);
+}
+
+@media (max-width: 359px) {
+  .score-pillars {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Layar rincian skor kesehatan ---------- */
+
+.score-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.score-hero .hero-label {
+  color: var(--muted);
+}
+
+.score-hero-num {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-hero-max {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.score-note {
+  margin-top: 4px;
+}
+
+.score-pillar-row {
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.score-pillar-row:last-child {
+  border-bottom: 0;
+}
+
+.score-pillar-row .row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 12px;
+}
+
+.score-hint {
+  white-space: normal;
+}
+
+.score-points {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}

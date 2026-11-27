@@ -40,6 +40,10 @@ describe("DashboardService", () => {
           return { income: "6000000", expense: "800000" }
         },
         list: async () => ({ data: [{ id: "t1" }], nextCursor: null }),
+        getHealthInputs: async () => ({ investments: 0n }),
+      } as never,
+      healthScore: {
+        get: async () => ({ score: 78, level: "good", levelLabel: "Baik" }),
       } as never,
       categories: {
         list: async () => [
@@ -52,7 +56,9 @@ describe("DashboardService", () => {
     expect(summaryRange).toEqual(["2026-11-01", "2026-11-30"])
     expect(d.wealth).toEqual({ netWorth: "4000000", cash: "5000000", investments: "0", debt: "-1000000" })
     expect(d.monthSummary).toEqual({ income: "6000000", expense: "800000" })
+    expect(d.healthScore).toEqual({ score: 78, level: "good", levelLabel: "Baik" })
     expect(d.topBudgets.map((b) => b.categoryId)).toEqual(["c2", "c1"])
+    expect(d.topBudgets.map((b) => b.usageBp)).toEqual([12_000, 2_000])
     expect(d.recent).toHaveLength(1)
   })
 })
