@@ -1,11 +1,60 @@
-import { EmptyState } from "@/components/States"
+import { getRouteApi, useNavigate } from "@tanstack/react-router"
+import { addMonths, formatMonth, monthOf } from "@vynance/shared"
+import { useState } from "react"
+import { IconButton } from "@/components/Button"
+import { ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
+import { useActiveBook } from "@/features/books"
+import { useCategories } from "@/features/categories"
+import { PlanEditor, useInvestmentTypes, usePlan } from "@/features/plans"
 
+const route = getRouteApi("/_tabs/anggaran")
+
+/** Anggaran (design/07-budget.svg, PB-04): rencana bulanan per bulan di URL. */
 export function BudgetPage() {
+  const navigate = useNavigate({ from: "/anggaran" })
+  const { bulan } = route.useSearch()
+  const month = bulan ?? monthOf(new Date())
+  const bookId = useActiveBook()?.id ?? ""
+  const plan = usePlan(bookId, month)
+  const categories = useCategories(bookId, "expense")
+  const types = useInvestmentTypes(bookId)
+  // Dinaikkan saat konflik supaya editor dipasang ulang dengan data terbaru.
+  const [reload, setReload] = useState(0)
+
+  const ready = plan.data && categories.data && types.data
   return (
     <>
       <TopBar level={1} title="Anggaran" />
-      <EmptyState icon="pie" title="Belum ada rencana bulan ini" body="Atur penghasilan dan anggaran per kategori." />
+      <div className="month-nav">
+        <IconButton
+          icon="chev_l"
+          label="Bulan sebelumnya"
+          onClick={() => void navigate({ search: { bulan: addMonths(month, -1) } })}
+        />
+        <span className="month-label">{formatMonth(month)}</span>
+        <IconButton
+          icon="chev_r"
+          label="Bulan berikutnya"
+          onClick={() => void navigate({ search: { bulan: addMonths(month, 1) } })}
+        />
+      </div>
+      {!ready && !plan.isError ? <Skeleton rows={4} height={88} /> : null}
+      {plan.isError ? (
+        <ErrorState message="Rencana gagal dimuat." onRetry={() => void plan.refetch()} retrying={plan.isFetching} />
+      ) : null}
+      {ready ? (
+        <PlanEditor
+          key={`${month}-${reload}`}
+          bookId={bookId}
+          plan={plan.data}
+          categories={categories.data}
+          investmentTypes={types.data}
+          onConflict={() => {
+            void plan.refetch().then(() => setReload((n) => n + 1))
+          }}
+        />
+      ) : null}
     </>
   )
 }

@@ -108,3 +108,69 @@ export const investmentTypes = mysqlTable(
   },
   (t) => [index("investment_types_book_idx").on(t.bookId, t.sortOrder)],
 )
+
+// Rencana bulanan (PB-04). Tabel anak ikut menyimpan book_id supaya setiap query bisa difilter buku (BR-45).
+export const monthlyPlans = mysqlTable(
+  "monthly_plans",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    month: month("month").notNull(),
+    spendingCap: money("spending_cap"),
+    defaultWalletId: ref("default_wallet_id").references(() => wallets.id),
+    method: mysqlEnum("method", ["custom", "50_30_20", "60_20_20", "70_10_20", "fixed"]).notNull().default("custom"),
+    version: int("version").notNull().default(1),
+    updatedBy: ref("updated_by"),
+    ...audit,
+  },
+  (t) => [uniqueIndex("monthly_plans_book_month_uq").on(t.bookId, t.month)],
+)
+
+export const planIncomes = mysqlTable(
+  "plan_incomes",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    planId: ref("plan_id")
+      .notNull()
+      .references(() => monthlyPlans.id),
+    name: varchar("name", { length: 60 }).notNull(),
+    amount: money("amount").notNull(),
+    sortOrder: int("sort_order").notNull().default(0),
+    ...audit,
+  },
+  (t) => [index("plan_incomes_plan_idx").on(t.bookId, t.planId)],
+)
+
+export const planAllocations = mysqlTable(
+  "plan_allocations",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    planId: ref("plan_id")
+      .notNull()
+      .references(() => monthlyPlans.id),
+    kind: mysqlEnum("kind", ["expense", "investment"]).notNull(),
+    categoryId: ref("category_id").references(() => categories.id),
+    investmentTypeId: ref("investment_type_id").references(() => investmentTypes.id),
+    mode: mysqlEnum("mode", ["amount", "percent"]).notNull().default("amount"),
+    amount: money("amount").notNull().default(sql`0`),
+    percentBp: int("percent_bp").notNull().default(0),
+    carriedOver: money("carried_over").notNull().default(sql`0`),
+    ...audit,
+  },
+  (t) => [
+    index("plan_alloc_plan_idx").on(t.bookId, t.planId),
+    index("plan_alloc_category_idx").on(t.bookId, t.categoryId),
+    check(
+      "plan_alloc_target",
+      sql`(${t.kind} = 'expense' AND ${t.categoryId} IS NOT NULL AND ${t.investmentTypeId} IS NULL) OR (${t.kind} = 'investment' AND ${t.investmentTypeId} IS NOT NULL AND ${t.categoryId} IS NULL)`,
+    ),
+  ],
+)

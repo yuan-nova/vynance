@@ -11,10 +11,14 @@ import { categoryRoutes } from "./modules/categories/categories.route"
 import type { CategoriesService } from "./modules/categories/categories.service"
 import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
+import { investmentTypeRoutes } from "./modules/investments/investments.route"
+import type { InvestmentsService } from "./modules/investments/investments.service"
 import { meRoutes } from "./modules/me/me.route"
 import type { MeService } from "./modules/me/me.service"
 import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
 import type { OnboardingService } from "./modules/onboarding/onboarding.service"
+import { planRoutes } from "./modules/plans/plans.route"
+import type { PlansService } from "./modules/plans/plans.service"
 import { transactionRoutes } from "./modules/transactions/transactions.route"
 import type { TransactionsService } from "./modules/transactions/transactions.service"
 import { walletRoutes } from "./modules/wallets/wallets.route"
@@ -29,6 +33,8 @@ type Deps = {
   categoriesService: CategoriesService
   onboardingService: OnboardingService
   transactionsService: TransactionsService
+  plansService: PlansService
+  investmentsService: InvestmentsService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -52,7 +58,9 @@ export const createApp = (deps: Deps) => {
         .route("/wallets", walletRoutes(deps.walletsService))
         .route("/categories", categoryRoutes(deps.categoriesService))
         .route("/onboarding", onboardingRoutes(deps.onboardingService))
-        .route("/transactions", transactionRoutes(deps.transactionsService)),
+        .route("/transactions", transactionRoutes(deps.transactionsService))
+        .route("/plans", planRoutes(deps.plansService))
+        .route("/investment-types", investmentTypeRoutes(deps.investmentsService)),
     )
 }
 

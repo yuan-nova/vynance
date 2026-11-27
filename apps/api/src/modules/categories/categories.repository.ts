@@ -1,4 +1,4 @@
-import { categories, type Executor, transactions } from "@vynance/db"
+import { categories, type Executor, planAllocations, transactions } from "@vynance/db"
 import type { BudgetGroup, Category, CategoryKind, CategoryListQuery } from "@vynance/shared"
 import { and, asc, eq, inArray, isNotNull, isNull, max } from "drizzle-orm"
 
@@ -56,13 +56,22 @@ export class CategoriesRepository {
     return (row?.m ?? -1) + 1
   }
 
+  /** Dipakai transaksi atau alokasi rencana → diarsipkan, bukan dihapus (BR-36). */
   async isUsed(bookId: string, id: string): Promise<boolean> {
-    const [row] = await this.db
+    const [tx] = await this.db
       .select({ id: transactions.id })
       .from(transactions)
       .where(and(eq(transactions.bookId, bookId), eq(transactions.categoryId, id), isNull(transactions.deletedAt)))
       .limit(1)
-    return Boolean(row)
+    if (tx) return true
+    const [alloc] = await this.db
+      .select({ id: planAllocations.id })
+      .from(planAllocations)
+      .where(
+        and(eq(planAllocations.bookId, bookId), eq(planAllocations.categoryId, id), isNull(planAllocations.deletedAt)),
+      )
+      .limit(1)
+    return Boolean(alloc)
   }
 
   async insert(v: {
