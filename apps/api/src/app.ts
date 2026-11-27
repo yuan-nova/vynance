@@ -24,6 +24,8 @@ import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
 import { healthScoreRoutes } from "./modules/health-score/health-score.route"
 import type { HealthScoreService } from "./modules/health-score/health-score.service"
+import { incomeRoutes } from "./modules/incomes/incomes.route"
+import type { IncomesService } from "./modules/incomes/incomes.service"
 import { assetRoutes, investmentTypeRoutes, portfolioRoutes } from "./modules/investments/investments.route"
 import type { InvestmentsService } from "./modules/investments/investments.service"
 import { bookInvitationRoutes, invitationRoutes } from "./modules/invitations/invitations.route"
@@ -64,6 +66,7 @@ type Deps = {
   healthScoreService: HealthScoreService
   goalsService: GoalsService
   educationService: EducationService
+  incomesService: IncomesService
   invitationsService: InvitationsService
   membersService: MembersService
   subscriptionsService: SubscriptionsService
@@ -109,6 +112,7 @@ export const createApp = (deps: Deps) => {
         .route("/goals", goalRoutes(deps.goalsService))
         .route("/children", childRoutes(deps.educationService))
         .route("/education-plan", educationPlanRoutes(deps.educationService))
+        .route("/income-sources", incomeRoutes(deps.incomesService))
         .route("/invitations", bookInvitationRoutes(deps.invitationsService))
         .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService))
         .route("/zakat", zakatRoutes(deps.zakatService))

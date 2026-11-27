@@ -28,6 +28,7 @@ import { Route as TabsLainnyaKategoriRouteImport } from './routes/_tabs/lainnya/
 import { Route as TabsLainnyaLanggananRouteImport } from './routes/_tabs/lainnya/langganan'
 import { Route as TabsLainnyaPendidikanRouteImport } from './routes/_tabs/lainnya/pendidikan'
 import { Route as TabsLainnyaPengaturanRouteImport } from './routes/_tabs/lainnya/pengaturan'
+import { Route as TabsLainnyaPenghasilanRouteImport } from './routes/_tabs/lainnya/penghasilan'
 import { Route as TabsLainnyaRekeningRouteImport } from './routes/_tabs/lainnya/rekening'
 import { Route as TabsLainnyaTargetRouteImport } from './routes/_tabs/lainnya/target'
 import { Route as TabsLainnyaZakatRouteImport } from './routes/_tabs/lainnya/zakat'
@@ -128,6 +129,11 @@ const TabsLainnyaPengaturanRoute = TabsLainnyaPengaturanRouteImport.update({
   path: '/lainnya/pengaturan',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsLainnyaPenghasilanRoute = TabsLainnyaPenghasilanRouteImport.update({
+  id: '/lainnya/penghasilan',
+  path: '/lainnya/penghasilan',
+  getParentRoute: () => TabsRoute,
+} as any)
 const TabsLainnyaRekeningRoute = TabsLainnyaRekeningRouteImport.update({
   id: '/lainnya/rekening',
   path: '/lainnya/rekening',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/lainnya/langganan': typeof TabsLainnyaLanggananRoute
   '/lainnya/pendidikan': typeof TabsLainnyaPendidikanRoute
   '/lainnya/pengaturan': typeof TabsLainnyaPengaturanRoute
+  '/lainnya/penghasilan': typeof TabsLainnyaPenghasilanRoute
   '/lainnya/rekening': typeof TabsLainnyaRekeningRoute
   '/lainnya/target': typeof TabsLainnyaTargetRoute
   '/lainnya/zakat': typeof TabsLainnyaZakatRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/lainnya/langganan': typeof TabsLainnyaLanggananRoute
   '/lainnya/pendidikan': typeof TabsLainnyaPendidikanRoute
   '/lainnya/pengaturan': typeof TabsLainnyaPengaturanRoute
+  '/lainnya/penghasilan': typeof TabsLainnyaPenghasilanRoute
   '/lainnya/rekening': typeof TabsLainnyaRekeningRoute
   '/lainnya/target': typeof TabsLainnyaTargetRoute
   '/lainnya/zakat': typeof TabsLainnyaZakatRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/_tabs/lainnya/langganan': typeof TabsLainnyaLanggananRoute
   '/_tabs/lainnya/pendidikan': typeof TabsLainnyaPendidikanRoute
   '/_tabs/lainnya/pengaturan': typeof TabsLainnyaPengaturanRoute
+  '/_tabs/lainnya/penghasilan': typeof TabsLainnyaPenghasilanRoute
   '/_tabs/lainnya/rekening': typeof TabsLainnyaRekeningRoute
   '/_tabs/lainnya/target': typeof TabsLainnyaTargetRoute
   '/_tabs/lainnya/zakat': typeof TabsLainnyaZakatRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/lainnya/langganan'
     | '/lainnya/pendidikan'
     | '/lainnya/pengaturan'
+    | '/lainnya/penghasilan'
     | '/lainnya/rekening'
     | '/lainnya/target'
     | '/lainnya/zakat'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/lainnya/langganan'
     | '/lainnya/pendidikan'
     | '/lainnya/pengaturan'
+    | '/lainnya/penghasilan'
     | '/lainnya/rekening'
     | '/lainnya/target'
     | '/lainnya/zakat'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/_tabs/lainnya/langganan'
     | '/_tabs/lainnya/pendidikan'
     | '/_tabs/lainnya/pengaturan'
+    | '/_tabs/lainnya/penghasilan'
     | '/_tabs/lainnya/rekening'
     | '/_tabs/lainnya/target'
     | '/_tabs/lainnya/zakat'
@@ -453,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsLainnyaPengaturanRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/lainnya/penghasilan': {
+      id: '/_tabs/lainnya/penghasilan'
+      path: '/lainnya/penghasilan'
+      fullPath: '/lainnya/penghasilan'
+      preLoaderRoute: typeof TabsLainnyaPenghasilanRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/lainnya/rekening': {
       id: '/_tabs/lainnya/rekening'
       path: '/lainnya/rekening'
@@ -505,6 +524,7 @@ interface TabsRouteChildren {
   TabsLainnyaLanggananRoute: typeof TabsLainnyaLanggananRoute
   TabsLainnyaPendidikanRoute: typeof TabsLainnyaPendidikanRoute
   TabsLainnyaPengaturanRoute: typeof TabsLainnyaPengaturanRoute
+  TabsLainnyaPenghasilanRoute: typeof TabsLainnyaPenghasilanRoute
   TabsLainnyaRekeningRoute: typeof TabsLainnyaRekeningRoute
   TabsLainnyaTargetRoute: typeof TabsLainnyaTargetRoute
   TabsLainnyaZakatRoute: typeof TabsLainnyaZakatRoute
@@ -527,6 +547,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsLainnyaLanggananRoute: TabsLainnyaLanggananRoute,
   TabsLainnyaPendidikanRoute: TabsLainnyaPendidikanRoute,
   TabsLainnyaPengaturanRoute: TabsLainnyaPengaturanRoute,
+  TabsLainnyaPenghasilanRoute: TabsLainnyaPenghasilanRoute,
   TabsLainnyaRekeningRoute: TabsLainnyaRekeningRoute,
   TabsLainnyaTargetRoute: TabsLainnyaTargetRoute,
   TabsLainnyaZakatRoute: TabsLainnyaZakatRoute,

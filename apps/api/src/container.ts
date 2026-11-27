@@ -25,6 +25,8 @@ import { GoalsService } from "./modules/goals/goals.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { HealthScoreService } from "./modules/health-score/health-score.service"
+import { IncomesRepository } from "./modules/incomes/incomes.repository"
+import { IncomesService } from "./modules/incomes/incomes.service"
 import { AssetsRepository } from "./modules/investments/assets.repository"
 import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
 import { InvestmentsService } from "./modules/investments/investments.service"
@@ -193,6 +195,15 @@ const services = {
     goals: new GoalsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       goals: new GoalsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
+  incomesService: new IncomesService({
+    incomes: new IncomesRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      incomes: new IncomesRepository(exec),
       activity: new ActivityRepository(exec),
     })),
     newId: () => newId(),
