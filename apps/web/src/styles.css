@@ -1904,3 +1904,8 @@ p {
 .zakat-note {
   margin: 12px 0;
 }
+
+.zakat-result .text-warn {
+  color: var(--warn);
+  font-weight: 700;
+}
