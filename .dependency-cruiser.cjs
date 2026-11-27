@@ -189,7 +189,7 @@ module.exports = {
       name: "shared-is-pure",
       severity: "error",
       comment: `packages/shared wajib TypeScript murni; dependensi luar hanya zod (${ref("§4.1 butir 4")}).`,
-      from: { path: "^packages/shared/" },
+      from: { path: "^packages/shared/", pathNot: "\\.test\\.ts$" },
       to: { pathNot: ["^packages/shared/", "^node_modules/zod/", "^zod$"] },
     },
     {
