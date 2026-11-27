@@ -1,4 +1,13 @@
-import { monthDateRange, type Plan, type PutPlanInput, type ServiceCtx } from "@vynance/shared"
+import {
+  addMonths,
+  allocationAmount,
+  carryOverAmount,
+  monthDateRange,
+  type Plan,
+  type PutPlanInput,
+  planTotals,
+  type ServiceCtx,
+} from "@vynance/shared"
 import type { UnitOfWork } from "../../db/unit-of-work"
 import { BusinessError } from "../../lib/errors"
 import type { ActivityRepository } from "../activity/activity.repository"
@@ -18,6 +27,7 @@ type Repos = {
 type Deps = {
   plans: Pick<PlansRepository, "findByMonth">
   transactions: Pick<TransactionsRepository, "sumIncomeExpense" | "sumExpenseByCategory">
+  realization?: Pick<PlansRepository, "investmentRealization">
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
 }
@@ -111,6 +121,105 @@ export class PlansService {
         entityType: "plan",
         entityId: planId,
         summary: { month },
+      })
+    })
+    return this.get(ctx, month)
+  }
+
+  /**
+   * Bawa sisa bulan lalu (PB-04 langkah 7, BR-14). Sisa tiap kategori = max(alokasi − realisasi, 0), sisa
+   * investasi = max(alokasi − beli aset jenis itu). Nilainya DITETAPKAN ke carried_over bulan ini (bukan
+   * ditambah), jadi menekan dua kali tidak menggandakan.
+   */
+  async carryOver(ctx: ServiceCtx, month: string): Promise<Plan> {
+    const prevMonth = addMonths(month, -1)
+    const { from, to } = monthDateRange(prevMonth)
+    const [prev, spent, invested] = await Promise.all([
+      this.d.plans.findByMonth(ctx.bookId, prevMonth),
+      this.d.transactions.sumExpenseByCategory(ctx.bookId, from, to),
+      this.d.realization?.investmentRealization(ctx.bookId, from, to) ?? Promise.resolve(new Map<string, bigint>()),
+    ])
+    if (!prev) throw new BusinessError("PLAN_NO_PREVIOUS")
+    const prevIncome = planTotals(prev.incomes, prev.spendingCap, []).totalIncome
+    const cap = prev.spendingCap ?? 0n
+    const leftover = new Map<string, { kind: "expense" | "investment"; amount: bigint }>()
+    for (const a of prev.allocations) {
+      const target = a.categoryId ?? a.investmentTypeId
+      if (!target) continue
+      const allocated = allocationAmount(a, cap, prevIncome)
+      const used = a.kind === "expense" ? (spent[target] ?? 0n) : (invested.get(target) ?? 0n)
+      const amount = carryOverAmount(allocated, used)
+      if (amount > 0n) leftover.set(target, { kind: a.kind, amount })
+    }
+
+    await this.d.uow.withTransaction(async (r) => {
+      let current = await r.plans.findByMonth(ctx.bookId, month)
+      if (!current) {
+        const res = await r.plans.insertPlan({
+          id: this.d.newId(),
+          bookId: ctx.bookId,
+          month,
+          spendingCap: prev.spendingCap,
+          defaultWalletId: prev.defaultWalletId,
+          method: prev.method,
+          createdBy: ctx.userId,
+        })
+        if (res === "conflict") throw new BusinessError("PLAN_CONFLICT", undefined, 409)
+        current = await r.plans.findByMonth(ctx.bookId, month)
+        if (!current) throw new BusinessError("PLAN_CONFLICT", undefined, 409)
+      } else if (
+        !(await r.plans.updatePlan(ctx.bookId, current.id, current.version, {
+          spendingCap: current.spendingCap,
+          defaultWalletId: current.defaultWalletId,
+          method: current.method,
+          updatedBy: ctx.userId,
+        }))
+      ) {
+        throw new BusinessError("PLAN_CONFLICT", undefined, 409)
+      }
+      const existing = new Set(current.allocations.map((a) => a.categoryId ?? a.investmentTypeId ?? ""))
+      const allocations = [
+        ...current.allocations.map((a) => {
+          const target = a.categoryId ?? a.investmentTypeId ?? ""
+          return {
+            ...(a.kind === "expense"
+              ? { kind: "expense" as const, categoryId: target }
+              : { kind: "investment" as const, investmentTypeId: target }),
+            mode: a.mode,
+            amount: a.amount,
+            percentBp: a.percentBp,
+            id: this.d.newId(),
+            carriedOver: leftover.get(target)?.amount ?? 0n,
+          }
+        }),
+        ...[...leftover.entries()]
+          .filter(([target]) => !existing.has(target))
+          .map(([target, l]) => ({
+            ...(l.kind === "expense"
+              ? { kind: "expense" as const, categoryId: target }
+              : { kind: "investment" as const, investmentTypeId: target }),
+            mode: "amount" as const,
+            amount: 0n,
+            percentBp: 0,
+            id: this.d.newId(),
+            carriedOver: l.amount,
+          })),
+      ]
+      await r.plans.replaceChildren(
+        ctx.bookId,
+        current.id,
+        ctx.userId,
+        current.incomes.map((i) => ({ id: this.d.newId(), ...i })),
+        allocations,
+      )
+      await r.activity.record({
+        id: this.d.newId(),
+        bookId: ctx.bookId,
+        actorId: ctx.userId,
+        action: "plan.carried_over",
+        entityType: "plan",
+        entityId: current.id,
+        summary: { month, from: prevMonth },
       })
     })
     return this.get(ctx, month)

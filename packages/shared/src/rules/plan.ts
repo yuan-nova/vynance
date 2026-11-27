@@ -47,3 +47,8 @@ export function planTotals(
     unallocated: totalIncome - (expenseAllocated + investmentAllocated),
   }
 }
+
+/** BR-14: sisa yang dibawa = max(alokasi − realisasi, 0). */
+export function carryOverAmount(allocated: bigint, spent: bigint): bigint {
+  return allocated > spent ? allocated - spent : 0n
+}

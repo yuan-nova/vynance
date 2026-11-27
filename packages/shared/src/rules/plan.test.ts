@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { allocationAmount, planTotals } from "./plan"
+import { allocationAmount, carryOverAmount, planTotals } from "./plan"
 
 describe("BR-13 sisa belum dialokasikan", () => {
   // Contoh design/07-budget.svg: penghasilan Rp24,5 jt, pengeluaran Rp17 jt, investasi Rp5 jt → belum diatur Rp2,5 jt.
@@ -31,5 +31,13 @@ describe("BR-13 sisa belum dialokasikan", () => {
     expect(
       allocationAmount({ kind: "expense", mode: "amount", amount: 1_000n, percentBp: 0, carriedOver: 250n }, 0n, 0n),
     ).toBe(1_250n)
+  })
+})
+
+describe("BR-14 bawa sisa", () => {
+  test("sisa = max(alokasi − realisasi, 0)", () => {
+    expect(carryOverAmount(1_500_000n, 1_200_000n)).toBe(300_000n)
+    expect(carryOverAmount(1_000n, 1_000n)).toBe(0n)
+    expect(carryOverAmount(1_000n, 1_800n)).toBe(0n)
   })
 })

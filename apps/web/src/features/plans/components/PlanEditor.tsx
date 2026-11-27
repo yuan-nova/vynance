@@ -123,6 +123,10 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
     schedule(next)
   }
 
+  // Sisa bulan lalu per target (BR-14), hanya dibaca; tetap tersimpan saat rencana disimpan ulang.
+  const carried = new Map(
+    plan.allocations.map((a) => [a.categoryId ?? a.investmentTypeId ?? "", BigInt(a.carriedOver)] as const),
+  )
   const allocList = (m: Record<string, Alloc>) =>
     Object.values(m).map((a) => ({ mode: a.mode, amount: a.amount ?? 0n, percentBp: a.percentBp }))
   const totals = planTotals(
@@ -135,6 +139,7 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
   )
 
   const allocRow = (kind: "expense" | "investment", id: string, name: string) => {
+    const carry = carried.get(id) ?? 0n
     const m = kind === "expense" ? draft.expense : draft.investment
     const a = m[id] ?? { mode: "amount" as const, amount: null, percentBp: 0 }
     const set = (patch: Partial<Alloc>) =>
@@ -145,7 +150,7 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
     const budget = (() => {
       if (kind !== "expense") return null
       const allocated = allocationAmount(
-        { kind, mode: a.mode, amount: a.amount ?? 0n, percentBp: a.percentBp },
+        { kind, mode: a.mode, amount: a.amount ?? 0n, percentBp: a.percentBp, carriedOver: carried.get(id) ?? 0n },
         draft.spendingCap ?? 0n,
         totals.totalIncome,
       )
@@ -157,7 +162,15 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
     return (
       <div key={id} className="alloc-row">
         <div className="alloc-head">
-          <p className="row-title truncate">{name}</p>
+          <p className="row-title truncate">
+            {name}
+            {carry > 0n ? (
+              <span className="row-sub">
+                {" "}
+                + sisa <Money value={carry} short />
+              </span>
+            ) : null}
+          </p>
           {budget ? <Pill tone={BUDGET_STATUS_TONE[budget.status]}>{BUDGET_STATUS_LABEL[budget.status]}</Pill> : null}
         </div>
         {budget && budget.status !== "unset" ? (
