@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import {
+  char,
   check,
   date,
   foreignKey,
@@ -11,7 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core"
 import { books } from "./books"
-import { audit, id, money, month, ref, timestamp } from "./columns"
+import { audit, id, money, month, ref, timestamp, timestamps, units } from "./columns"
 
 // Rekening dan transaksi (TSD §6.2). Saldo tidak disimpan (BR-01).
 
@@ -66,6 +67,7 @@ export const transactions = mysqlTable(
     uniqueIndex("tx_book_idem_uq").on(t.bookId, t.idempotencyKey),
     uniqueIndex("tx_subscription_period_uq").on(t.subscriptionId, t.subscriptionPeriod),
     foreignKey({ name: "tx_category_fk", columns: [t.categoryId], foreignColumns: [categories.id] }),
+    foreignKey({ name: "tx_subscription_fk", columns: [t.subscriptionId], foreignColumns: [subscriptions.id] }),
     check("tx_amount_positive", sql`${t.amount} > 0`),
     check(
       "tx_transfer_wallets",
@@ -173,4 +175,52 @@ export const planAllocations = mysqlTable(
       sql`(${t.kind} = 'expense' AND ${t.categoryId} IS NOT NULL AND ${t.investmentTypeId} IS NULL) OR (${t.kind} = 'investment' AND ${t.investmentTypeId} IS NOT NULL AND ${t.categoryId} IS NULL)`,
     ),
   ],
+)
+
+// Langganan (TSD §6, PB-05). amount_idr disimpan saat disimpan supaya BR-40 tidak bergantung kurs harian.
+export const subscriptions = mysqlTable(
+  "subscriptions",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    name: varchar("name", { length: 60 }).notNull(),
+    serviceKey: varchar("service_key", { length: 32 }),
+    currency: char("currency", { length: 3 }).notNull().default("IDR"),
+    originalAmount: units("original_amount").notNull(),
+    /** Kurs manual (IDR per 1 unit). null = kurs otomatis dari reference_rates saat disimpan. */
+    fxRate: units("fx_rate"),
+    amountIdr: money("amount_idr").notNull(),
+    cycle: mysqlEnum("cycle", ["monthly", "yearly"]).notNull(),
+    billingDay: int("billing_day").notNull(),
+    billingMonth: int("billing_month"),
+    walletId: ref("wallet_id")
+      .notNull()
+      .references(() => wallets.id),
+    categoryId: ref("category_id").references(() => categories.id),
+    startDate: date("start_date", { mode: "string" }).notNull(),
+    pausedAt: timestamp("paused_at"),
+    ...audit,
+  },
+  (t) => [
+    index("subscriptions_book_idx").on(t.bookId, t.deletedAt),
+    check("subscriptions_day", sql`${t.billingDay} between 1 and 31`),
+    check("subscriptions_month", sql`${t.billingMonth} is null or ${t.billingMonth} between 1 and 12`),
+    check("subscriptions_amount_pos", sql`${t.amountIdr} > 0`),
+  ],
+)
+
+/** Kurs dan harga emas global (bukan data buku). Nilai terbaru per (kind, currency) dipakai. */
+export const referenceRates = mysqlTable(
+  "reference_rates",
+  {
+    id: id().primaryKey(),
+    kind: mysqlEnum("kind", ["gold_gram", "fx"]).notNull(),
+    currency: char("currency", { length: 3 }).notNull(),
+    value: units("value").notNull(),
+    fetchedAt: timestamp("fetched_at").notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("reference_rates_kind_currency_idx").on(t.kind, t.currency, t.fetchedAt)],
 )

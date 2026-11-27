@@ -1658,3 +1658,9 @@ p {
 .activity-row:last-child {
   border-bottom: 0;
 }
+
+.sub-amount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}

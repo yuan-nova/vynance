@@ -33,6 +33,8 @@ import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
 import type { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { planRoutes } from "./modules/plans/plans.route"
 import type { PlansService } from "./modules/plans/plans.service"
+import { subscriptionRoutes } from "./modules/subscriptions/subscriptions.route"
+import type { SubscriptionsService } from "./modules/subscriptions/subscriptions.service"
 import { transactionRoutes } from "./modules/transactions/transactions.route"
 import type { TransactionsService } from "./modules/transactions/transactions.service"
 import { walletRoutes } from "./modules/wallets/wallets.route"
@@ -55,6 +57,7 @@ type Deps = {
   goalsService: GoalsService
   invitationsService: InvitationsService
   membersService: MembersService
+  subscriptionsService: SubscriptionsService
   bookEvents: BookEvents
 }
 
@@ -88,7 +91,8 @@ export const createApp = (deps: Deps) => {
         .route("/dashboard", dashboardRoutes(deps.dashboardService))
         .route("/health-score", healthScoreRoutes(deps.healthScoreService))
         .route("/goals", goalRoutes(deps.goalsService))
-        .route("/invitations", bookInvitationRoutes(deps.invitationsService)),
+        .route("/invitations", bookInvitationRoutes(deps.invitationsService))
+        .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService)),
     )
 }
 

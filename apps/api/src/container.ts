@@ -34,6 +34,8 @@ import { MembersService } from "./modules/members/members.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { PlansRepository } from "./modules/plans/plans.repository"
 import { PlansService } from "./modules/plans/plans.service"
+import { SubscriptionsRepository } from "./modules/subscriptions/subscriptions.repository"
+import { SubscriptionsService } from "./modules/subscriptions/subscriptions.service"
 import { TransactionsRepository } from "./modules/transactions/transactions.repository"
 import { TransactionsService } from "./modules/transactions/transactions.service"
 import { WalletsRepository } from "./modules/wallets/wallets.repository"
@@ -122,6 +124,17 @@ const services = {
     wallets: new WalletsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       wallets: new WalletsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
+  subscriptionsService: new SubscriptionsService({
+    subscriptions: new SubscriptionsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      subscriptions: new SubscriptionsRepository(exec),
+      wallets: new WalletsRepository(exec),
+      categories: new CategoriesRepository(exec),
       activity: new ActivityRepository(exec),
     })),
     newId: () => newId(),
