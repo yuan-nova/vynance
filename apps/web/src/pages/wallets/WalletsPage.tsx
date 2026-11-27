@@ -27,6 +27,7 @@ export function WalletsPage() {
   const active = (data?.wallets ?? []).filter((w) => w.archivedAt === null)
   const cash = active.filter((w) => !isDebtWallet(w.type))
   const debts = active.filter((w) => isDebtWallet(w.type))
+  const archived = (data?.wallets ?? []).filter((w) => w.archivedAt !== null)
 
   return (
     <>
@@ -90,6 +91,22 @@ export function WalletsPage() {
           </h2>
           <div className="card plain-list">
             {debts.map((w) => (
+              <WalletRow key={w.id} wallet={w} onOpen={() => open(w.id)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {archived.length > 0 ? (
+        <section className="section" aria-labelledby="w-archived">
+          <h2 id="w-archived" className="h2">
+            Diarsipkan
+          </h2>
+          <p className="row-sub section-note">
+            Tidak muncul di pilihan transaksi baru, tetapi saldonya tetap dihitung.
+          </p>
+          <div className="card plain-list">
+            {archived.map((w) => (
               <WalletRow key={w.id} wallet={w} onOpen={() => open(w.id)} />
             ))}
           </div>

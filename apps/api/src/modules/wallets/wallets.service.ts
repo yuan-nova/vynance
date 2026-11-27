@@ -48,7 +48,8 @@ export class WalletsService {
     const balances = walletBalances(rows, sums)
     const items = rows.map((r) => ({ row: r, balance: balances.get(r.id) ?? r.openingBalance }))
     const active = items.filter((i) => i.row.archivedAt === null)
-    const summary = wealthSummary(active.map((i) => ({ type: i.row.type, balance: i.balance })))
+    // Rekening arsip tetap dihitung: arsip tidak boleh mengubah total kekayaan (BR-35).
+    const summary = wealthSummary(items.map((i) => ({ type: i.row.type, balance: i.balance })))
     return {
       wallets: items.map((i) => toWallet(i.row, i.balance)),
       summary: {
@@ -108,7 +109,18 @@ export class WalletsService {
     return this.get(ctx, id)
   }
 
-  /** Hapus hanya bila belum ada transaksi; selain itu arsipkan (BR-35, #24). */
+  /** BR-35: rekening yang sudah dipakai diarsipkan, bukan dihapus. Tersembunyi dari pilihan transaksi baru. */
+  async setArchived(ctx: ServiceCtx, id: string, archived: boolean): Promise<Wallet> {
+    await this.d.uow.withTransaction(async (r) => {
+      const current = await r.wallets.findById(ctx.bookId, id)
+      if (!current) throw new NotFound("WALLET_NOT_FOUND")
+      await r.wallets.setArchived(ctx.bookId, id, archived ? this.d.now() : null)
+      await this.log(r, ctx, archived ? "wallet.archived" : "wallet.unarchived", id, current.name)
+    })
+    return this.get(ctx, id)
+  }
+
+  /** Hapus hanya bila belum ada transaksi; selain itu arsipkan (BR-35). */
   async remove(ctx: ServiceCtx, id: string): Promise<void> {
     await this.d.uow.withTransaction(async (r) => {
       const current = await r.wallets.findById(ctx.bookId, id)

@@ -54,7 +54,8 @@ describe("DashboardService", () => {
     })
     const d = await svc.get(ctx as never, "2026-11")
     expect(summaryRange).toEqual(["2026-11-01", "2026-11-30"])
-    expect(d.wealth).toEqual({ netWorth: "4000000", cash: "5000000", investments: "0", debt: "-1000000" })
+    // Rekening arsip tetap dihitung (BR-35): kas 5.000.000 + 999.
+    expect(d.wealth).toEqual({ netWorth: "4000999", cash: "5000999", investments: "0", debt: "-1000000" })
     expect(d.monthSummary).toEqual({ income: "6000000", expense: "800000" })
     expect(d.healthScore).toEqual({ score: 78, level: "good", levelLabel: "Baik" })
     expect(d.topBudgets.map((b) => b.categoryId)).toEqual(["c2", "c1"])

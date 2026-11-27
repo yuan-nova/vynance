@@ -124,6 +124,14 @@ export class WalletsRepository {
       .where(and(eq(wallets.bookId, bookId), eq(wallets.id, id), isNull(wallets.deletedAt)))
   }
 
+  /** BR-35: arsip (at) atau aktifkan lagi (null). Saldo dan riwayat tidak berubah. */
+  async setArchived(bookId: string, id: string, at: Date | null): Promise<void> {
+    await this.db
+      .update(wallets)
+      .set({ archivedAt: at })
+      .where(and(eq(wallets.bookId, bookId), eq(wallets.id, id), isNull(wallets.deletedAt)))
+  }
+
   async softDelete(bookId: string, id: string, at: Date): Promise<void> {
     await this.db
       .update(wallets)

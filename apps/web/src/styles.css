@@ -1608,3 +1608,14 @@ p {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.archived-note {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.section-note {
+  margin: -4px 0 8px;
+}

@@ -9,7 +9,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
 import { TransactionList, useTransactionList } from "@/features/transactions"
-import { useDeleteWallet, useUpdateWallet, useWallets, WalletForm } from "@/features/wallets"
+import { useArchiveWallet, useDeleteWallet, useUpdateWallet, useWallets, WalletForm } from "@/features/wallets"
 import { showSnackbar } from "@/lib/snackbar"
 
 const route = getRouteApi("/_tabs/lainnya/rekening_/$id")
@@ -27,10 +27,13 @@ export function WalletDetailPage() {
   const list = useTransactionList(bookId, { walletId: id })
   const update = useUpdateWallet(bookId)
   const remove = useDeleteWallet(bookId)
+  const archive = useArchiveWallet(bookId)
   const [sheet, setSheet] = useState<"edit" | "delete" | null>(null)
   const close = () => setSheet(null)
   const back = () => void navigate({ to: "/lainnya/rekening" })
   const items = list.data?.pages.flatMap((p) => p.data) ?? []
+  // BR-35: rekening yang sudah dipakai ditawarkan arsip, bukan hapus.
+  const used = items.length > 0
   const today = dateOnlyOf(new Date())
 
   if (wallets.isSuccess && !wallet) {
@@ -96,6 +99,30 @@ export function WalletDetailPage() {
         </section>
       ) : null}
 
+      {wallet?.archivedAt ? (
+        <section className="card archived-note" aria-label="Rekening diarsipkan">
+          <p className="body">
+            Rekening ini diarsipkan: tidak muncul di pilihan transaksi baru, tetapi saldo dan riwayatnya tetap dihitung.
+          </p>
+          <Button
+            variant="soft"
+            full
+            loading={archive.isPending}
+            onClick={() =>
+              archive.mutate(
+                { id: wallet.id, archived: false },
+                {
+                  onSuccess: () => showSnackbar("Rekening aktif lagi"),
+                  onError: (e) => showSnackbar(e.message, { tone: "error" }),
+                },
+              )
+            }
+          >
+            Aktifkan lagi
+          </Button>
+        </section>
+      ) : null}
+
       <section className="section" aria-labelledby="wallet-history">
         <h2 id="wallet-history" className="h2">
           Riwayat transaksi
@@ -150,10 +177,39 @@ export function WalletDetailPage() {
 
       <Sheet
         open={sheet === "delete"}
-        title={wallet ? `Hapus rekening ${wallet.name}?` : ""}
+        title={wallet ? (used ? `Arsipkan ${wallet.name}?` : `Hapus rekening ${wallet.name}?`) : ""}
         onClose={close}
         footer={
-          wallet ? (
+          wallet && used ? (
+            <>
+              {wallet.archivedAt ? null : (
+                <Button
+                  full
+                  loading={archive.isPending}
+                  onClick={() =>
+                    archive.mutate(
+                      { id: wallet.id, archived: true },
+                      {
+                        onSuccess: () => {
+                          close()
+                          showSnackbar("Rekening diarsipkan")
+                        },
+                        onError: (e) => {
+                          close()
+                          showSnackbar(e.message, { tone: "error" })
+                        },
+                      },
+                    )
+                  }
+                >
+                  Arsipkan
+                </Button>
+              )}
+              <Button variant="ghost" full onClick={close}>
+                Batal
+              </Button>
+            </>
+          ) : wallet ? (
             <>
               <Button
                 variant="destructive"
@@ -181,9 +237,14 @@ export function WalletDetailPage() {
           ) : null
         }
       >
-        <p className="body">
-          Rekening hanya bisa dihapus bila belum punya transaksi. Rekening yang sudah dipakai bisa diarsipkan.
-        </p>
+        {used ? (
+          <p className="body">
+            Rekening ini sudah punya transaksi, jadi tidak bisa dihapus tanpa mengubah saldo total. Arsipkan saja:
+            rekening disembunyikan dari pilihan transaksi baru, tetapi saldo dan riwayatnya tetap ada.
+          </p>
+        ) : (
+          <p className="body">Rekening ini belum punya transaksi dan akan dihapus.</p>
+        )}
       </Sheet>
     </>
   )

@@ -42,7 +42,7 @@ export class DashboardService {
     ])
     // Nilai investasi dari transaksi aset; aset (#31) menggantikan angka ini saat dirilis.
     const w = wealthSummary(
-      wallets.wallets.filter((x) => x.archivedAt === null).map((x) => ({ type: x.type, balance: BigInt(x.balance) })),
+      wallets.wallets.map((x) => ({ type: x.type, balance: BigInt(x.balance) })),
       assets.investments,
     )
     const cap = plan.spendingCap === null ? 0n : BigInt(plan.spendingCap)
