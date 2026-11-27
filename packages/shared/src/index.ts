@@ -1,4 +1,5 @@
 export * from "./date"
+export * from "./defaults/book-seed"
 export * from "./enums/wallet"
 export * from "./errors"
 export * from "./icons"

@@ -15,6 +15,7 @@ export const users = mysqlTable(
     theme: mysqlEnum("theme", ["system", "light", "dark"]).notNull().default("system"),
     privacyMode: boolean("privacy_mode").notNull().default(false),
     lastBookId: ref("last_book_id"),
+    onboardedAt: timestamp("onboarded_at"),
     createdAt: timestamps.createdAt,
     updatedAt: timestamps.updatedAt,
   },

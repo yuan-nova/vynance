@@ -11,6 +11,10 @@ export class MeRepository {
     return row ? toMe(row) : null
   }
 
+  async markOnboarded(userId: string, at: Date): Promise<void> {
+    await this.db.update(users).set({ onboardedAt: at }).where(eq(users.id, userId))
+  }
+
   async update(userId: string, input: UpdateMeInput): Promise<void> {
     await this.db.update(users).set(input).where(eq(users.id, userId))
   }
@@ -26,5 +30,6 @@ function toMe(row: typeof users.$inferSelect): Me {
     theme: row.theme,
     privacyMode: row.privacyMode,
     lastBookId: row.lastBookId,
+    onboardedAt: row.onboardedAt?.toISOString() ?? null,
   }
 }

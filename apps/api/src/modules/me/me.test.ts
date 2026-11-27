@@ -14,6 +14,7 @@ const me: Me = {
   theme: "system",
   privacyMode: false,
   lastBookId: null,
+  onboardedAt: null,
 }
 
 function build(sessionUserId: string | null) {

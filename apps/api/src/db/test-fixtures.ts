@@ -5,6 +5,7 @@ import {
   books,
   categories,
   createDb,
+  investmentTypes,
   transactions,
   users,
   wallets,
@@ -12,9 +13,9 @@ import {
 import { inArray } from "drizzle-orm"
 import { generateBookCode } from "../lib/book-code"
 import { newId } from "../lib/id"
-import { ActivityRepository } from "../modules/activity/activity.repository"
 import { BooksRepository } from "../modules/books/books.repository"
 import { BooksService } from "../modules/books/books.service"
+import { makeBookRepos } from "./book-repos"
 import { UnitOfWork } from "./unit-of-work"
 
 // Fixture test integrasi ke MySQL dev (docker compose, localhost:12306, migrasi terbaru).
@@ -23,7 +24,7 @@ export const testDb = createDb(Bun.env.DATABASE_URL ?? "mysql://vynance:vynance_
 
 export const testBooksService = new BooksService({
   books: new BooksRepository(testDb),
-  uow: new UnitOfWork(testDb, (exec) => ({ books: new BooksRepository(exec), activity: new ActivityRepository(exec) })),
+  uow: new UnitOfWork(testDb, makeBookRepos),
   newId: () => newId(),
   newCode: generateBookCode,
 })
@@ -46,6 +47,7 @@ export async function cleanupUsers(userIds: string[]): Promise<void> {
   if (ids.length) {
     await testDb.delete(transactions).where(inArray(transactions.bookId, ids))
     await testDb.delete(categories).where(inArray(categories.bookId, ids))
+    await testDb.delete(investmentTypes).where(inArray(investmentTypes.bookId, ids))
     await testDb.delete(wallets).where(inArray(wallets.bookId, ids))
     await testDb.delete(activityLogs).where(inArray(activityLogs.bookId, ids))
     await testDb.delete(bookSettings).where(inArray(bookSettings.bookId, ids))

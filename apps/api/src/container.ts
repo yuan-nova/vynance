@@ -1,5 +1,6 @@
 import { env } from "./config/env"
 import { createAuth } from "./db/auth"
+import { makeBookRepos } from "./db/book-repos"
 import { db } from "./db/client"
 import { UnitOfWork } from "./db/unit-of-work"
 import { generateBookCode } from "./lib/book-code"
@@ -15,12 +16,20 @@ import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
+import { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { WalletsRepository } from "./modules/wallets/wallets.repository"
 import { WalletsService } from "./modules/wallets/wallets.service"
 
 // Composition root: satu-satunya tempat membuat instance repository dan service (CODING-GUIDELINES §3.1 butir 6).
 const isProduction = env.NODE_ENV === "production"
 const mailer = createMailer({ from: env.EMAIL_FROM, apiKey: env.EMAIL_API_KEY, isProduction })
+const booksService = new BooksService({
+  books: new BooksRepository(db),
+  uow: new UnitOfWork(db, makeBookRepos),
+  newId: () => newId(),
+  newCode: generateBookCode,
+})
+
 const auth = createAuth(db, {
   secret: env.AUTH_SECRET,
   appUrl: env.APP_URL,
@@ -30,13 +39,9 @@ const auth = createAuth(db, {
       ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
       : undefined,
   sendOtp: mailer.sendOtp,
-})
-
-const booksService = new BooksService({
-  books: new BooksRepository(db),
-  uow: new UnitOfWork(db, (exec) => ({ books: new BooksRepository(exec), activity: new ActivityRepository(exec) })),
-  newId: () => newId(),
-  newCode: generateBookCode,
+  onUserCreated: async (userId) => {
+    await booksService.createDefault({ userId })
+  },
 })
 
 export const container = {
@@ -44,6 +49,15 @@ export const container = {
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
   meService: new MeService(new MeRepository(db), booksService),
   booksService,
+  onboardingService: new OnboardingService({
+    uow: new UnitOfWork(db, (exec) => ({
+      wallets: new WalletsRepository(exec),
+      me: new MeRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
   categoriesService: new CategoriesService({
     categories: new CategoriesRepository(db),
     uow: new UnitOfWork(db, (exec) => ({

@@ -13,6 +13,8 @@ import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
 import { meRoutes } from "./modules/me/me.route"
 import type { MeService } from "./modules/me/me.service"
+import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
+import type { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { walletRoutes } from "./modules/wallets/wallets.route"
 import type { WalletsService } from "./modules/wallets/wallets.service"
 
@@ -23,6 +25,7 @@ type Deps = {
   booksService: BooksService
   walletsService: WalletsService
   categoriesService: CategoriesService
+  onboardingService: OnboardingService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -44,7 +47,8 @@ export const createApp = (deps: Deps) => {
         .use(authed, bookBound)
         .route("/", bookRoutes(deps.booksService))
         .route("/wallets", walletRoutes(deps.walletsService))
-        .route("/categories", categoryRoutes(deps.categoriesService)),
+        .route("/categories", categoryRoutes(deps.categoriesService))
+        .route("/onboarding", onboardingRoutes(deps.onboardingService)),
     )
 }
 

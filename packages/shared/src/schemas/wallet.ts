@@ -50,3 +50,13 @@ export const updateWalletSchema = z
   .strict()
   .refine((v) => Object.keys(v).length > 0, "Tidak ada perubahan")
 export type UpdateWalletInput = z.infer<typeof updateWalletSchema>
+
+/** `POST /books/:bookId/onboarding/opening-balances` (PB-01 langkah 3). Daftar kosong = Lewati. */
+export const openingBalancesSchema = z
+  .object({
+    balances: z
+      .array(z.object({ walletId: z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/), openingBalance: moneySchema }).strict())
+      .max(50),
+  })
+  .strict()
+export type OpeningBalancesInput = z.infer<typeof openingBalancesSchema>

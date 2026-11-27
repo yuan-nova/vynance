@@ -91,3 +91,19 @@ export const categories = mysqlTable(
   },
   (t) => [index("categories_book_kind_order_idx").on(t.bookId, t.kind, t.sortOrder)],
 )
+
+export const investmentTypes = mysqlTable(
+  "investment_types",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    name: varchar("name", { length: 40 }).notNull(),
+    icon: varchar("icon", { length: 32 }).notNull(),
+    targetValue: money("target_value"),
+    sortOrder: int("sort_order").notNull().default(0),
+    ...audit,
+  },
+  (t) => [index("investment_types_book_idx").on(t.bookId, t.sortOrder)],
+)

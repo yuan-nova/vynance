@@ -22,7 +22,9 @@ export function NewBookPage() {
         initial="Pribadi"
         submitLabel="Buat buku"
         pending={create.isPending}
-        onSubmit={(name, onError) => create.mutate({ name }, { onSuccess: () => void navigate({ to: "/" }), onError })}
+        onSubmit={(name, onError) =>
+          create.mutate({ name }, { onSuccess: () => void navigate({ to: "/mulai" }), onError })
+        }
       />
     </main>
   )

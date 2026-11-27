@@ -1,7 +1,13 @@
 import { queryOptions, type UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { CreateWalletInput, UpdateWalletInput, WalletList } from "@vynance/shared"
 import { qk } from "@/lib/query-keys"
-import { createWallet, deleteWallet, fetchWallets, updateWallet } from "../services/wallets.service"
+import {
+  createWallet,
+  deleteWallet,
+  fetchWallets,
+  saveOpeningBalances,
+  updateWallet,
+} from "../services/wallets.service"
 
 export const walletsQueryOptions = (bookId: string) =>
   queryOptions({ queryKey: qk.wallets(bookId), queryFn: () => fetchWallets(bookId) })
@@ -32,4 +38,16 @@ export function useUpdateWallet(bookId: string) {
 export function useDeleteWallet(bookId: string) {
   const invalidate = useInvalidateBook(bookId)
   return useMutation({ mutationFn: (id: string) => deleteWallet(bookId, id), onSuccess: invalidate })
+}
+
+/** Simpan saldo awal + tandai onboarding selesai (PB-01). Profil ikut di-invalidasi (onboardedAt). */
+export function useSaveOpeningBalances(bookId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (balances: { walletId: string; openingBalance: bigint }[]) => saveOpeningBalances(bookId, balances),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: qk.me() })
+      await qc.invalidateQueries({ queryKey: qk.book(bookId) })
+    },
+  })
 }

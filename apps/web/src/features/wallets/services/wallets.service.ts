@@ -53,3 +53,14 @@ export async function deleteWallet(bookId: string, id: string): Promise<void> {
   const res = await w[":id"].$delete({ param: { bookId, id } })
   await ensureOk(res)
 }
+
+export async function saveOpeningBalances(
+  bookId: string,
+  balances: { walletId: string; openingBalance: bigint }[],
+): Promise<void> {
+  const res = await api.books[":bookId"].onboarding["opening-balances"].$post({
+    param: { bookId },
+    json: { balances: balances.map((b) => ({ walletId: b.walletId, openingBalance: moneyToJson(b.openingBalance) })) },
+  })
+  await ensureOk(res)
+}

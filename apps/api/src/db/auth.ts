@@ -14,6 +14,8 @@ type AuthConfig = {
   isProduction: boolean
   google?: { clientId: string; clientSecret: string }
   sendOtp: (email: string, otp: string) => Promise<void>
+  /** PB-01: buat buku Pribadi + data bawaan untuk akun baru. */
+  onUserCreated: (userId: string) => Promise<void>
 }
 
 export function createAuth(db: Db, cfg: AuthConfig) {
@@ -36,6 +38,18 @@ export function createAuth(db: Db, cfg: AuthConfig) {
         theme: { type: "string", required: false, defaultValue: "system", input: false },
         privacyMode: { type: "boolean", required: false, defaultValue: false, input: false },
         lastBookId: { type: "string", required: false, input: false },
+      },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            // Gagal membuat buku tidak menggagalkan login: pengguna diarahkan membuat buku (BR-54).
+            await cfg.onUserCreated(user.id).catch((e: unknown) => {
+              logger.error("buku pertama gagal dibuat", { err: e instanceof Error ? e.name : "unknown" })
+            })
+          },
+        },
       },
     },
     session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },

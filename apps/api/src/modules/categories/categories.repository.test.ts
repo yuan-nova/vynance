@@ -47,7 +47,6 @@ describe("kategori", () => {
   })
   afterAll(async () => {
     await cleanupUsers([U, V])
-    await testDb.$client.end()
   })
 
   test("tambah: urutan bertambah, grup bawaan Kebutuhan, anggaran bulanan", async () => {

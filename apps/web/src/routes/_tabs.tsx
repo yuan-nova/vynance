@@ -14,6 +14,7 @@ export const Route = createFileRoute("/_tabs")({
     const books = await context.queryClient.ensureQueryData(booksQueryOptions())
     const activeBook = pickActiveBook(books, me.lastBookId)
     if (!activeBook) throw redirect({ to: "/buku-baru" })
+    if (!me.onboardedAt) throw redirect({ to: "/mulai" })
     return { me, activeBook }
   },
   component: TabsLayout,
