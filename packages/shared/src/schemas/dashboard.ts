@@ -31,3 +31,17 @@ export const dashboardSchema = z.object({
   recent: z.array(transactionListItemSchema),
 })
 export type Dashboard = z.infer<typeof dashboardSchema>
+
+/** Grafik Beranda (FR-52): arus kas 6 bulan, pengeluaran per kategori, bulan ini vs lalu. Uang string. */
+export const dashboardChartsSchema = z.object({
+  month: monthSchema,
+  cashflow: z.array(z.object({ month: monthSchema, income: z.string(), expense: z.string() })),
+  byCategory: z.array(z.object({ name: z.string(), amount: z.string() })),
+  compare: z.object({
+    current: z.string(),
+    previous: z.string(),
+    changeBp: z.number().int().nullable(),
+    categories: z.array(z.object({ name: z.string(), current: z.string(), previous: z.string() })),
+  }),
+})
+export type DashboardCharts = z.infer<typeof dashboardChartsSchema>

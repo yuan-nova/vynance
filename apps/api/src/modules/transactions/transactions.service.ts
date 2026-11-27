@@ -37,7 +37,13 @@ type Repos = {
 type Deps = {
   transactions: Pick<
     TransactionsRepository,
-    "findById" | "findByIdempotencyKey" | "categoryUsage" | "list" | "sumIncomeExpense" | "detail"
+    | "findById"
+    | "findByIdempotencyKey"
+    | "categoryUsage"
+    | "list"
+    | "sumIncomeExpense"
+    | "sumExpenseByCategory"
+    | "detail"
   >
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
@@ -211,6 +217,11 @@ export class TransactionsService {
       t.createdByName,
     ])
     return toCsv(header, rows, ";")
+  }
+
+  /** Pengeluaran per kategori dalam rentang (id kategori → total). */
+  expenseByCategory(ctx: ServiceCtx, from: string, to: string): Promise<Record<string, bigint>> {
+    return this.d.transactions.sumExpenseByCategory(ctx.bookId, from, to)
   }
 
   async summary(ctx: ServiceCtx, from: string, to: string): Promise<TransactionSummary> {

@@ -1,2 +1,3 @@
+export { HomeCharts } from "./components/HomeCharts"
 export { TopBudgets } from "./components/TopBudgets"
-export { useDashboard } from "./hooks/useDashboard"
+export { useDashboard, useDashboardCharts } from "./hooks/useDashboard"

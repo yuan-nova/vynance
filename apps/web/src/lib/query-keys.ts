@@ -24,6 +24,7 @@ export const qk = {
   bookSettings: (bookId: string) => ["book", bookId, "settings"] as const,
   plan: (bookId: string, month: string) => ["book", bookId, "plans", month] as const,
   dashboard: (bookId: string, month: string) => ["book", bookId, "dashboard", month] as const,
+  dashboardCharts: (bookId: string, month: string) => ["book", bookId, "dashboard-charts", month] as const,
   healthScore: (bookId: string, month: string) => ["book", bookId, "health-score", month] as const,
   investmentTypes: (bookId: string) => ["book", bookId, "investment-types"] as const,
   portfolio: (bookId: string) => ["book", bookId, "portfolio"] as const,
