@@ -77,7 +77,8 @@ export class TransactionsRepository {
       .innerJoin(wallets, and(eq(wallets.id, transactions.walletId), eq(wallets.bookId, bookId)))
       .leftJoin(toWallet, and(eq(toWallet.id, transactions.toWalletId), eq(toWallet.bookId, bookId)))
       .leftJoin(categories, and(eq(categories.id, transactions.categoryId), eq(categories.bookId, bookId)))
-      .innerJoin(users, eq(users.id, transactions.createdBy))
+      // leftJoin: transaksi tetap tampil walau akun pencatatnya sudah dihapus (BR-53, NFR-08).
+      .leftJoin(users, eq(users.id, transactions.createdBy))
       .where(
         and(
           eq(transactions.bookId, bookId),
@@ -100,7 +101,7 @@ export class TransactionsRepository {
       categoryIcon: r.categoryIcon,
       walletName: r.walletName,
       toWalletName: r.toWalletName,
-      createdByName: r.createdByName,
+      createdByName: r.createdByName ?? "",
     }))
     return { items, hasMore: rows.length > q.limit }
   }
