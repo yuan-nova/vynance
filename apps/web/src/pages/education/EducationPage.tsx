@@ -1,11 +1,11 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type ChildPlan, updateEducationSettingsSchema } from "@vynance/shared"
-import { type FormEvent, useState } from "react"
+import { useState } from "react"
 import { Button, IconButton } from "@/components/Button"
 import { Money } from "@/components/Money"
+import { PercentForm } from "@/components/PercentForm"
 import { Sheet } from "@/components/Sheet"
 import { EmptyState, ErrorState, Skeleton } from "@/components/States"
-import { TextField } from "@/components/TextField"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
 import {
@@ -136,7 +136,10 @@ export function EducationPage() {
 
       <Sheet open={sheet?.kind === "inflation"} title="Inflasi pendidikan" onClose={close}>
         {sheet?.kind === "inflation" && data ? (
-          <InflationForm
+          <PercentForm
+            label="Inflasi per tahun (%)"
+            hint="Bawaan 12%. Berlaku untuk semua anak di buku ini."
+            schema={updateEducationSettingsSchema.shape.inflationBp}
             initialBp={data.inflationBp}
             pending={inflation.isPending}
             onSubmit={(bp, onError) =>
@@ -188,46 +191,5 @@ export function EducationPage() {
         <p className="row-sub">Rencana pendidikan anak ini ikut terhapus. Saldo rekening tidak berubah.</p>
       </Sheet>
     </>
-  )
-}
-
-type InflationFormProps = {
-  initialBp: number
-  pending: boolean
-  onSubmit: (bp: number, onError: (err: unknown) => void) => void
-}
-
-/** Inflasi pendidikan per tahun dalam persen, bawaan 12% (BR-43). */
-function InflationForm({ initialBp, pending, onSubmit }: InflationFormProps) {
-  const [value, setValue] = useState(String(initialBp / 100).replace(".", ","))
-  const [error, setError] = useState<string>()
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault()
-    const pct = Number(value.replace(",", "."))
-    const parsed = updateEducationSettingsSchema.safeParse({ inflationBp: Math.round(pct * 100) })
-    if (value.trim() === "" || Number.isNaN(pct) || !parsed.success) {
-      setError(parsed.success ? "Isi angka persen, misalnya 12" : parsed.error.issues[0]?.message)
-      return
-    }
-    setError(undefined)
-    onSubmit(parsed.data.inflationBp, (err) => setError(err instanceof Error ? err.message : "Gagal menyimpan"))
-  }
-
-  return (
-    <form onSubmit={submit} noValidate>
-      <TextField
-        label="Inflasi per tahun (%)"
-        inputMode="decimal"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        error={error}
-        hint="Bawaan 12%. Berlaku untuk semua anak di buku ini."
-        autoFocus
-      />
-      <Button type="submit" full loading={pending}>
-        Simpan
-      </Button>
-    </form>
   )
 }

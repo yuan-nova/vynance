@@ -42,6 +42,7 @@ export const ERROR_MESSAGES = {
   ASSET_HAS_TRANSACTIONS: "Aset ini sudah punya transaksi beli/jual, jadi tidak bisa dihapus.",
   GOAL_NOT_FOUND: "Target tabungan tidak ditemukan.",
   CHILD_NOT_FOUND: "Data anak tidak ditemukan.",
+  INCOME_SOURCE_NOT_FOUND: "Sumber penghasilan tidak ditemukan.",
   SUBSCRIPTION_NOT_FOUND: "Langganan tidak ditemukan.",
   ACCOUNT_CONFIRM_MISMATCH: "Email tidak cocok dengan akun ini.",
   AUTH_FAILED: "Gagal masuk. Coba lagi sebentar lagi.",

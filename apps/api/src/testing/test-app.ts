@@ -30,6 +30,7 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
     dashboardService: empty,
     goalsService: empty,
     educationService: empty,
+    incomesService: empty,
     invitationsService: empty,
     membersService: empty,
     subscriptionsService: empty,

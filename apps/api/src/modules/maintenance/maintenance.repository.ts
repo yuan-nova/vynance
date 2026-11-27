@@ -10,6 +10,7 @@ import {
   children,
   type Executor,
   goalContributions,
+  incomeSources,
   investmentTypes,
   monthlyPlans,
   notifications,
@@ -29,6 +30,7 @@ import { and, asc, eq, isNotNull, lt, sql } from "drizzle-orm"
  */
 export const BOOK_TABLES = [
   children,
+  incomeSources,
   goalContributions,
   savingsGoals,
   planAllocations,
