@@ -1,5 +1,6 @@
 import {
   activityLogs,
+  assets,
   bookInvitations,
   bookMembers,
   bookSettings,
@@ -31,6 +32,7 @@ export const BOOK_TABLES = [
   monthlyPlans,
   transactions,
   subscriptions,
+  assets,
   categories,
   investmentTypes,
   wallets,

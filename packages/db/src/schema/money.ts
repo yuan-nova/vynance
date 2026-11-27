@@ -68,6 +68,7 @@ export const transactions = mysqlTable(
     uniqueIndex("tx_subscription_period_uq").on(t.subscriptionId, t.subscriptionPeriod),
     foreignKey({ name: "tx_category_fk", columns: [t.categoryId], foreignColumns: [categories.id] }),
     foreignKey({ name: "tx_subscription_fk", columns: [t.subscriptionId], foreignColumns: [subscriptions.id] }),
+    foreignKey({ name: "tx_asset_fk", columns: [t.assetId], foreignColumns: [assets.id] }),
     check("tx_amount_positive", sql`${t.amount} > 0`),
     check(
       "tx_transfer_wallets",
@@ -109,6 +110,31 @@ export const investmentTypes = mysqlTable(
     ...audit,
   },
   (t) => [index("investment_types_book_idx").on(t.bookId, t.sortOrder)],
+)
+
+/** Aset investasi (PB-06). Modal dan nilai berubah lewat beli/jual (#32) dan pembaruan nilai manual. */
+export const assets = mysqlTable(
+  "assets",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    investmentTypeId: ref("investment_type_id")
+      .notNull()
+      .references(() => investmentTypes.id),
+    name: varchar("name", { length: 60 }).notNull(),
+    units: units("units").notNull().default("0"),
+    costBasis: money("cost_basis").notNull().default(sql`0`),
+    currentValue: money("current_value").notNull().default(sql`0`),
+    valueUpdatedAt: timestamp("value_updated_at"),
+    ...audit,
+  },
+  (t) => [
+    index("assets_book_idx").on(t.bookId, t.deletedAt),
+    check("assets_cost_nonneg", sql`${t.costBasis} >= 0`),
+    check("assets_value_nonneg", sql`${t.currentValue} >= 0`),
+  ],
 )
 
 // Rencana bulanan (PB-04). Tabel anak ikut menyimpan book_id supaya setiap query bisa difilter buku (BR-45).

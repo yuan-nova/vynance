@@ -19,6 +19,7 @@ import { GoalsService } from "./modules/goals/goals.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { HealthScoreService } from "./modules/health-score/health-score.service"
+import { AssetsRepository } from "./modules/investments/assets.repository"
 import { InvestmentTypesRepository } from "./modules/investments/investment-types.repository"
 import { InvestmentsService } from "./modules/investments/investments.service"
 import { InvitationsRepository } from "./modules/invitations/invitations.repository"
@@ -103,7 +104,17 @@ const services = {
     })),
     newId: () => newId(),
   }),
-  investmentsService: new InvestmentsService(new InvestmentTypesRepository(db)),
+  investmentsService: new InvestmentsService({
+    types: new InvestmentTypesRepository(db),
+    assets: new AssetsRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      types: new InvestmentTypesRepository(exec),
+      assets: new AssetsRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
   onboardingService: new OnboardingService({
     uow: new UnitOfWork(db, (exec) => ({
       wallets: new WalletsRepository(exec),
@@ -177,6 +188,7 @@ const healthScoreService = new HealthScoreService({
   plans: services.plansService,
   transactions: services.transactionsService,
   categories: services.categoriesService,
+  investments: services.investmentsService,
 })
 
 export const container = {
@@ -197,6 +209,7 @@ export const container = {
     plans: services.plansService,
     transactions: services.transactionsService,
     categories: services.categoriesService,
+    investments: services.investmentsService,
     healthScore: healthScoreService,
   }),
 }

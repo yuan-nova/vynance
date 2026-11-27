@@ -15,6 +15,7 @@ import {
   wealthSummary,
 } from "@vynance/shared"
 import type { CategoriesService } from "../categories/categories.service"
+import type { InvestmentsService } from "../investments/investments.service"
 import type { PlansService } from "../plans/plans.service"
 import type { TransactionsService } from "../transactions/transactions.service"
 import type { WalletsService } from "../wallets/wallets.service"
@@ -22,8 +23,9 @@ import type { WalletsService } from "../wallets/wallets.service"
 type Deps = {
   wallets: Pick<WalletsService, "list">
   plans: Pick<PlansService, "get">
-  transactions: Pick<TransactionsService, "summary" | "getHealthInputs">
+  transactions: Pick<TransactionsService, "summary">
   categories: Pick<CategoriesService, "list">
+  investments: Pick<InvestmentsService, "totalValue">
 }
 
 /** Rincian angka mentah per pilar untuk layar rincian (FR-51). Pilar belum dinilai menyebut alasannya. */
@@ -69,12 +71,12 @@ export class HealthScoreService {
 
   async get(ctx: ServiceCtx, month: string): Promise<HealthScoreResponse> {
     const { from, to } = monthDateRange(month)
-    const [wallets, plan, summary, cats, sums] = await Promise.all([
+    const [wallets, plan, summary, cats, investments] = await Promise.all([
       this.d.wallets.list(ctx),
       this.d.plans.get(ctx, month),
       this.d.transactions.summary(ctx, from, to),
       this.d.categories.list(ctx, { kind: "expense" }),
-      this.d.transactions.getHealthInputs(ctx, to),
+      this.d.investments.totalValue(ctx),
     ])
     const active = wallets.wallets.filter((x) => x.archivedAt === null)
     const w = wealthSummary(
@@ -114,7 +116,6 @@ export class HealthScoreService {
 
     const income = BigInt(summary.income)
     const expense = BigInt(summary.expense)
-    const investments = sums.investments
     const raw = {
       income,
       expense,

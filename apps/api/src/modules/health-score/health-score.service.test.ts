@@ -53,8 +53,8 @@ function build(over: {
     } as never,
     transactions: {
       summary: async () => ({ income: over.income ?? "0", expense: over.expense ?? "0" }),
-      getHealthInputs: async () => ({ investments: over.investments ?? 0n }),
     } as never,
+    investments: { totalValue: async () => over.investments ?? 0n } as never,
   })
 }
 

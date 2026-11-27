@@ -22,6 +22,7 @@ export const qk = {
   dashboard: (bookId: string, month: string) => ["book", bookId, "dashboard", month] as const,
   healthScore: (bookId: string, month: string) => ["book", bookId, "health-score", month] as const,
   investmentTypes: (bookId: string) => ["book", bookId, "investment-types"] as const,
+  portfolio: (bookId: string) => ["book", bookId, "portfolio"] as const,
   categoryUsage: (bookId: string, kind: string) => ["book", bookId, "category-usage", kind] as const,
   transactions: (bookId: string) => ["book", bookId, "transactions"] as const,
   transactionList: (bookId: string, filter: Record<string, string | undefined>) =>
