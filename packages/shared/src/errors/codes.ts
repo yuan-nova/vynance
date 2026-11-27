@@ -41,6 +41,7 @@ export const ERROR_MESSAGES = {
   ASSET_SELL_EXCEEDS: "Jumlah jual melebihi nilai kini atau modal aset.",
   ASSET_HAS_TRANSACTIONS: "Aset ini sudah punya transaksi beli/jual, jadi tidak bisa dihapus.",
   GOAL_NOT_FOUND: "Target tabungan tidak ditemukan.",
+  CHILD_NOT_FOUND: "Data anak tidak ditemukan.",
   SUBSCRIPTION_NOT_FOUND: "Langganan tidak ditemukan.",
   ACCOUNT_CONFIRM_MISMATCH: "Email tidak cocok dengan akun ini.",
   AUTH_FAILED: "Gagal masuk. Coba lagi sebentar lagi.",
