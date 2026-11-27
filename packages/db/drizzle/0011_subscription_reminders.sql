@@ -1,0 +1,1 @@
+ALTER TABLE `subscriptions` ADD `reminded_period` char(7);
