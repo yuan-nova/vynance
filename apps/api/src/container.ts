@@ -32,6 +32,8 @@ import { MeRepository } from "./modules/me/me.repository"
 import { MeService } from "./modules/me/me.service"
 import { MembersRepository } from "./modules/members/members.repository"
 import { MembersService } from "./modules/members/members.service"
+import { NotificationsRepository } from "./modules/notifications/notifications.repository"
+import { NotificationsService } from "./modules/notifications/notifications.service"
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { PlansRepository } from "./modules/plans/plans.repository"
 import { PlansService } from "./modules/plans/plans.service"
@@ -76,6 +78,9 @@ const txRepos = (exec: Parameters<typeof makeBookRepos>[0]) => ({
   activity: new ActivityRepository(exec),
 })
 
+// Diisi setelah services dibuat; TransactionsService memanggilnya setelah commit (#35).
+let notificationsService: NotificationsService | null = null
+
 const services = {
   healthService: new HealthService(new HealthRepository(db)),
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
@@ -92,6 +97,8 @@ const services = {
     uow: new UnitOfWork(db, txRepos),
     newId: () => newId(),
     now: () => new Date(),
+    afterExpense: (ctx, categoryId, txDate) =>
+      notificationsService?.checkBudgetSafely(ctx, categoryId, txDate) ?? Promise.resolve(),
   }),
   plansService: new PlansService({
     plans: new PlansRepository(db),
@@ -185,6 +192,14 @@ const services = {
   }),
 }
 
+notificationsService = new NotificationsService({
+  notifications: new NotificationsRepository(db),
+  plans: services.plansService,
+  categories: services.categoriesService,
+  newId: () => newId(),
+  now: () => new Date(),
+})
+
 const healthScoreService = new HealthScoreService({
   wallets: services.walletsService,
   plans: services.plansService,
@@ -195,6 +210,7 @@ const healthScoreService = new HealthScoreService({
 
 export const container = {
   ...services,
+  notificationsService,
   billingService: new BillingService({
     billing: new BillingRepository(db),
     newId: () => newId(),

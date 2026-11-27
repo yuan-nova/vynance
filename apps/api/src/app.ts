@@ -29,6 +29,8 @@ import { meRoutes } from "./modules/me/me.route"
 import type { MeService } from "./modules/me/me.service"
 import { memberRoutes } from "./modules/members/members.route"
 import type { MembersService } from "./modules/members/members.service"
+import { notificationRoutes } from "./modules/notifications/notifications.route"
+import type { NotificationsService } from "./modules/notifications/notifications.service"
 import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
 import type { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { planRoutes } from "./modules/plans/plans.route"
@@ -59,6 +61,7 @@ type Deps = {
   membersService: MembersService
   subscriptionsService: SubscriptionsService
   bookEvents: BookEvents
+  notificationsService: NotificationsService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -82,6 +85,7 @@ export const createApp = (deps: Deps) => {
         .route("/events", eventRoutes(deps.bookEvents))
         .route("/", bookRoutes(deps.booksService))
         .route("/", memberRoutes(deps.membersService))
+        .route("/", notificationRoutes(deps.notificationsService))
         .route("/wallets", walletRoutes(deps.walletsService))
         .route("/categories", categoryRoutes(deps.categoriesService))
         .route("/onboarding", onboardingRoutes(deps.onboardingService))

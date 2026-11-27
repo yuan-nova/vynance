@@ -5,11 +5,13 @@ import {
   bookMembers,
   bookSettings,
   books,
+  budgetAlerts,
   categories,
   createDb,
   goalContributions,
   investmentTypes,
   monthlyPlans,
+  notifications,
   planAllocations,
   planIncomes,
   savingsGoals,
@@ -54,6 +56,8 @@ export async function cleanupUsers(userIds: string[]): Promise<void> {
   )
   if (ids.length) {
     await testDb.delete(bookInvitations).where(inArray(bookInvitations.bookId, ids))
+    await testDb.delete(notifications).where(inArray(notifications.bookId, ids))
+    await testDb.delete(budgetAlerts).where(inArray(budgetAlerts.bookId, ids))
     await testDb.delete(goalContributions).where(inArray(goalContributions.bookId, ids))
     await testDb.delete(savingsGoals).where(inArray(savingsGoals.bookId, ids))
     await testDb.delete(planAllocations).where(inArray(planAllocations.bookId, ids))

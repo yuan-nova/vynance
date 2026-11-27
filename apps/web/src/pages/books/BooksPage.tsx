@@ -6,6 +6,7 @@ import { Icon } from "@/components/Icon"
 import { Pill } from "@/components/Pill"
 import { Sheet } from "@/components/Sheet"
 import { ErrorState, Skeleton } from "@/components/States"
+import { Switch } from "@/components/Switch"
 import { TopBar } from "@/components/TopBar"
 import {
   BookCode,
@@ -22,6 +23,7 @@ import {
 } from "@/features/books"
 import { InvitePanel } from "@/features/invitations"
 import { ActivityList, MemberList, useActivities, useLeaveBook, useMembers, useRemoveMember } from "@/features/members"
+import { useBookSettings, useSaveBookSettings } from "@/features/notifications"
 import { showSnackbar } from "@/lib/snackbar"
 
 /** Layar Buku (design/17-books.svg): buku aktif, buku lain, buat buku baru. Anggota & undangan di #25–#26. */
@@ -39,6 +41,8 @@ export function BooksPage() {
   const removeMember = useRemoveMember(active?.id ?? "")
   const leave = useLeaveBook(active?.id ?? "")
   const lastMember = (members.data?.length ?? 0) <= 1
+  const settings = useBookSettings(active?.id ?? "")
+  const saveSettings = useSaveBookSettings(active?.id ?? "")
   const remove = useDeleteBook()
   const deletionInfo = useBookDeletionInfo(active?.id ?? "", sheet === "delete")
 
@@ -77,6 +81,22 @@ export function BooksPage() {
               Hapus buku
             </Button>
           </div>
+        </section>
+      ) : null}
+
+      {settings.data ? (
+        <section className="card section">
+          <Switch
+            label="Peringatan anggaran 90%"
+            hint="Semua anggota diberi tahu saat kategori mencapai 90% dan 100% anggaran bulan ini."
+            checked={settings.data.budgetAlertEnabled}
+            onChange={(budgetAlertEnabled) =>
+              saveSettings.mutate(
+                { budgetAlertEnabled },
+                { onError: (e) => showSnackbar(e.message, { tone: "error" }) },
+              )
+            }
+          />
         </section>
       ) : null}
 

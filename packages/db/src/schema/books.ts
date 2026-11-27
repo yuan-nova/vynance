@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { boolean, char, index, json, mysqlTable, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
+import { boolean, char, index, int, json, mysqlTable, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
 import { users } from "./auth"
 import { audit, basisPoints, id, ref, timestamp, timestamps } from "./columns"
 
@@ -85,4 +85,42 @@ export const bookInvitations = mysqlTable(
     uniqueIndex("book_invitations_token_uq").on(t.tokenHash),
     index("book_invitations_book_expires_idx").on(t.bookId, t.expiresAt),
   ],
+)
+
+/**
+ * Notifikasi per anggota (PB-12 langkah 6, BR-11). Teks dibentuk saat ditampilkan dari `data`
+ * tanpa nominal, jadi aman untuk mode privasi.
+ */
+export const notifications = mysqlTable(
+  "notifications",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    userId: ref("user_id")
+      .notNull()
+      .references(() => users.id),
+    kind: varchar("kind", { length: 32 }).notNull(),
+    data: json("data").$type<Record<string, string>>().notNull(),
+    readAt: timestamp("read_at"),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("notifications_user_book_idx").on(t.userId, t.bookId, t.createdAt)],
+)
+
+/** Satu peringatan per kategori per bulan per ambang; UNIQUE mencegah dobel saat dua anggota mencatat bersamaan. */
+export const budgetAlerts = mysqlTable(
+  "budget_alerts",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    categoryId: ref("category_id").notNull(),
+    month: char("month", { length: 7 }).notNull(),
+    thresholdBp: int("threshold_bp").notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [uniqueIndex("budget_alerts_uq").on(t.bookId, t.categoryId, t.month, t.thresholdBp)],
 )

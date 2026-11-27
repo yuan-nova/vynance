@@ -1783,3 +1783,51 @@ p {
   padding: 12px 0;
   background: var(--bg);
 }
+
+/* ---------- Notifikasi (#35) ---------- */
+
+.home-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bell-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--exp);
+  color: var(--onp);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.notify-unread .row-title::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--pri);
+  vertical-align: middle;
+}
+
+.notify-perm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}

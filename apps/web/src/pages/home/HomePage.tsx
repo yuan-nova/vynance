@@ -7,6 +7,7 @@ import { useMe, useUpdateMe } from "@/features/auth"
 import { BookPicker, useActiveBook } from "@/features/books"
 import { TopBudgets, useDashboard } from "@/features/dashboard"
 import { HealthScoreCard, useHealthScore } from "@/features/health-score"
+import { useNotifications } from "@/features/notifications"
 import { TransactionRow } from "@/features/transactions"
 import { usePrivacyMode } from "@/lib/hooks/usePrivacyMode"
 import { useT } from "@/lib/hooks/useT"
@@ -23,6 +24,8 @@ export function HomePage() {
   const t = useT()
   const privacy = usePrivacyMode()
   const updateMe = useUpdateMe()
+  const notes = useNotifications(bookId)
+  const unread = notes.data?.unread ?? 0
   const q = useDashboard(bookId, month)
   const score = useHealthScore(bookId, month)
   const d = q.data
@@ -33,11 +36,25 @@ export function HomePage() {
       <header className="home-head">
         <div className="home-greet">
           <h1 className="h1-tab">{firstName ? `Halo, ${firstName}` : "Halo"}</h1>
-          <IconButton
-            icon={privacy ? "eye_off" : "eye"}
-            label={privacy ? t("privacy.show") : t("privacy.hide")}
-            onClick={() => updateMe.mutate({ privacyMode: !privacy })}
-          />
+          <span className="home-actions">
+            <span className="bell-wrap">
+              <IconButton
+                icon="bell"
+                label={unread ? `Notifikasi, ${unread} belum dibaca` : "Notifikasi"}
+                onClick={() => void navigate({ to: "/notifikasi" })}
+              />
+              {unread ? (
+                <span className="bell-badge" aria-hidden="true">
+                  {unread > 9 ? "9+" : unread}
+                </span>
+              ) : null}
+            </span>
+            <IconButton
+              icon={privacy ? "eye_off" : "eye"}
+              label={privacy ? t("privacy.show") : t("privacy.hide")}
+              onClick={() => updateMe.mutate({ privacyMode: !privacy })}
+            />
+          </span>
         </div>
         <BookPicker />
       </header>
