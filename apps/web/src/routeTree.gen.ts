@@ -15,6 +15,7 @@ import { Route as MasukRouteImport } from './routes/masuk'
 import { Route as MulaiRouteImport } from './routes/mulai'
 import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
 import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
+import { Route as TabsNotifikasiRouteImport } from './routes/_tabs/notifikasi'
 import { Route as TabsSkorKesehatanRouteImport } from './routes/_tabs/skor-kesehatan'
 import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
 import { Route as UndanganTokenRouteImport } from './routes/undangan.$token'
@@ -57,6 +58,11 @@ const TabsIndexRoute = TabsIndexRouteImport.update({
 const TabsAnggaranRoute = TabsAnggaranRouteImport.update({
   id: '/anggaran',
   path: '/anggaran',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsNotifikasiRoute = TabsNotifikasiRouteImport.update({
+  id: '/notifikasi',
+  path: '/notifikasi',
   getParentRoute: () => TabsRoute,
 } as any)
 const TabsSkorKesehatanRoute = TabsSkorKesehatanRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
+  '/notifikasi': typeof TabsNotifikasiRoute
   '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/anggaran': typeof TabsAnggaranRoute
+  '/notifikasi': typeof TabsNotifikasiRoute
   '/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/masuk': typeof MasukRoute
   '/mulai': typeof MulaiRoute
   '/_tabs/anggaran': typeof TabsAnggaranRoute
+  '/_tabs/notifikasi': typeof TabsNotifikasiRoute
   '/_tabs/skor-kesehatan': typeof TabsSkorKesehatanRoute
   '/_tabs/transaksi': typeof TabsTransaksiRoute
   '/undangan/$token': typeof UndanganTokenRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/masuk'
     | '/mulai'
     | '/anggaran'
+    | '/notifikasi'
     | '/skor-kesehatan'
     | '/transaksi'
     | '/undangan/$token'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/masuk'
     | '/mulai'
     | '/anggaran'
+    | '/notifikasi'
     | '/skor-kesehatan'
     | '/transaksi'
     | '/undangan/$token'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/masuk'
     | '/mulai'
     | '/_tabs/anggaran'
+    | '/_tabs/notifikasi'
     | '/_tabs/skor-kesehatan'
     | '/_tabs/transaksi'
     | '/undangan/$token'
@@ -312,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/anggaran'
       fullPath: '/anggaran'
       preLoaderRoute: typeof TabsAnggaranRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/notifikasi': {
+      id: '/_tabs/notifikasi'
+      path: '/notifikasi'
+      fullPath: '/notifikasi'
+      preLoaderRoute: typeof TabsNotifikasiRouteImport
       parentRoute: typeof TabsRoute
     }
     '/_tabs/skor-kesehatan': {
@@ -417,6 +436,7 @@ declare module '@tanstack/react-router' {
 
 interface TabsRouteChildren {
   TabsAnggaranRoute: typeof TabsAnggaranRoute
+  TabsNotifikasiRoute: typeof TabsNotifikasiRoute
   TabsSkorKesehatanRoute: typeof TabsSkorKesehatanRoute
   TabsTransaksiRoute: typeof TabsTransaksiRoute
   TabsIndexRoute: typeof TabsIndexRoute
@@ -435,6 +455,7 @@ interface TabsRouteChildren {
 
 const TabsRouteChildren: TabsRouteChildren = {
   TabsAnggaranRoute: TabsAnggaranRoute,
+  TabsNotifikasiRoute: TabsNotifikasiRoute,
   TabsSkorKesehatanRoute: TabsSkorKesehatanRoute,
   TabsTransaksiRoute: TabsTransaksiRoute,
   TabsIndexRoute: TabsIndexRoute,

@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Outlet } from "@tanstack/react-router"
+import { notificationText } from "@vynance/shared"
 import { useState } from "react"
 import { BottomNav } from "@/components/BottomNav"
 import { Button } from "@/components/Button"
@@ -7,8 +8,10 @@ import { PullIndicator } from "@/components/PullIndicator"
 import { Sheet } from "@/components/Sheet"
 import { OfflineBanner } from "@/components/States"
 import { useActiveBook } from "@/features/books"
+import { useNotifications } from "@/features/notifications"
 import { AddTransactionForm } from "@/features/transactions"
 import { useBookRealtime } from "@/lib/hooks/useBookRealtime"
+import { useDeviceNotifications } from "@/lib/hooks/useDeviceNotifications"
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh"
 import { qk } from "@/lib/query-keys"
 import { showSnackbar } from "@/lib/snackbar"
@@ -17,6 +20,8 @@ import { showSnackbar } from "@/lib/snackbar"
 export function TabsLayout() {
   const book = useActiveBook()
   const qc = useQueryClient()
+  const notes = useNotifications(book?.id ?? "")
+  useDeviceNotifications(notes.data?.items.map((n) => ({ ...n, ...notificationText(n) })))
   // Realtime antar anggota (NFR-03): perubahan dari perangkat lain meng-invalidate data buku.
   useBookRealtime(book?.id ?? null, (keys) => {
     if (!book) return

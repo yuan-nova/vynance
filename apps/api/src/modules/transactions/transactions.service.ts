@@ -40,6 +40,8 @@ type Deps = {
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
   now: () => Date
+  /** Dipanggil setelah commit untuk uang keluar (peringatan anggaran BR-11, #35). Tidak boleh melempar. */
+  afterExpense?: (ctx: ServiceCtx, categoryId: string, txDate: string) => Promise<void>
 }
 
 export class TransactionsService {
@@ -92,7 +94,14 @@ export class TransactionsService {
     }
     const tx = await this.d.transactions.findById(ctx.bookId, id)
     if (!tx) throw new NotFound("TRANSACTION_NOT_FOUND")
+    await this.notifyExpense(ctx, tx)
     return tx
+  }
+
+  private async notifyExpense(ctx: ServiceCtx, tx: { type: string; categoryId: string | null; txDate: string }) {
+    if (tx.type === "expense" && tx.categoryId && this.d.afterExpense) {
+      await this.d.afterExpense(ctx, tx.categoryId, tx.txDate)
+    }
   }
 
   async get(ctx: ServiceCtx, id: string): Promise<TransactionDetail> {
@@ -123,7 +132,9 @@ export class TransactionsService {
       })
       await this.log(r, ctx, "transaction.updated", id, input.amount, input.note)
     })
-    return this.get(ctx, id)
+    const updated = await this.get(ctx, id)
+    await this.notifyExpense(ctx, updated)
+    return updated
   }
 
   /** FR-24: hapus lunak; bisa diurungkan. Saldo otomatis ikut karena dihitung dari transaksi aktif (BR-01). */
