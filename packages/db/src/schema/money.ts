@@ -1,5 +1,15 @@
 import { sql } from "drizzle-orm"
-import { check, date, index, mysqlEnum, mysqlTable, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
+import {
+  check,
+  date,
+  foreignKey,
+  index,
+  int,
+  mysqlEnum,
+  mysqlTable,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/mysql-core"
 import { books } from "./books"
 import { audit, id, money, month, ref, timestamp } from "./columns"
 
@@ -54,10 +64,30 @@ export const transactions = mysqlTable(
     index("tx_book_category_date_idx").on(t.bookId, t.categoryId, t.txDate),
     uniqueIndex("tx_book_idem_uq").on(t.bookId, t.idempotencyKey),
     uniqueIndex("tx_subscription_period_uq").on(t.subscriptionId, t.subscriptionPeriod),
+    foreignKey({ name: "tx_category_fk", columns: [t.categoryId], foreignColumns: [categories.id] }),
     check("tx_amount_positive", sql`${t.amount} > 0`),
     check(
       "tx_transfer_wallets",
       sql`${t.type} <> 'transfer' OR (${t.toWalletId} IS NOT NULL AND ${t.toWalletId} <> ${t.walletId})`,
     ),
   ],
+)
+
+export const categories = mysqlTable(
+  "categories",
+  {
+    id: id().primaryKey(),
+    bookId: ref("book_id")
+      .notNull()
+      .references(() => books.id),
+    name: varchar("name", { length: 40 }).notNull(),
+    kind: mysqlEnum("kind", ["income", "expense"]).notNull(),
+    budgetGroup: mysqlEnum("budget_group", ["needs", "wants", "savings"]),
+    icon: varchar("icon", { length: 32 }).notNull(),
+    monthlyBudget: money("monthly_budget"),
+    sortOrder: int("sort_order").notNull().default(0),
+    archivedAt: timestamp("archived_at"),
+    ...audit,
+  },
+  (t) => [index("categories_book_kind_order_idx").on(t.bookId, t.kind, t.sortOrder)],
 )

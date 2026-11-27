@@ -224,7 +224,7 @@ DILARANG membuat varian ad hoc lewat class (misalnya `ghost` + warna merah).
 | Kartu / PayLater | `card` | | Dana pendidikan | `school` |
 | Buku | `book` | | Pengaturan | `sliders` |
 | Anggota | `users` | | E-wallet | `wallet` |
-| RDN | `trend` | | | |
+| RDN | `trend` | | Pindah naik / turun | `chev_u` / `chev_d` |
 
 Nama ikon sama dengan kunci `ICONS` di `design/_source/gen_svg.py` dan komponen `Icon` di `packages/ui`. Tanda * berarti ikon belum ada di generator dan wajib ditambahkan sebelum dipakai. Makna baru WAJIB ditambahkan ke registri ini sebelum dipakai.
 

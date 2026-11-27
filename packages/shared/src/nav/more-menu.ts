@@ -28,7 +28,7 @@ export const MORE_MENU: MoreMenuGroup[] = [
   {
     title: "Data",
     items: [
-      { key: "categories", label: "Kategori", icon: "tag", path: null },
+      { key: "categories", label: "Kategori", icon: "tag", path: "/lainnya/kategori" },
       { key: "books", label: "Buku", icon: "book", path: "/lainnya/buku" },
       { key: "settings", label: "Pengaturan", icon: "sliders", path: null },
     ],

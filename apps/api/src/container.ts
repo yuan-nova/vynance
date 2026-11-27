@@ -9,6 +9,8 @@ import { ActivityRepository } from "./modules/activity/activity.repository"
 import { AuthService } from "./modules/auth/auth.service"
 import { BooksRepository } from "./modules/books/books.repository"
 import { BooksService } from "./modules/books/books.service"
+import { CategoriesRepository } from "./modules/categories/categories.repository"
+import { CategoriesService } from "./modules/categories/categories.service"
 import { HealthRepository } from "./modules/health/health.repository"
 import { HealthService } from "./modules/health/health.service"
 import { MeRepository } from "./modules/me/me.repository"
@@ -42,6 +44,15 @@ export const container = {
   authService: new AuthService(auth.api, auth.handler, Boolean(env.GOOGLE_CLIENT_ID)),
   meService: new MeService(new MeRepository(db), booksService),
   booksService,
+  categoriesService: new CategoriesService({
+    categories: new CategoriesRepository(db),
+    uow: new UnitOfWork(db, (exec) => ({
+      categories: new CategoriesRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
+    now: () => new Date(),
+  }),
   walletsService: new WalletsService({
     wallets: new WalletsRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
