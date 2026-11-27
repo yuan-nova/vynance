@@ -1,7 +1,7 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { addMonths, formatMonth, monthOf } from "@vynance/shared"
 import { useState } from "react"
-import { IconButton } from "@/components/Button"
+import { Button, IconButton } from "@/components/Button"
 import { ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
@@ -39,6 +39,14 @@ export function BudgetPage() {
           onClick={() => void navigate({ search: { bulan: addMonths(month, 1) } })}
         />
       </div>
+      <Button
+        variant="soft"
+        full
+        icon="spark"
+        onClick={() => void navigate({ to: "/anggaran/wizard", search: { bulan: month } })}
+      >
+        Susun dengan wizard 50/30/20
+      </Button>
       {!ready && !plan.isError ? <Skeleton rows={4} height={88} /> : null}
       {plan.isError ? (
         <ErrorState message="Rencana gagal dimuat." onRetry={() => void plan.refetch()} retrying={plan.isFetching} />
