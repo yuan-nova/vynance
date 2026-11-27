@@ -22,3 +22,4 @@ Keputusan satu layar cukup dicatat di issue/PR.
 |---|---|---|
 | [0001](0001-bottom-nav-five-slots.md) | Navigasi bawah lima slot dengan tombol tambah di tengah | diterima |
 | [0002](0002-monorepo-stack-and-layering.md) | Monorepo Bun + Hono + TanStack + MySQL dan aturan lapisan | diterima |
+| [0003](0003-release-theme.md) | Tema rilis: Hutan (terang) + Malam (gelap) | usulan |
