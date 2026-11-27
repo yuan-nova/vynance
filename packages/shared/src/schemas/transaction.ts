@@ -107,3 +107,14 @@ export const transactionSummarySchema = z.object({ income: z.string(), expense: 
 export type TransactionSummary = z.infer<typeof transactionSummarySchema>
 
 export const transactionSummaryQuerySchema = z.object({ from: dateOnlySchema, to: dateOnlySchema }).strict()
+
+/** Ubah transaksi: isi lengkap seperti saat mencatat (FR-20). Beli/jual aset diubah lewat #32 (BR-34). */
+export const updateTransactionSchema = createTransactionSchema
+export type UpdateTransactionInput = CreateTransactionInput
+
+/** Detail transaksi + riwayat pembuat/pengubah (FR-20). */
+export const transactionDetailSchema = transactionListItemSchema.extend({
+  updatedByName: z.string().nullable(),
+  updatedAt: z.string(),
+})
+export type TransactionDetail = z.infer<typeof transactionDetailSchema>

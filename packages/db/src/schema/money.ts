@@ -55,6 +55,7 @@ export const transactions = mysqlTable(
     subscriptionId: ref("subscription_id"),
     subscriptionPeriod: month("subscription_period"),
     idempotencyKey: varchar("idempotency_key", { length: 64 }),
+    updatedBy: ref("updated_by"),
     ...audit,
   },
   (t) => [

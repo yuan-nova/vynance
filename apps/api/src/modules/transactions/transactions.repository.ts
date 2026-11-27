@@ -3,6 +3,7 @@ import type {
   CategoryKind,
   CategoryUsage,
   Transaction,
+  TransactionDetail,
   TransactionListItem,
   TransactionListQuery,
   TxSource,
@@ -104,6 +105,78 @@ export class TransactionsRepository {
       createdByName: r.createdByName ?? "",
     }))
     return { items, hasMore: rows.length > q.limit }
+  }
+
+  /** Detail + nama pengubah terakhir. Tidak termasuk yang dihapus. */
+  async detail(bookId: string, id: string): Promise<TransactionDetail | null> {
+    const toWallet = alias(wallets, "to_wallet")
+    const updater = alias(users, "updater")
+    const [r] = await this.db
+      .select({
+        tx: transactions,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        walletName: wallets.name,
+        toWalletName: toWallet.name,
+        createdByName: users.name,
+        updatedByName: updater.name,
+      })
+      .from(transactions)
+      .innerJoin(wallets, and(eq(wallets.id, transactions.walletId), eq(wallets.bookId, bookId)))
+      .leftJoin(toWallet, and(eq(toWallet.id, transactions.toWalletId), eq(toWallet.bookId, bookId)))
+      .leftJoin(categories, and(eq(categories.id, transactions.categoryId), eq(categories.bookId, bookId)))
+      .leftJoin(users, eq(users.id, transactions.createdBy))
+      .leftJoin(updater, eq(updater.id, transactions.updatedBy))
+      .where(and(eq(transactions.bookId, bookId), eq(transactions.id, id), isNull(transactions.deletedAt)))
+      .limit(1)
+    if (!r) return null
+    return {
+      ...toTransaction(r.tx),
+      categoryName: r.categoryName,
+      categoryIcon: r.categoryIcon,
+      walletName: r.walletName,
+      toWalletName: r.toWalletName,
+      createdByName: r.createdByName ?? "",
+      updatedByName: r.tx.updatedBy ? (r.updatedByName ?? "") : null,
+      updatedAt: r.tx.updatedAt.toISOString(),
+    }
+  }
+
+  /** Termasuk yang dihapus lunak (untuk Urungkan). */
+  async findAny(bookId: string, id: string): Promise<(Transaction & { deleted: boolean }) | null> {
+    const [row] = await this.db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.bookId, bookId), eq(transactions.id, id)))
+      .limit(1)
+    return row ? { ...toTransaction(row), deleted: row.deletedAt !== null } : null
+  }
+
+  async update(
+    bookId: string,
+    id: string,
+    v: {
+      type: TxType
+      amount: bigint
+      txDate: string
+      walletId: string
+      toWalletId: string | null
+      categoryId: string | null
+      note: string | null
+      updatedBy: string
+    },
+  ): Promise<void> {
+    await this.db
+      .update(transactions)
+      .set(v)
+      .where(and(eq(transactions.bookId, bookId), eq(transactions.id, id), isNull(transactions.deletedAt)))
+  }
+
+  async setDeleted(bookId: string, id: string, at: Date | null, by: string): Promise<void> {
+    await this.db
+      .update(transactions)
+      .set({ deletedAt: at, updatedBy: by })
+      .where(and(eq(transactions.bookId, bookId), eq(transactions.id, id)))
   }
 
   /** Σ uang masuk dan keluar dalam rentang tanggal (transfer & aset tidak dihitung). */

@@ -124,6 +124,7 @@ export function TransactionsPage() {
           loadingMore={list.isFetchingNextPage}
           loadMoreFailed={list.isFetchNextPageError}
           onLoadMore={() => void list.fetchNextPage()}
+          onOpen={(tx) => void navigate({ to: "/transaksi/$id", params: { id: tx.id } })}
         />
       ) : null}
 

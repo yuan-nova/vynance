@@ -43,6 +43,13 @@
       "when": 1795753983079,
       "tag": "0005_investment_types_onboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1795755250719,
+      "tag": "0006_transactions_updated_by",
+      "breakpoints": true
     }
   ]
 }
