@@ -31,6 +31,7 @@ export function testApp(userId: string | null, deps: Partial<Deps>): ReturnType<
     goalsService: empty,
     educationService: empty,
     incomesService: empty,
+    payslipsService: empty,
     invitationsService: empty,
     membersService: empty,
     subscriptionsService: empty,

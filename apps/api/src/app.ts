@@ -39,6 +39,8 @@ import { notificationRoutes } from "./modules/notifications/notifications.route"
 import type { NotificationsService } from "./modules/notifications/notifications.service"
 import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
 import type { OnboardingService } from "./modules/onboarding/onboarding.service"
+import { payslipRoutes } from "./modules/payslips/payslips.route"
+import type { PayslipsService } from "./modules/payslips/payslips.service"
 import { planRoutes } from "./modules/plans/plans.route"
 import type { PlansService } from "./modules/plans/plans.service"
 import { subscriptionRoutes } from "./modules/subscriptions/subscriptions.route"
@@ -67,6 +69,7 @@ type Deps = {
   goalsService: GoalsService
   educationService: EducationService
   incomesService: IncomesService
+  payslipsService: PayslipsService
   invitationsService: InvitationsService
   membersService: MembersService
   subscriptionsService: SubscriptionsService
@@ -113,6 +116,7 @@ export const createApp = (deps: Deps) => {
         .route("/children", childRoutes(deps.educationService))
         .route("/education-plan", educationPlanRoutes(deps.educationService))
         .route("/income-sources", incomeRoutes(deps.incomesService))
+        .route("/payslips", payslipRoutes(deps.payslipsService))
         .route("/invitations", bookInvitationRoutes(deps.invitationsService))
         .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService))
         .route("/zakat", zakatRoutes(deps.zakatService))

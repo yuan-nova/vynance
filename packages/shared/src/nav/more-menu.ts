@@ -14,7 +14,7 @@ export const MORE_MENU: MoreMenuGroup[] = [
       { key: "investments", label: "Investasi", icon: "coins", path: "/lainnya/investasi" },
       { key: "subscriptions", label: "Langganan", icon: "repeat", path: "/lainnya/langganan" },
       { key: "incomes", label: "Sumber penghasilan", icon: "brief", path: "/lainnya/penghasilan" },
-      { key: "payslips", label: "Slip gaji", icon: "doc", path: null },
+      { key: "payslips", label: "Slip gaji", icon: "doc", path: "/lainnya/slip-gaji" },
     ],
   },
   {
