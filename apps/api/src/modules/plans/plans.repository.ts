@@ -1,6 +1,6 @@
-import { type Executor, monthlyPlans, planAllocations, planIncomes, users } from "@vynance/db"
+import { assets, type Executor, monthlyPlans, planAllocations, planIncomes, transactions, users } from "@vynance/db"
 import type { PlanAllocationInput, PlanMethod } from "@vynance/shared"
-import { and, asc, eq, isNull } from "drizzle-orm"
+import { and, asc, eq, gte, isNull, lte, sum } from "drizzle-orm"
 
 type PlanRow = {
   id: string
@@ -144,5 +144,24 @@ export class PlansRepository {
         })),
       )
     }
+  }
+
+  /** Realisasi alokasi investasi: Σ beli aset per jenis investasi dalam rentang (BR-14 sisa investasi). */
+  async investmentRealization(bookId: string, from: string, to: string): Promise<Map<string, bigint>> {
+    const rows = await this.db
+      .select({ typeId: assets.investmentTypeId, total: sum(transactions.amount) })
+      .from(transactions)
+      .innerJoin(assets, and(eq(assets.id, transactions.assetId), eq(assets.bookId, bookId)))
+      .where(
+        and(
+          eq(transactions.bookId, bookId),
+          eq(transactions.type, "asset_buy"),
+          isNull(transactions.deletedAt),
+          gte(transactions.txDate, from),
+          lte(transactions.txDate, to),
+        ),
+      )
+      .groupBy(assets.investmentTypeId)
+    return new Map(rows.map((r) => [r.typeId, BigInt(r.total ?? "0")]))
   }
 }

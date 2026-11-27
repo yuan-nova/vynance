@@ -96,6 +96,7 @@ const services = {
   plansService: new PlansService({
     plans: new PlansRepository(db),
     transactions: new TransactionsRepository(db),
+    realization: new PlansRepository(db),
     uow: new UnitOfWork(db, (exec) => ({
       plans: new PlansRepository(exec),
       categories: new CategoriesRepository(exec),

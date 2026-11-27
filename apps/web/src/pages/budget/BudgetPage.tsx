@@ -6,7 +6,8 @@ import { ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
 import { useCategories } from "@/features/categories"
-import { PlanEditor, useInvestmentTypes, usePlan } from "@/features/plans"
+import { PlanEditor, useCarryOver, useInvestmentTypes, usePlan } from "@/features/plans"
+import { showSnackbar } from "@/lib/snackbar"
 
 const route = getRouteApi("/_tabs/anggaran")
 
@@ -19,6 +20,7 @@ export function BudgetPage() {
   const plan = usePlan(bookId, month)
   const categories = useCategories(bookId, "expense")
   const types = useInvestmentTypes(bookId)
+  const carry = useCarryOver(bookId, month)
   // Dinaikkan saat konflik supaya editor dipasang ulang dengan data terbaru.
   const [reload, setReload] = useState(0)
 
@@ -46,6 +48,23 @@ export function BudgetPage() {
         onClick={() => void navigate({ to: "/anggaran/wizard", search: { bulan: month } })}
       >
         Susun dengan wizard 50/30/20
+      </Button>
+      <Button
+        variant="ghost"
+        full
+        icon="repeat"
+        loading={carry.isPending}
+        onClick={() =>
+          carry.mutate(undefined, {
+            onSuccess: () => {
+              setReload((n) => n + 1)
+              showSnackbar(`Sisa ${formatMonth(addMonths(month, -1))} dibawa ke bulan ini`)
+            },
+            onError: (e) => showSnackbar(e.message, { tone: "error" }),
+          })
+        }
+      >
+        Bawa sisa bulan lalu
       </Button>
       {!ready && !plan.isError ? <Skeleton rows={4} height={88} /> : null}
       {plan.isError ? (

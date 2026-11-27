@@ -35,3 +35,10 @@ export async function fetchInvestmentTypes(bookId: string): Promise<InvestmentTy
   await ensureOk(res)
   return z.array(investmentTypeSchema).parse((await res.json()).data)
 }
+
+/** Bawa sisa bulan lalu (PB-04 langkah 7, BR-14). */
+export async function carryOverPlan(bookId: string, month: string): Promise<Plan> {
+  const res = await api.books[":bookId"].plans[":month"]["carry-over"].$post({ param: { bookId, month } })
+  await ensureOk(res)
+  return planSchema.parse((await res.json()).data)
+}
