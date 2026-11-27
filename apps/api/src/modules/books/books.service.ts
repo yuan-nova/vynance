@@ -7,9 +7,8 @@ import type { BooksRepository } from "./books.repository"
 
 type Repos = { books: BooksRepository; activity: ActivityRepository }
 type Deps = {
-  books: Pick<BooksRepository, "listForUser" | "findForMember" | "isActiveMember" | "rename">
+  books: Pick<BooksRepository, "listForUser" | "findForMember" | "isActiveMember">
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
-  activity: Pick<ActivityRepository, "record">
   newId: () => string
   newCode: () => string
 }
@@ -70,15 +69,17 @@ export class BooksService {
   }
 
   async rename(ctx: ServiceCtx, input: UpdateBookInput): Promise<Book> {
-    await this.d.books.rename(ctx.bookId, input.name)
-    await this.d.activity.record({
-      id: this.d.newId(),
-      bookId: ctx.bookId,
-      actorId: ctx.userId,
-      action: "book.renamed",
-      entityType: "book",
-      entityId: ctx.bookId,
-      summary: { name: input.name },
+    await this.d.uow.withTransaction(async (r) => {
+      await r.books.rename(ctx.bookId, input.name)
+      await r.activity.record({
+        id: this.d.newId(),
+        bookId: ctx.bookId,
+        actorId: ctx.userId,
+        action: "book.renamed",
+        entityType: "book",
+        entityId: ctx.bookId,
+        summary: { name: input.name },
+      })
     })
     return this.get(ctx)
   }

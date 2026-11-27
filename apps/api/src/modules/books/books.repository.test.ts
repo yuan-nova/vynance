@@ -20,7 +20,6 @@ const BOB = "01JTESTBOOKBBBBBBBBBBBBBBB"
 function service(newCode: () => string = generateBookCode) {
   return new BooksService({
     books: new BooksRepository(db),
-    activity: new ActivityRepository(db),
     uow: new UnitOfWork(db, (exec) => ({ books: new BooksRepository(exec), activity: new ActivityRepository(exec) })),
     newId: () => newId(),
     newCode,

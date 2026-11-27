@@ -30,7 +30,6 @@ const auth = createAuth(db, {
 
 const booksService = new BooksService({
   books: new BooksRepository(db),
-  activity: new ActivityRepository(db),
   uow: new UnitOfWork(db, (exec) => ({ books: new BooksRepository(exec), activity: new ActivityRepository(exec) })),
   newId: () => newId(),
   newCode: generateBookCode,
