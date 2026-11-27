@@ -71,6 +71,13 @@
       "when": 1795785608318,
       "tag": "0009_book_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1795786676677,
+      "tag": "0010_subscriptions",
+      "breakpoints": true
     }
   ]
 }

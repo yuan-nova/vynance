@@ -12,6 +12,7 @@ import {
   planAllocations,
   planIncomes,
   savingsGoals,
+  subscriptions,
   transactions,
   users,
   wallets,
@@ -58,6 +59,7 @@ export async function cleanupUsers(userIds: string[]): Promise<void> {
     await testDb.delete(planIncomes).where(inArray(planIncomes.bookId, ids))
     await testDb.delete(monthlyPlans).where(inArray(monthlyPlans.bookId, ids))
     await testDb.delete(transactions).where(inArray(transactions.bookId, ids))
+    await testDb.delete(subscriptions).where(inArray(subscriptions.bookId, ids))
     await testDb.delete(categories).where(inArray(categories.bookId, ids))
     await testDb.delete(investmentTypes).where(inArray(investmentTypes.bookId, ids))
     await testDb.delete(wallets).where(inArray(wallets.bookId, ids))
