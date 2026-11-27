@@ -15,6 +15,13 @@
       "when": 1795752343409,
       "tag": "0001_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1795752744675,
+      "tag": "0002_books",
+      "breakpoints": true
     }
   ]
 }

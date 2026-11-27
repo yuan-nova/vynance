@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test"
 import type { Me } from "@vynance/shared"
 import { createApp } from "../../app"
+import { NotFound } from "../../lib/errors"
 import { AuthService } from "../auth/auth.service"
+import type { BooksService } from "../books/books.service"
 import type { HealthService } from "../health/health.service"
 import { MeService } from "./me.service"
 
@@ -30,7 +32,12 @@ function build(sessionUserId: string | null) {
     false,
   )
   const healthService = { check: async () => ({}) } as unknown as HealthService
-  return createApp({ healthService, authService, meService: new MeService(repo) })
+  const booksService = {
+    assertMember: async () => {
+      throw new NotFound("BOOK_NOT_FOUND")
+    },
+  } as unknown as BooksService
+  return createApp({ healthService, authService, meService: new MeService(repo, booksService), booksService })
 }
 
 describe("/me", () => {
@@ -55,6 +62,15 @@ describe("/me", () => {
     const body = (await res.json()) as { data: Me }
     expect(body.data.privacyMode).toBe(true)
     expect(body.data.theme).toBe("dark")
+  })
+
+  test("PATCH lastBookId buku orang lain → 404", async () => {
+    const res = await build(me.id).request("/api/v1/me", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ lastBookId: "01JBBBBBBBBBBBBBBBBBBBBBBB" }),
+    })
+    expect(res.status).toBe(404)
   })
 
   test("PATCH tema tidak dikenal → 422 field theme", async () => {
