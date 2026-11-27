@@ -65,13 +65,20 @@ export function ErrorState({ message, onRetry, retrying = false }: ErrorStatePro
   )
 }
 
-export function OfflineBanner() {
+type OfflineBannerProps = { pending?: number }
+
+/** Pita offline (BRD §12.4). `pending` = transaksi di antrean yang belum terkirim. */
+export function OfflineBanner({ pending = 0 }: OfflineBannerProps) {
   const online = useOnlineStatus()
-  if (online) return null
+  if (online && pending === 0) return null
   return (
     <div className="offline-banner" role="status">
       <Icon name="wifi" size={16} />
-      Offline — perubahan akan disinkronkan
+      {online
+        ? `Menyinkronkan ${pending} transaksi…`
+        : pending > 0
+          ? `Offline — ${pending} transaksi akan disinkronkan`
+          : "Offline — akan disinkronkan"}
     </div>
   )
 }

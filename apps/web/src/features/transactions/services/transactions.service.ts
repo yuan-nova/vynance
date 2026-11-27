@@ -4,6 +4,8 @@ import {
   type CreateTransactionInput,
   categoryUsageSchema,
   moneyToJson,
+  type OutboxItem,
+  type OutboxSendResult,
   type ScanCommitInput,
   type Transaction,
   type TransactionDetail,
@@ -33,6 +35,25 @@ export async function createTransaction(
   })
   await ensureOk(res)
   return transactionSchema.parse((await res.json()).data)
+}
+
+/**
+ * Kirim satu item antrean offline dengan Idempotency-Key aslinya (NFR-04).
+ * 2xx = terkirim; 4xx selain 401/408/429 = ditolak permanen; sisanya dan kegagalan jaringan = coba lagi.
+ */
+export async function sendOutboxItem(item: OutboxItem): Promise<OutboxSendResult> {
+  try {
+    const res = await t.$post({
+      param: { bookId: item.bookId },
+      header: { "idempotency-key": item.key },
+      // Sudah berbentuk JSON (amount string) sejak dimasukkan ke antrean.
+      json: item.input as Parameters<typeof t.$post>[0]["json"],
+    })
+    if (res.ok) return "sent"
+    return res.status >= 500 || [401, 408, 429].includes(res.status) ? "retry" : "rejected"
+  } catch {
+    return "retry"
+  }
 }
 
 /** Simpan semua baris scan yang dipilih (PB-03 langkah 5). */

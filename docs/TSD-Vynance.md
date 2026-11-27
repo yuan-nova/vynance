@@ -520,7 +520,7 @@ Satu `withTransaction` per operasi tulis yang mengubah lebih dari satu tabel (CO
 - Query key selalu memuat `bookId`: `qk.transactions.list(bookId, filter)`. Mengganti buku aktif membersihkan cache buku lama (DS-NAV-04).
 - Klien API: Hono RPC `hc<AppType>("/")`, satu origin.
 - Token tema dari `packages/ui/src/tokens.css`. Tema terang bawaan Hutan, gelap Malam, sampai rubrik memilih tema rilis.
-- PWA (Fase 3): manifest, service worker, antrean tulis offline dengan `Idempotency-Key` (NFR-04).
+- PWA: `public/manifest.webmanifest` dan `public/sw.js` (didaftarkan hanya di build produksi). Navigasi jaringan dulu dengan cadangan shell; aset cache dulu; `/api/*` tidak pernah di-cache. Transaksi baru yang gagal terkirim masuk antrean `localStorage` dengan `Idempotency-Key` yang sama dan dikirim ulang saat online (NFR-04).
 
 ### 8.1 Realtime (NFR-03)
 

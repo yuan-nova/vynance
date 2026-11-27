@@ -44,7 +44,12 @@ function shiftDate(date: string, days: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-type AddTransactionFormProps = { bookId: string; onSaved: () => void; initial?: TransactionDetail }
+type AddTransactionFormProps = {
+  bookId: string
+  /** `queued` = disimpan di antrean offline, belum terkirim (NFR-04). */
+  onSaved: (opts?: { queued: boolean }) => void
+  initial?: TransactionDetail
+}
 
 /**
  * Catat transaksi (design/04-add-transaction.svg, PB-02): tipe → jumlah → kategori → rekening → tanggal → catatan.
@@ -111,7 +116,7 @@ export function AddTransactionForm({ bookId, onSaved, initial }: AddTransactionF
     }
     setErrors({})
     const handlers = {
-      onSuccess: onSaved,
+      onSuccess: (r: unknown) => onSaved({ queued: r === null }),
       onError: (err: unknown) => {
         const { fields, formError } = splitApiError(err, [
           "amount",

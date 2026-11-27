@@ -1,0 +1,17 @@
+{
+  "name": "Vynance",
+  "short_name": "Vynance",
+  "description": "Catat keuangan keluarga bersama dalam satu buku.",
+  "lang": "id",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E1412",
+  "theme_color": "#1C5D4C",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

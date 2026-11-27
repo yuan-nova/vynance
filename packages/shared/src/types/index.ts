@@ -19,3 +19,14 @@ export type SnackbarItem = {
   onAction?: () => void
   durationMs: number
 }
+
+/** Item antrean tulis offline (NFR-04). `input` sudah berbentuk JSON (amount string). */
+export type OutboxItem = {
+  key: string
+  bookId: string
+  input: Record<string, unknown>
+  queuedAt: string
+}
+
+/** Hasil kirim item antrean: `sent`/`rejected` dibuang dari antrean, `retry` dicoba lagi nanti. */
+export type OutboxSendResult = "sent" | "rejected" | "retry"
