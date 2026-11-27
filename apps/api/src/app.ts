@@ -7,6 +7,8 @@ import { authRoutes } from "./modules/auth/auth.route"
 import type { AuthService } from "./modules/auth/auth.service"
 import { bookRoutes, booksRoutes } from "./modules/books/books.route"
 import type { BooksService } from "./modules/books/books.service"
+import { categoryRoutes } from "./modules/categories/categories.route"
+import type { CategoriesService } from "./modules/categories/categories.service"
 import { healthRoutes } from "./modules/health/health.route"
 import type { HealthService } from "./modules/health/health.service"
 import { meRoutes } from "./modules/me/me.route"
@@ -20,6 +22,7 @@ type Deps = {
   meService: MeService
   booksService: BooksService
   walletsService: WalletsService
+  categoriesService: CategoriesService
 }
 
 // Route wajib dirangkai supaya AppType terbaca Hono RPC (CODING-GUIDELINES §6.2).
@@ -40,7 +43,8 @@ export const createApp = (deps: Deps) => {
       new Hono<AppEnv>()
         .use(authed, bookBound)
         .route("/", bookRoutes(deps.booksService))
-        .route("/wallets", walletRoutes(deps.walletsService)),
+        .route("/wallets", walletRoutes(deps.walletsService))
+        .route("/categories", categoryRoutes(deps.categoriesService)),
     )
 }
 

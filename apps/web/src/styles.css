@@ -991,3 +991,59 @@ p {
   gap: 6px;
   padding-bottom: 8px;
 }
+
+/* ---------- Ikon pilihan, segmented, urutan ---------- */
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 8px;
+}
+
+.icon-choice {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-tile);
+  background: var(--surf);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-choice-on {
+  border-color: var(--pri);
+  background: var(--pri-s);
+  color: var(--pri);
+}
+
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-btn);
+  background: var(--surf2);
+}
+
+.segmented a {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 12px;
+  color: var(--muted);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.segmented a[aria-current="page"] {
+  background: var(--surf);
+  color: var(--ink);
+}
+
+.order-btns {
+  display: flex;
+  gap: 0;
+}

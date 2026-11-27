@@ -8,4 +8,6 @@ export const qk = {
   book: (bookId: string) => ["book", bookId] as const,
   bookDetail: (bookId: string) => ["book", bookId, "detail"] as const,
   wallets: (bookId: string) => ["book", bookId, "wallets"] as const,
+  categories: (bookId: string, kind?: string) =>
+    kind ? (["book", bookId, "categories", kind] as const) : (["book", bookId, "categories"] as const),
 }

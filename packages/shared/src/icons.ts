@@ -24,6 +24,8 @@ export const ICON_PATHS = {
   chev_l: "M15 18l-6-6 6-6",
   // biome-ignore lint/style/useNamingConvention: nama ikon mengikuti kunci ICONS di generator
   chev_d: "M6 9l6 6 6-6",
+  // biome-ignore lint/style/useNamingConvention: nama ikon mengikuti kunci ICONS di generator
+  chev_u: "M6 15l6-6 6 6",
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",
   filter: "M3 5h18M6 12h12M10 19h4",
   in: "M17 7 7 17M17 17H7V7",
