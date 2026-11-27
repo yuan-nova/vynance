@@ -1,0 +1,108 @@
+import type { Locale } from "../schemas/me"
+
+// Teks antarmuka dua bahasa (FR-150). Bahasa Indonesia = sumber; English wajib lengkap untuk setiap kunci.
+// Cakupan awal: kerangka aplikasi (navigasi, menu Lainnya, Pengaturan). Layar lain menyusul bertahap.
+
+const id = {
+  "nav.home": "Beranda",
+  "nav.transactions": "Transaksi",
+  "nav.budget": "Anggaran",
+  "nav.more": "Lainnya",
+  "nav.add": "Catat transaksi",
+  "more.title": "Lainnya",
+  "more.soon": "Segera hadir",
+  "more.signOut": "Keluar",
+  "more.group.money": "Uang",
+  "more.group.planning": "Perencanaan",
+  "more.group.data": "Data",
+  "menu.wallets": "Rekening",
+  "menu.investments": "Investasi",
+  "menu.subscriptions": "Langganan",
+  "menu.incomes": "Sumber penghasilan",
+  "menu.payslips": "Slip gaji",
+  "menu.goals": "Target tabungan",
+  "menu.zakat": "Zakat",
+  "menu.education": "Dana pendidikan",
+  "menu.advisor": "AI advisor",
+  "menu.categories": "Kategori",
+  "menu.books": "Buku",
+  "menu.settings": "Pengaturan",
+  "settings.title": "Pengaturan",
+  "settings.back": "Kembali ke Lainnya",
+  "settings.display": "Tampilan",
+  "settings.privacy": "Mode privasi",
+  "settings.privacyHint": "Sembunyikan semua nominal menjadi Rp ••••••. Berlaku di semua buku.",
+  "settings.theme": "Tema",
+  "settings.theme.system": "Ikuti sistem",
+  "settings.theme.light": "Terang",
+  "settings.theme.dark": "Gelap",
+  "settings.language": "Bahasa",
+  "settings.account": "Akun",
+  "settings.name": "Nama",
+  "settings.email": "Email",
+  "settings.save": "Simpan",
+  "settings.saved": "Pengaturan disimpan",
+  "settings.failed": "Pengaturan gagal disimpan. Coba lagi.",
+  "privacy.show": "Tampilkan nominal",
+  "privacy.hide": "Sembunyikan nominal",
+  "refresh.pull": "Tarik untuk muat ulang",
+  "refresh.release": "Lepas untuk muat ulang",
+  "refresh.loading": "Memuat ulang…",
+} as const
+
+export type MessageKey = keyof typeof id
+
+const en: Record<MessageKey, string> = {
+  "nav.home": "Home",
+  "nav.transactions": "Transactions",
+  "nav.budget": "Budget",
+  "nav.more": "More",
+  "nav.add": "Add transaction",
+  "more.title": "More",
+  "more.soon": "Coming soon",
+  "more.signOut": "Sign out",
+  "more.group.money": "Money",
+  "more.group.planning": "Planning",
+  "more.group.data": "Data",
+  "menu.wallets": "Accounts",
+  "menu.investments": "Investments",
+  "menu.subscriptions": "Subscriptions",
+  "menu.incomes": "Income sources",
+  "menu.payslips": "Payslips",
+  "menu.goals": "Savings goals",
+  "menu.zakat": "Zakat",
+  "menu.education": "Education fund",
+  "menu.advisor": "AI advisor",
+  "menu.categories": "Categories",
+  "menu.books": "Books",
+  "menu.settings": "Settings",
+  "settings.title": "Settings",
+  "settings.back": "Back to More",
+  "settings.display": "Display",
+  "settings.privacy": "Privacy mode",
+  "settings.privacyHint": "Hide every amount as Rp ••••••. Applies to all books.",
+  "settings.theme": "Theme",
+  "settings.theme.system": "Match system",
+  "settings.theme.light": "Light",
+  "settings.theme.dark": "Dark",
+  "settings.language": "Language",
+  "settings.account": "Account",
+  "settings.name": "Name",
+  "settings.email": "Email",
+  "settings.save": "Save",
+  "settings.saved": "Settings saved",
+  "settings.failed": "Couldn't save settings. Try again.",
+  "privacy.show": "Show amounts",
+  "privacy.hide": "Hide amounts",
+  "refresh.pull": "Pull to refresh",
+  "refresh.release": "Release to refresh",
+  "refresh.loading": "Refreshing…",
+}
+
+export const MESSAGES: Record<Locale, Record<MessageKey, string>> = { id, en }
+
+export function translate(locale: Locale, key: MessageKey): string {
+  return MESSAGES[locale][key]
+}
+
+export const LOCALE_LABEL: Record<Locale, string> = { id: "Bahasa Indonesia", en: "English" }

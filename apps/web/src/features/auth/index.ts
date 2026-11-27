@@ -6,4 +6,5 @@ export {
   useGoogleSignIn,
   useMe,
   useSignOut,
+  useUpdateMe,
 } from "./hooks/useAuth"

@@ -1,14 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import type { IconName } from "@vynance/shared"
+import type { IconName, MessageKey } from "@vynance/shared"
 import { useRef } from "react"
 import { useKeyboardOpen } from "@/lib/hooks/useKeyboardOpen"
+import { useT } from "@/lib/hooks/useT"
 import { Icon } from "./Icon"
 
-const TABS: { to: "/" | "/transaksi" | "/anggaran" | "/lainnya"; label: string; icon: IconName }[] = [
-  { to: "/", label: "Beranda", icon: "home" },
-  { to: "/transaksi", label: "Transaksi", icon: "list" },
-  { to: "/anggaran", label: "Anggaran", icon: "pie" },
-  { to: "/lainnya", label: "Lainnya", icon: "grid" },
+const TABS: { to: "/" | "/transaksi" | "/anggaran" | "/lainnya"; label: MessageKey; icon: IconName }[] = [
+  { to: "/", label: "nav.home", icon: "home" },
+  { to: "/transaksi", label: "nav.transactions", icon: "list" },
+  { to: "/anggaran", label: "nav.budget", icon: "pie" },
+  { to: "/lainnya", label: "nav.more", icon: "grid" },
 ]
 
 function isActive(path: string, to: string): boolean {
@@ -21,6 +22,7 @@ type BottomNavProps = { onAdd: () => void; onScan: () => void }
 export function BottomNav({ onAdd, onScan }: BottomNavProps) {
   const path = useRouterState({ select: (s) => s.location.pathname })
   const keyboardOpen = useKeyboardOpen()
+  const tr = useT()
   const pressTimer = useRef<number | undefined>(undefined)
   const longPressed = useRef(false)
   const tab = (t: (typeof TABS)[number]) => {
@@ -35,7 +37,7 @@ export function BottomNav({ onAdd, onScan }: BottomNavProps) {
         <span className="nav-pill">
           <Icon name={t.icon} size={22} strokeWidth={active ? 2 : 1.8} />
         </span>
-        <span className="nav-label">{t.label}</span>
+        <span className="nav-label">{tr(t.label)}</span>
       </Link>
     )
   }
@@ -47,7 +49,7 @@ export function BottomNav({ onAdd, onScan }: BottomNavProps) {
         <button
           type="button"
           className="nav-add"
-          aria-label="Catat transaksi"
+          aria-label={tr("nav.add")}
           onPointerDown={() => {
             longPressed.current = false
             pressTimer.current = window.setTimeout(() => {
