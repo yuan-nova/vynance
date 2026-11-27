@@ -1224,6 +1224,10 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
+.month-card {
+  margin-top: 12px;
+}
+
 .month-card .month-nav {
   margin: -4px 0 4px;
 }
@@ -1264,6 +1268,8 @@ p {
 
 .score-ring {
   flex: 0 0 84px;
+  width: 84px;
+  height: 84px;
   position: relative;
   display: grid;
   place-items: center;
