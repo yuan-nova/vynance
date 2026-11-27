@@ -1,16 +1,28 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { Outlet } from "@tanstack/react-router"
 import { useState } from "react"
 import { BottomNav } from "@/components/BottomNav"
 import { Button } from "@/components/Button"
+import { PullIndicator } from "@/components/PullIndicator"
 import { Sheet } from "@/components/Sheet"
 import { OfflineBanner } from "@/components/States"
 import { useActiveBook } from "@/features/books"
 import { AddTransactionForm } from "@/features/transactions"
+import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh"
+import { qk } from "@/lib/query-keys"
 import { showSnackbar } from "@/lib/snackbar"
 
 /** Shell layar tab: konten + bottom nav + sheet Catat transaksi (ADR 0001). Scan struk di #36. */
 export function TabsLayout() {
   const book = useActiveBook()
+  const qc = useQueryClient()
+  // Tarik untuk muat ulang: ambil ulang semua data buku aktif + profil (FR-150).
+  const pull = usePullToRefresh(() =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: qk.me() }),
+      book ? qc.invalidateQueries({ queryKey: qk.book(book.id) }) : null,
+    ]),
+  )
   const [sheet, setSheet] = useState<"add" | "scan" | null>(null)
   // Kunci sheet baru tiap dibuka supaya form dan Idempotency-Key selalu baru.
   const [openCount, setOpenCount] = useState(0)
@@ -22,6 +34,7 @@ export function TabsLayout() {
   return (
     <div className="app-shell">
       <OfflineBanner />
+      <PullIndicator state={pull} />
       <main className="app-main">
         <Outlet />
       </main>

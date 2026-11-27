@@ -3,11 +3,13 @@ import { addMonths, formatMonth, heroNeedsShort, monthOf } from "@vynance/shared
 import { IconButton } from "@/components/Button"
 import { Money } from "@/components/Money"
 import { EmptyState, ErrorState, Skeleton } from "@/components/States"
-import { useMe } from "@/features/auth"
+import { useMe, useUpdateMe } from "@/features/auth"
 import { BookPicker, useActiveBook } from "@/features/books"
 import { TopBudgets, useDashboard } from "@/features/dashboard"
 import { HealthScoreCard, useHealthScore } from "@/features/health-score"
 import { TransactionRow } from "@/features/transactions"
+import { usePrivacyMode } from "@/lib/hooks/usePrivacyMode"
+import { useT } from "@/lib/hooks/useT"
 
 const route = getRouteApi("/_tabs/")
 
@@ -18,6 +20,9 @@ export function HomePage() {
   const month = bulan ?? monthOf(new Date())
   const bookId = useActiveBook()?.id ?? ""
   const me = useMe()
+  const t = useT()
+  const privacy = usePrivacyMode()
+  const updateMe = useUpdateMe()
   const q = useDashboard(bookId, month)
   const score = useHealthScore(bookId, month)
   const d = q.data
@@ -26,7 +31,14 @@ export function HomePage() {
   return (
     <>
       <header className="home-head">
-        <h1 className="h1-tab">{firstName ? `Halo, ${firstName}` : "Halo"}</h1>
+        <div className="home-greet">
+          <h1 className="h1-tab">{firstName ? `Halo, ${firstName}` : "Halo"}</h1>
+          <IconButton
+            icon={privacy ? "eye_off" : "eye"}
+            label={privacy ? t("privacy.show") : t("privacy.hide")}
+            onClick={() => updateMe.mutate({ privacyMode: !privacy })}
+          />
+        </div>
         <BookPicker />
       </header>
 
