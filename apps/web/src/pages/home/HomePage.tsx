@@ -5,7 +5,7 @@ import { Money } from "@/components/Money"
 import { EmptyState, ErrorState, Skeleton } from "@/components/States"
 import { useMe, useUpdateMe } from "@/features/auth"
 import { BookPicker, useActiveBook } from "@/features/books"
-import { TopBudgets, useDashboard } from "@/features/dashboard"
+import { HomeCharts, TopBudgets, useDashboard, useDashboardCharts } from "@/features/dashboard"
 import { HealthScoreCard, useHealthScore } from "@/features/health-score"
 import { useNotifications } from "@/features/notifications"
 import { TransactionRow } from "@/features/transactions"
@@ -29,6 +29,8 @@ export function HomePage() {
   const q = useDashboard(bookId, month)
   const score = useHealthScore(bookId, month)
   const d = q.data
+  // Grafik setelah angka utama (FR-52): query terpisah, tidak menahan render Beranda.
+  const charts = useDashboardCharts(d ? bookId : "", month)
   const firstName = me.data?.name.split(" ")[0] ?? ""
 
   return (
@@ -173,6 +175,8 @@ export function HomePage() {
               <EmptyState icon="list" title="Belum ada transaksi" body="Catat uang masuk atau keluar pertama Anda." />
             )}
           </section>
+
+          {charts.data ? <HomeCharts data={charts.data} /> : null}
         </>
       ) : null}
     </>

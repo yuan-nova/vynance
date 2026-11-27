@@ -1892,7 +1892,7 @@ p {
 }
 
 .zakat-due {
-  background: color-mix(in srgb, var(--inc) 10%, var(--card));
+  background: color-mix(in srgb, var(--inc) 10%, var(--surf));
 }
 
 .zakat-amount {
@@ -1908,4 +1908,120 @@ p {
 .zakat-result .text-warn {
   color: var(--warn);
   font-weight: 700;
+}
+
+/* ---------- Grafik Beranda (#39) ---------- */
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-bars {
+  width: 100%;
+  height: 120px;
+}
+
+.chart-axis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  margin-top: -6px;
+}
+
+.chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-table th,
+.chart-table td {
+  padding: 4px 0;
+  text-align: right;
+  font-weight: 500;
+}
+
+.chart-table th:first-child {
+  text-align: left;
+  color: var(--muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.dot-inc {
+  background: var(--inc);
+}
+
+.dot-exp {
+  background: var(--exp);
+}
+
+.chart-donut-row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chart-donut {
+  width: 112px;
+  height: 112px;
+  flex: none;
+}
+
+.chart-legend,
+.chart-compare {
+  flex: 1 1 160px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.chart-legend li,
+.chart-compare li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-compare li {
+  grid-template-columns: minmax(0, 1fr) minmax(48px, 30%) auto;
+}
+
+.chart-legend-val {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chart-compare-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chart-compare-bars .bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.bar-cur {
+  background: var(--exp);
+}
+
+.bar-prev {
+  background: var(--surf3);
 }

@@ -62,4 +62,38 @@ describe("DashboardService", () => {
     expect(d.topBudgets.map((b) => b.usageBp)).toEqual([12_000, 2_000])
     expect(d.recent).toHaveLength(1)
   })
+
+  test("grafik: arus kas 6 bulan berakhir di bulan dipilih, donut, bulan ini vs lalu (FR-52)", async () => {
+    const ranges: string[] = []
+    const svc = new DashboardService({
+      wallets: {} as never,
+      plans: {} as never,
+      investments: {} as never,
+      healthScore: {} as never,
+      transactions: {
+        summary: async (_c: unknown, from: string) => {
+          ranges.push(from)
+          return { income: "100", expense: "50" }
+        },
+        expenseByCategory: async (_c: unknown, from: string) =>
+          from === "2026-11-01" ? { c1: 300n, c2: 100n } : { c1: 200n, c3: 50n },
+      } as never,
+      categories: {
+        list: async () => [
+          { id: "c1", name: "Makan" },
+          { id: "c2", name: "Bensin" },
+          { id: "c3", name: "Hiburan" },
+        ],
+      } as never,
+    })
+    const c = await svc.charts(ctx as never, "2026-11")
+    expect(c.cashflow.map((x) => x.month)).toEqual(["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"])
+    expect(ranges).toHaveLength(6)
+    expect(c.byCategory).toEqual([
+      { name: "Makan", amount: "300" },
+      { name: "Bensin", amount: "100" },
+    ])
+    expect(c.compare).toMatchObject({ current: "400", previous: "250", changeBp: 6000 })
+    expect(c.compare.categories[0]).toEqual({ name: "Makan", current: "300", previous: "200" })
+  })
 })
