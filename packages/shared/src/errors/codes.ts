@@ -9,6 +9,8 @@ export const ERROR_MESSAGES = {
   NOT_FOUND: "Data tidak ditemukan.",
   CONFLICT: "Data sudah berubah. Muat ulang lalu coba lagi.",
   RATE_LIMITED: "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",
+  BOOK_NOT_FOUND: "Buku tidak ditemukan atau kamu bukan anggotanya.",
+  BOOK_CODE_EXHAUSTED: "Gagal membuat kode buku. Coba lagi.",
   AUTH_FAILED: "Gagal masuk. Coba lagi sebentar lagi.",
   OTP_INVALID: "Kode salah. Periksa lagi email kamu.",
   OTP_EXPIRED: "Kode sudah kedaluwarsa. Minta kode baru.",
