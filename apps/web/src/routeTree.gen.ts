@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabsRouteImport } from './routes/_tabs'
+import { Route as MasukRouteImport } from './routes/masuk'
 import { Route as TabsIndexRouteImport } from './routes/_tabs/index'
 import { Route as TabsAnggaranRouteImport } from './routes/_tabs/anggaran'
 import { Route as TabsLainnyaRouteImport } from './routes/_tabs/lainnya'
@@ -17,6 +18,11 @@ import { Route as TabsTransaksiRouteImport } from './routes/_tabs/transaksi'
 
 const TabsRoute = TabsRouteImport.update({
   id: '/_tabs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasukRoute = MasukRouteImport.update({
+  id: '/masuk',
+  path: '/masuk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TabsIndexRoute = TabsIndexRouteImport.update({
@@ -42,11 +48,13 @@ const TabsTransaksiRoute = TabsTransaksiRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
+  '/masuk': typeof MasukRoute
   '/anggaran': typeof TabsAnggaranRoute
   '/lainnya': typeof TabsLainnyaRoute
   '/transaksi': typeof TabsTransaksiRoute
 }
 export interface FileRoutesByTo {
+  '/masuk': typeof MasukRoute
   '/anggaran': typeof TabsAnggaranRoute
   '/lainnya': typeof TabsLainnyaRoute
   '/transaksi': typeof TabsTransaksiRoute
@@ -55,6 +63,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_tabs': typeof TabsRouteWithChildren
+  '/masuk': typeof MasukRoute
   '/_tabs/anggaran': typeof TabsAnggaranRoute
   '/_tabs/lainnya': typeof TabsLainnyaRoute
   '/_tabs/transaksi': typeof TabsTransaksiRoute
@@ -62,12 +71,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anggaran' | '/lainnya' | '/transaksi'
+  fullPaths: '/' | '/masuk' | '/anggaran' | '/lainnya' | '/transaksi'
   fileRoutesByTo: FileRoutesByTo
-  to: '/anggaran' | '/lainnya' | '/transaksi' | '/'
+  to: '/masuk' | '/anggaran' | '/lainnya' | '/transaksi' | '/'
   id:
     | '__root__'
     | '/_tabs'
+    | '/masuk'
     | '/_tabs/anggaran'
     | '/_tabs/lainnya'
     | '/_tabs/transaksi'
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   TabsRoute: typeof TabsRouteWithChildren
+  MasukRoute: typeof MasukRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,6 +96,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof TabsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masuk': {
+      id: '/masuk'
+      path: '/masuk'
+      fullPath: '/masuk'
+      preLoaderRoute: typeof MasukRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_tabs/': {
@@ -136,6 +154,7 @@ const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   TabsRoute: TabsRouteWithChildren,
+  MasukRoute: MasukRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
