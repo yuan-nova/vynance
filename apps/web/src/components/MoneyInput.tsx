@@ -44,9 +44,11 @@ export function MoneyInput({
       onChange(null)
       return
     }
-    const parsed = parseMoney(cleaned)
     // Angka polos langsung diformat; singkatan ("1,5jt") dibiarkan apa adanya sampai blur.
+    // Titik pada angka polos selalu pemisah ribuan lama, jadi dibuang sebelum diparse:
+    // "1.0000" (ketik 0 setelah "1.000") harus jadi 10.000, bukan ditolak.
     const plain = /^-?[\d.]*$/.test(cleaned.trim())
+    const parsed = parseMoney(plain ? cleaned.replaceAll(".", "") : cleaned)
     setDraft(plain && parsed !== null ? null : cleaned)
     onChange(parsed)
   }
