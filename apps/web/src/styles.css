@@ -1103,6 +1103,14 @@ p {
   font-size: 11px;
 }
 
+/* Mode Per kategori (PB-14): pagu · realisasi · rencana di bawah judul kelompok. */
+.cat-group-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: -4px 0 8px;
+}
+
 .list-end {
   min-height: 44px;
   display: grid;

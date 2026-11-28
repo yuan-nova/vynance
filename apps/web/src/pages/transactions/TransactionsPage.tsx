@@ -1,5 +1,15 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
-import { addMonths, dateOnlyOf, formatMonth, monthDateRange, monthOf, type TxType } from "@vynance/shared"
+import {
+  addMonths,
+  dateOnlyOf,
+  formatMonth,
+  groupTransactionsByCategory,
+  monthDateRange,
+  monthOf,
+  type PlannedItem,
+  planBudgets,
+  type TxType,
+} from "@vynance/shared"
 import { useState } from "react"
 import { Button, IconButton } from "@/components/Button"
 import { ChipGroup } from "@/components/ChipGroup"
@@ -10,9 +20,20 @@ import { EmptyState, ErrorState, NoMatchState, Skeleton } from "@/components/Sta
 import { TextField } from "@/components/TextField"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
-import { TransactionList, transactionsCsvUrl, useTransactionList, useTransactionSummary } from "@/features/transactions"
+import { useCategories } from "@/features/categories"
+import { PlannedSection, RealizeForm, usePlanned, useRealizePlanned } from "@/features/planned"
+import { usePlan } from "@/features/plans"
+import {
+  CategoryGroups,
+  TransactionList,
+  transactionsCsvUrl,
+  useTransactionList,
+  useTransactionSummary,
+} from "@/features/transactions"
 import { useWallets } from "@/features/wallets"
 import { useDebouncedCallback } from "@/lib/hooks/useDebouncedCallback"
+import { useLoadAllPages } from "@/lib/hooks/useLoadAllPages"
+import { showSnackbar } from "@/lib/snackbar"
 
 const route = getRouteApi("/_tabs/transaksi")
 
@@ -21,6 +42,10 @@ const TYPE_CHIPS = [
   { value: "keluar", label: "Keluar" },
   { value: "masuk", label: "Masuk" },
   { value: "transfer", label: "Transfer" },
+] as const
+const MODE_CHIPS = [
+  { value: "riwayat", label: "Riwayat" },
+  { value: "kategori", label: "Per kategori" },
 ] as const
 const TYPE_MAP: Record<string, TxType | undefined> = { keluar: "expense", masuk: "income", transfer: "transfer" }
 
@@ -43,6 +68,20 @@ export function TransactionsPage() {
   const summary = useTransactionSummary(bookId, from, to)
   const wallets = useWallets(bookId)
   const [filterOpen, setFilterOpen] = useState(false)
+  const currentMonth = monthOf(new Date())
+  const planned = usePlanned(bookId, month)
+  // Rencana bulan lalu yang belum direalisasi tampil sebagai Terlewat di bulan berjalan (PB-13 langkah 6).
+  const prevPlanned = usePlanned(bookId, addMonths(month, -1))
+  const plannedItems = [
+    ...(month === currentMonth ? (prevPlanned.data?.items ?? []).filter((i) => i.status === "pending") : []),
+    ...(planned.data?.items ?? []),
+  ]
+  const plan = usePlan(bookId, month)
+  const expenseCats = useCategories(bookId, "expense")
+  const incomeCats = useCategories(bookId, "income")
+  const realize = useRealizePlanned(bookId)
+  const [realizing, setRealizing] = useState<PlannedItem | null>(null)
+  const byCategory = search.mode === "kategori"
   // Teks ketikan lokal; URL diperbarui 300 ms setelah berhenti mengetik (DS-DATA-02).
   const [draft, setDraft] = useState(search.cari ?? "")
   const pushSearch = useDebouncedCallback((cari: string) =>
@@ -50,11 +89,25 @@ export function TransactionsPage() {
   )
 
   const items = list.data?.pages.flatMap((p) => p.data) ?? []
+  // Per kategori butuh seluruh transaksi bulan itu supaya total realisasi benar.
+  useLoadAllPages(list, byCategory)
+  const allCats = [...(expenseCats.data ?? []), ...(incomeCats.data ?? [])]
+  const subscriptionCat = expenseCats.data?.find((c) => c.name.toLowerCase() === "langganan")?.id ?? null
+  // Langganan tanpa kategori tercatat ke kategori Langganan bawaan (PB-05).
+  const plannedForGroups = plannedItems
+    .filter((i) => i.period === month)
+    .map((i) => ({ ...i, categoryId: i.categoryId ?? (i.sourceType === "subscription" ? subscriptionCat : null) }))
+  const groups = byCategory
+    ? groupTransactionsByCategory(items, {
+        budgets: plan.data ? planBudgets(plan.data) : new Map<string, bigint>(),
+        planned: plannedForGroups,
+      })
+    : []
   const filtered = search.jenis !== "semua" || Boolean(search.rekening) || Boolean(search.cari)
   const activeFilters = (search.rekening ? 1 : 0) + (search.cari ? 1 : 0)
   const reset = () => {
     setDraft("")
-    void navigate({ search: { bulan: search.bulan, jenis: "semua" } })
+    void navigate({ search: { bulan: search.bulan, jenis: "semua", mode: search.mode } })
   }
 
   return (
@@ -106,6 +159,15 @@ export function TransactionsPage() {
       </section>
       <div className="chip-scroll">
         <ChipGroup
+          label="Tampilan"
+          options={MODE_CHIPS}
+          value={search.mode}
+          onChange={(mode) => void navigate({ search: (s) => ({ ...s, mode }) })}
+        />
+      </div>
+      {!byCategory ? <PlannedSection items={plannedItems} currentMonth={currentMonth} onOpen={setRealizing} /> : null}
+      <div className="chip-scroll">
+        <ChipGroup
           label="Jenis transaksi"
           options={TYPE_CHIPS}
           value={search.jenis}
@@ -117,7 +179,7 @@ export function TransactionsPage() {
       {list.isError && items.length === 0 ? (
         <ErrorState message="Transaksi gagal dimuat." onRetry={() => void list.refetch()} retrying={list.isFetching} />
       ) : null}
-      {list.isSuccess && items.length === 0 ? (
+      {list.isSuccess && items.length === 0 && !(byCategory && groups.length > 0) ? (
         filtered ? (
           <NoMatchState title="Tidak ada transaksi yang cocok" onReset={reset} />
         ) : (
@@ -128,7 +190,14 @@ export function TransactionsPage() {
           />
         )
       ) : null}
-      {items.length > 0 ? (
+      {byCategory && list.isSuccess && groups.length > 0 ? (
+        <CategoryGroups
+          groups={groups}
+          categoryName={(id) => allCats.find((c) => c.id === id)?.name ?? "(dihapus)"}
+          onOpen={(tx) => void navigate({ to: "/transaksi/$id", params: { id: tx.id } })}
+        />
+      ) : null}
+      {!byCategory && items.length > 0 ? (
         <TransactionList
           items={items}
           today={today}
@@ -139,6 +208,41 @@ export function TransactionsPage() {
           onOpen={(tx) => void navigate({ to: "/transaksi/$id", params: { id: tx.id } })}
         />
       ) : null}
+
+      <Sheet
+        open={realizing !== null}
+        title={realizing ? `Realisasi ${realizing.name}` : ""}
+        onClose={() => {
+          setRealizing(null)
+          realize.reset()
+        }}
+      >
+        {realizing && wallets.data && expenseCats.data && incomeCats.data ? (
+          <RealizeForm
+            key={`${realizing.period}:${realizing.sourceId}`}
+            item={realizing}
+            wallets={wallets.data.wallets.filter((w) => !w.archivedAt)}
+            categories={(realizing.sourceType === "income" ? incomeCats.data : expenseCats.data).filter(
+              (c) => !c.archivedAt,
+            )}
+            defaultCategoryId={realizing.sourceType === "subscription" ? subscriptionCat : null}
+            defaultWalletId={plan.data?.defaultWalletId ?? null}
+            today={today}
+            pending={realize.isPending}
+            error={realize.error?.message}
+            onSubmit={(input) =>
+              realize.mutate(input, {
+                onSuccess: () => {
+                  showSnackbar(
+                    input.amount === 0n ? `${realizing.name} dilewati bulan ini` : `${realizing.name} direalisasi`,
+                  )
+                  setRealizing(null)
+                },
+              })
+            }
+          />
+        ) : null}
+      </Sheet>
 
       <Sheet
         open={filterOpen}

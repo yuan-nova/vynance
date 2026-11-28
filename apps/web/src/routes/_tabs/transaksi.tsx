@@ -10,6 +10,8 @@ export const Route = createFileRoute("/_tabs/transaksi")({
     jenis: z.enum(["semua", "keluar", "masuk", "transfer"]).catch("semua").default("semua"),
     rekening: z.string().optional().catch(undefined),
     cari: z.string().max(100).optional().catch(undefined),
+    // Mode daftar (PB-14): riwayat (bawaan) atau per kategori.
+    mode: z.enum(["riwayat", "kategori"]).catch("riwayat").default("riwayat"),
   }),
   component: TransactionsPage,
 })
