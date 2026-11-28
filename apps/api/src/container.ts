@@ -45,6 +45,8 @@ import { NotificationsService } from "./modules/notifications/notifications.serv
 import { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { PayslipsRepository } from "./modules/payslips/payslips.repository"
 import { PayslipsService } from "./modules/payslips/payslips.service"
+import { PlannedRepository } from "./modules/planned/planned.repository"
+import { PlannedService } from "./modules/planned/planned.service"
 import { PlansRepository } from "./modules/plans/plans.repository"
 import { PlansService } from "./modules/plans/plans.service"
 import { BillingRepository } from "./modules/subscriptions/billing.repository"
@@ -278,6 +280,15 @@ export const container = {
     newId: () => newId(),
     now: () => new Date(),
     fetchGoldPrice,
+  }),
+  plannedService: new PlannedService({
+    planned: new PlannedRepository(db),
+    transactions: services.transactionsService,
+    uow: new UnitOfWork(db, (exec) => ({
+      planned: new PlannedRepository(exec),
+      activity: new ActivityRepository(exec),
+    })),
+    newId: () => newId(),
   }),
   billingService: new BillingService({
     billing: new BillingRepository(db),

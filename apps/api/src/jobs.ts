@@ -13,8 +13,7 @@ export function createJobs(s: {
   zakatService: ZakatService
 }): Job[] {
   return [
-    // Tiap jam (PB-05, BR-41); idempoten lewat UNIQUE(subscription_id, subscription_period).
-    { name: "subscription-billing", run: (now) => s.billingService.chargeDue(now) },
+    // Tagihan otomatis diganti rencana transaksi + Realisasi (PB-05 langkah 2, PB-13); pengingat H-3 tetap.
     { name: "subscription-reminders", run: (now) => s.billingService.remindUpcoming(now) },
     { name: "purge-deleted-books", run: (now) => s.maintenanceService.purgeDeletedBooks(now) },
     { name: "clean-invitations", run: (now) => s.maintenanceService.cleanInvitations(now) },

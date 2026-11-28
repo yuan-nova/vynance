@@ -72,7 +72,7 @@ export class BillingService {
       if (nextBillingDate(s, today) !== target || target < s.startDate) continue
       if (!(await this.d.billing.claimReminder(s.bookId, s.id, monthOfDate(target)))) continue
       const subject = `Tagihan ${s.name} ${REMIND_DAYS} hari lagi`
-      const text = `${s.name} akan ditagih ${formatMoney(s.amountIdr)} pada ${formatDateLong(target)}. Vynance mencatat transaksinya otomatis pada tanggal itu.`
+      const text = `${s.name} akan ditagih ${formatMoney(s.amountIdr)} pada ${formatDateLong(target)}. Tandai Realisasi di daftar transaksi Vynance setelah dibayar.`
       for (const email of await this.d.billing.memberEmails(s.bookId)) {
         try {
           await this.d.sendMail(email, subject, text)

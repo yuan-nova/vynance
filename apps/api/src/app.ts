@@ -41,6 +41,8 @@ import { onboardingRoutes } from "./modules/onboarding/onboarding.route"
 import type { OnboardingService } from "./modules/onboarding/onboarding.service"
 import { payslipRoutes } from "./modules/payslips/payslips.route"
 import type { PayslipsService } from "./modules/payslips/payslips.service"
+import { plannedRoutes } from "./modules/planned/planned.route"
+import type { PlannedService } from "./modules/planned/planned.service"
 import { planRoutes } from "./modules/plans/plans.route"
 import type { PlansService } from "./modules/plans/plans.service"
 import { subscriptionRoutes } from "./modules/subscriptions/subscriptions.route"
@@ -70,6 +72,7 @@ type Deps = {
   educationService: EducationService
   incomesService: IncomesService
   payslipsService: PayslipsService
+  plannedService: PlannedService
   invitationsService: InvitationsService
   membersService: MembersService
   subscriptionsService: SubscriptionsService
@@ -117,6 +120,7 @@ export const createApp = (deps: Deps) => {
         .route("/education-plan", educationPlanRoutes(deps.educationService))
         .route("/income-sources", incomeRoutes(deps.incomesService))
         .route("/payslips", payslipRoutes(deps.payslipsService))
+        .route("/planned", plannedRoutes(deps.plannedService))
         .route("/invitations", bookInvitationRoutes(deps.invitationsService))
         .route("/subscriptions", subscriptionRoutes(deps.subscriptionsService))
         .route("/zakat", zakatRoutes(deps.zakatService))

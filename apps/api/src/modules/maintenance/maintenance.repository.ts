@@ -17,6 +17,7 @@ import {
   payslips,
   planAllocations,
   planIncomes,
+  plannedRecords,
   savingsGoals,
   subscriptions,
   transactions,
@@ -30,6 +31,7 @@ import { and, asc, eq, isNotNull, lt, sql } from "drizzle-orm"
  * test `maintenance.repository.test.ts` gagal bila ada tabel ber-book_id yang belum tercantum.
  */
 export const BOOK_TABLES = [
+  plannedRecords,
   children,
   incomeSources,
   payslips,

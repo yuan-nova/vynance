@@ -34,6 +34,8 @@ export const ERROR_MESSAGES = {
   TRANSACTION_NOT_FOUND: "Transaksi tidak ditemukan.",
   IDEMPOTENCY_KEY_INVALID: "Permintaan tidak valid. Muat ulang lalu coba lagi.",
   PLAN_NO_PREVIOUS: "Bulan lalu belum punya rencana, jadi belum ada sisa yang bisa dibawa.",
+  PLANNED_NOT_FOUND: "Rencana transaksi ini tidak ada di bulan itu. Muat ulang daftar.",
+  PLANNED_ALREADY_REALIZED: "Rencana ini sudah direalisasi. Hapus transaksinya dulu bila ingin mengulang.",
   PLAN_CONFLICT: "Rencana bulan ini baru diubah anggota lain. Data terbaru sudah dimuat.",
   INVESTMENT_TYPE_NOT_FOUND: "Jenis investasi tidak ditemukan.",
   INVESTMENT_TYPE_HAS_ASSETS: "Jenis ini masih punya aset. Pindahkan atau hapus asetnya dulu.",

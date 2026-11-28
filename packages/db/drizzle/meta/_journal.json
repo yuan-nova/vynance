@@ -134,6 +134,13 @@
       "when": 1795818311464,
       "tag": "0018_payslips",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1795825989065,
+      "tag": "0019_planned_records",
+      "breakpoints": true
     }
   ]
 }
