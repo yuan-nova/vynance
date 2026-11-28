@@ -15,6 +15,7 @@ import {
 import { useRef, useState } from "react"
 import { Button, IconButton } from "@/components/Button"
 import { ChipGroup } from "@/components/ChipGroup"
+import { ListRow } from "@/components/ListRow"
 import { Money } from "@/components/Money"
 import { MoneyInput } from "@/components/MoneyInput"
 import { Pill } from "@/components/Pill"
@@ -48,7 +49,7 @@ function fromPlan(p: Plan): Draft {
   }
   return {
     spendingCap: p.spendingCap === null ? null : BigInt(p.spendingCap),
-    incomes: p.incomes.map((i, key) => ({ key, name: i.name, amount: BigInt(i.amount) })),
+    incomes: p.incomes.filter((i) => !i.fromSource).map((i, key) => ({ key, name: i.name, amount: BigInt(i.amount) })),
     expense,
     investment,
   }
@@ -129,8 +130,13 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
   )
   const allocList = (m: Record<string, Alloc>) =>
     Object.values(m).map((a) => ({ mode: a.mode, amount: a.amount ?? 0n, percentBp: a.percentBp }))
+  // BR-62: penghasilan dari Sumber Penghasilan ikut dihitung, tetapi diubah di halaman Penghasilan.
+  const sourceIncomes = plan.incomes.filter((i) => i.fromSource)
   const totals = planTotals(
-    draft.incomes.map((i) => ({ amount: i.amount ?? 0n })),
+    [
+      ...sourceIncomes.map((i) => ({ amount: BigInt(i.amount) })),
+      ...draft.incomes.map((i) => ({ amount: i.amount ?? 0n })),
+    ],
     draft.spendingCap,
     [
       ...allocList(draft.expense).map((a) => ({ ...a, kind: "expense" as const })),
@@ -264,6 +270,23 @@ export function PlanEditor({ bookId, plan, categories, investmentTypes, onConfli
           Penghasilan
         </h2>
         <div className="card">
+          {sourceIncomes.length > 0 ? (
+            <div className="plain-list">
+              {sourceIncomes.map((inc) => (
+                <ListRow
+                  key={inc.name}
+                  icon="trend"
+                  tone="inc"
+                  title={inc.name}
+                  subtitle="Dari Sumber Penghasilan"
+                  trailing={<Money value={BigInt(inc.amount)} />}
+                />
+              ))}
+              <p className="row-sub section-note">
+                Ubah di Lainnya → Sumber Penghasilan. Di bawah untuk penghasilan khusus bulan ini.
+              </p>
+            </div>
+          ) : null}
           {draft.incomes.map((inc, i) => (
             <div key={inc.key} className="income-row">
               <TextField

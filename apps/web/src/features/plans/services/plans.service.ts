@@ -37,6 +37,12 @@ export async function fetchInvestmentTypes(bookId: string): Promise<InvestmentTy
 }
 
 /** Bawa sisa bulan lalu (PB-04 langkah 7, BR-14). */
+export async function copyPreviousPlan(bookId: string, month: string): Promise<Plan> {
+  const res = await api.books[":bookId"].plans[":month"]["copy-previous"].$post({ param: { bookId, month } })
+  await ensureOk(res)
+  return planSchema.parse((await res.json()).data)
+}
+
 export async function carryOverPlan(bookId: string, month: string): Promise<Plan> {
   const res = await api.books[":bookId"].plans[":month"]["carry-over"].$post({ param: { bookId, month } })
   await ensureOk(res)

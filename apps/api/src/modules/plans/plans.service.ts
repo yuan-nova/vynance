@@ -4,6 +4,7 @@ import {
   carryOverAmount,
   monthDateRange,
   type Plan,
+  type PlannedIncomeSource,
   type PutPlanInput,
   planTotals,
   type ServiceCtx,
@@ -28,6 +29,8 @@ type Deps = {
   plans: Pick<PlansRepository, "findByMonth">
   transactions: Pick<TransactionsRepository, "sumIncomeExpense" | "sumExpenseByCategory">
   realization?: Pick<PlansRepository, "investmentRealization">
+  /** Sumber penghasilan rutin buku (PB-10); masuk otomatis ke penghasilan rencana (BR-62). */
+  incomeSources?: (bookId: string) => Promise<PlannedIncomeSource[]>
   uow: Pick<UnitOfWork<Repos>, "withTransaction">
   newId: () => string
 }
@@ -38,10 +41,11 @@ export class PlansService {
   /** Rencana bulan (PB-04) + pemasukan tercatat sebagai realisasi terpisah. Belum ada → dokumen kosong versi 0. */
   async get(ctx: ServiceCtx, month: string): Promise<Plan> {
     const { from, to } = monthDateRange(month)
-    const [p, sums, spent] = await Promise.all([
+    const [p, sums, spent, sources] = await Promise.all([
       this.d.plans.findByMonth(ctx.bookId, month),
       this.d.transactions.sumIncomeExpense(ctx.bookId, from, to),
       this.d.transactions.sumExpenseByCategory(ctx.bookId, from, to),
+      this.sourceIncomes(ctx.bookId, month),
     ])
     return {
       month,
@@ -49,7 +53,10 @@ export class PlansService {
       spendingCap: p?.spendingCap?.toString() ?? null,
       defaultWalletId: p?.defaultWalletId ?? null,
       method: p?.method ?? "custom",
-      incomes: (p?.incomes ?? []).map((i) => ({ name: i.name, amount: i.amount.toString() })),
+      incomes: [
+        ...sources.map((i) => ({ name: i.name, amount: i.amount.toString(), fromSource: true })),
+        ...(p?.incomes ?? []).map((i) => ({ name: i.name, amount: i.amount.toString(), fromSource: false })),
+      ],
       allocations: (p?.allocations ?? []).map((a) => ({
         kind: a.kind,
         categoryId: a.categoryId,
@@ -64,6 +71,66 @@ export class PlansService {
       updatedByName: p ? (p.updatedByName ?? "") : null,
       updatedAt: p?.updatedAt.toISOString() ?? null,
     }
+  }
+
+  /** BR-62: sumber penghasilan rutin yang sudah ada di bulan itu. */
+  private async sourceIncomes(bookId: string, month: string): Promise<{ name: string; amount: bigint }[]> {
+    const rows = (await this.d.incomeSources?.(bookId)) ?? []
+    return rows.filter((s) => s.createdMonth <= month).map((s) => ({ name: s.name, amount: s.monthlyAmount }))
+  }
+
+  /**
+   * Salin rencana bulan lalu (PB-04 langkah 2, BR-63): plafon, rekening default, metode, penghasilan khusus,
+   * dan alokasi beserta nominal/persennya. Sisa bawaan (carry-over) tidak ikut; pakai Bawa sisa terpisah.
+   * Menimpa isi bulan ini; konfirmasi dilakukan di aplikasi sebelum memanggil.
+   */
+  async copyPrevious(ctx: ServiceCtx, month: string): Promise<Plan> {
+    const prev = await this.d.plans.findByMonth(ctx.bookId, addMonths(month, -1))
+    if (!prev) throw new BusinessError("PLAN_NO_PREVIOUS_TO_COPY")
+    await this.d.uow.withTransaction(async (r) => {
+      const current = await r.plans.findByMonth(ctx.bookId, month)
+      let planId: string
+      const fields = { spendingCap: prev.spendingCap, defaultWalletId: prev.defaultWalletId, method: prev.method }
+      if (!current) {
+        planId = this.d.newId()
+        const res = await r.plans.insertPlan({
+          id: planId,
+          bookId: ctx.bookId,
+          month,
+          ...fields,
+          createdBy: ctx.userId,
+        })
+        if (res === "conflict") throw new BusinessError("PLAN_CONFLICT", undefined, 409)
+      } else {
+        planId = current.id
+        const ok = await r.plans.updatePlan(ctx.bookId, planId, current.version, { ...fields, updatedBy: ctx.userId })
+        if (!ok) throw new BusinessError("PLAN_CONFLICT", undefined, 409)
+      }
+      await r.plans.replaceChildren(
+        ctx.bookId,
+        planId,
+        ctx.userId,
+        prev.incomes.map((i) => ({ id: this.d.newId(), name: i.name, amount: i.amount })),
+        prev.allocations.flatMap((a): Parameters<PlansRepository["replaceChildren"]>[4] => {
+          const base = { id: this.d.newId(), mode: a.mode, amount: a.amount, percentBp: a.percentBp, carriedOver: 0n }
+          if (a.kind === "expense" && a.categoryId)
+            return [{ ...base, kind: "expense" as const, categoryId: a.categoryId }]
+          if (a.kind === "investment" && a.investmentTypeId)
+            return [{ ...base, kind: "investment" as const, investmentTypeId: a.investmentTypeId }]
+          return []
+        }),
+      )
+      await r.activity.record({
+        id: this.d.newId(),
+        bookId: ctx.bookId,
+        actorId: ctx.userId,
+        action: "plan.copied",
+        entityType: "plan",
+        entityId: planId,
+        summary: { month, from: addMonths(month, -1) },
+      })
+    })
+    return this.get(ctx, month)
   }
 
   /**
@@ -140,7 +207,8 @@ export class PlansService {
       this.d.realization?.investmentRealization(ctx.bookId, from, to) ?? Promise.resolve(new Map<string, bigint>()),
     ])
     if (!prev) throw new BusinessError("PLAN_NO_PREVIOUS")
-    const prevIncome = planTotals(prev.incomes, prev.spendingCap, []).totalIncome
+    const prevSources = await this.sourceIncomes(ctx.bookId, prevMonth)
+    const prevIncome = planTotals([...prevSources, ...prev.incomes], prev.spendingCap, []).totalIncome
     const cap = prev.spendingCap ?? 0n
     const leftover = new Map<string, { kind: "expense" | "investment"; amount: bigint }>()
     for (const a of prev.allocations) {

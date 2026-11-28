@@ -21,6 +21,9 @@ export const planRoutes = (svc: PlansService) =>
       zValidator("json", putPlanSchema, validationHook),
       async (c) => ok(c, await svc.put(c.var.ctx, c.req.valid("param").month, c.req.valid("json"))),
     )
+    .post("/:month/copy-previous", zValidator("param", monthParam, validationHook), async (c) =>
+      ok(c, await svc.copyPrevious(c.var.ctx, c.req.valid("param").month)),
+    )
     .post("/:month/carry-over", zValidator("param", monthParam, validationHook), async (c) =>
       ok(c, await svc.carryOver(c.var.ctx, c.req.valid("param").month)),
     )

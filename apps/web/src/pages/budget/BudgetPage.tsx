@@ -2,11 +2,12 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { addMonths, formatMonth, monthOf } from "@vynance/shared"
 import { useState } from "react"
 import { Button, IconButton } from "@/components/Button"
+import { Sheet } from "@/components/Sheet"
 import { ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
 import { useCategories } from "@/features/categories"
-import { PlanEditor, useCarryOver, useInvestmentTypes, usePlan } from "@/features/plans"
+import { PlanEditor, useCarryOver, useCopyPreviousPlan, useInvestmentTypes, usePlan } from "@/features/plans"
 import { showSnackbar } from "@/lib/snackbar"
 
 const route = getRouteApi("/_tabs/anggaran")
@@ -21,6 +22,21 @@ export function BudgetPage() {
   const categories = useCategories(bookId, "expense")
   const types = useInvestmentTypes(bookId)
   const carry = useCarryOver(bookId, month)
+  const copy = useCopyPreviousPlan(bookId, month)
+  const [confirmCopy, setConfirmCopy] = useState(false)
+  const hasContent = Boolean(plan.data && (plan.data.version > 0 || plan.data.incomes.some((i) => !i.fromSource)))
+  const runCopy = () =>
+    copy.mutate(undefined, {
+      onSuccess: () => {
+        setConfirmCopy(false)
+        setReload((n) => n + 1)
+        showSnackbar(`Rencana ${formatMonth(addMonths(month, -1))} disalin ke bulan ini`)
+      },
+      onError: (e) => {
+        setConfirmCopy(false)
+        showSnackbar(e.message, { tone: "error" })
+      },
+    })
   // Dinaikkan saat konflik supaya editor dipasang ulang dengan data terbaru.
   const [reload, setReload] = useState(0)
 
@@ -49,6 +65,35 @@ export function BudgetPage() {
       >
         Susun dengan wizard 50/30/20
       </Button>
+      <Button
+        variant="ghost"
+        full
+        icon="list"
+        loading={copy.isPending}
+        onClick={() => (hasContent ? setConfirmCopy(true) : runCopy())}
+      >
+        Salin rencana bulan lalu
+      </Button>
+      <Sheet
+        open={confirmCopy}
+        title="Timpa rencana bulan ini?"
+        onClose={() => setConfirmCopy(false)}
+        footer={
+          <>
+            <Button variant="destructive" full loading={copy.isPending} onClick={runCopy}>
+              Ya, salin dan timpa
+            </Button>
+            <Button variant="ghost" full onClick={() => setConfirmCopy(false)}>
+              Batal
+            </Button>
+          </>
+        }
+      >
+        <p className="row-sub">
+          Plafon, penghasilan khusus, dan semua alokasi {formatMonth(month)} diganti dengan isi{" "}
+          {formatMonth(addMonths(month, -1))}. Sisa yang sudah dibawa ikut hilang.
+        </p>
+      </Sheet>
       <Button
         variant="ghost"
         full

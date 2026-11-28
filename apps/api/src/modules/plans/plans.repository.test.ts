@@ -90,7 +90,7 @@ describe("rencana bulanan (PB-04)", () => {
   test("simpan lalu baca; versi naik", async () => {
     const saved = await dataOf<Plan>(await app(U).request(url(), jsonRequest("PUT", body(0))))
     expect(saved.version).toBe(1)
-    expect(saved.incomes).toEqual([{ name: "Gaji", amount: "24500000" }])
+    expect(saved.incomes).toEqual([{ name: "Gaji", amount: "24500000", fromSource: false }])
     expect(saved.allocations).toHaveLength(2)
     const again = await dataOf<Plan>(
       await app(U).request(url(), jsonRequest("PUT", { ...body(1), spendingCap: "16000000" })),

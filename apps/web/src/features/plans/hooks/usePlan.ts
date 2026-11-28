@@ -1,7 +1,7 @@
 import { queryOptions, type UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { InvestmentType, Plan, PutPlanInput } from "@vynance/shared"
 import { qk } from "@/lib/query-keys"
-import { carryOverPlan, fetchInvestmentTypes, fetchPlan, savePlan } from "../services/plans.service"
+import { carryOverPlan, copyPreviousPlan, fetchInvestmentTypes, fetchPlan, savePlan } from "../services/plans.service"
 
 export const planQueryOptions = (bookId: string, month: string) =>
   queryOptions({ queryKey: qk.plan(bookId, month), queryFn: () => fetchPlan(bookId, month) })
@@ -26,6 +26,17 @@ export function useSavePlan(bookId: string, month: string) {
 }
 
 /** Hasil server menggantikan cache; editor dipasang ulang oleh pemanggil karena versinya berubah. */
+/** Salin rencana bulan lalu (BR-63). Menimpa isi bulan ini; konfirmasi di layar. */
+export function useCopyPreviousPlan(bookId: string, month: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => copyPreviousPlan(bookId, month),
+    onSuccess: (plan) => {
+      qc.setQueryData(qk.plan(bookId, month), plan)
+    },
+  })
+}
+
 export function useCarryOver(bookId: string, month: string) {
   const qc = useQueryClient()
   return useMutation({
