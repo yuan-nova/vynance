@@ -52,3 +52,39 @@ export function planTotals(
 export function carryOverAmount(allocated: bigint, spent: bigint): bigint {
   return allocated > spent ? allocated - spent : 0n
 }
+
+type PlanJson = {
+  spendingCap: string | null
+  incomes: readonly { amount: string }[]
+  allocations: readonly {
+    kind: "expense" | "investment"
+    categoryId: string | null
+    mode: AllocationMode
+    amount: string
+    percentBp: number
+    carriedOver: string
+  }[]
+}
+
+/** Pagu per kategori pengeluaran dari rencana bulanan JSON (PB-14). */
+export function planBudgets(plan: PlanJson): Map<string, bigint> {
+  const cap = BigInt(plan.spendingCap ?? "0")
+  const income = plan.incomes.reduce((s, i) => s + BigInt(i.amount), 0n)
+  const out = new Map<string, bigint>()
+  for (const a of plan.allocations) {
+    if (a.kind !== "expense" || !a.categoryId) continue
+    const v = allocationAmount(
+      {
+        kind: a.kind,
+        mode: a.mode,
+        amount: BigInt(a.amount),
+        percentBp: a.percentBp,
+        carriedOver: BigInt(a.carriedOver),
+      },
+      cap,
+      income,
+    )
+    if (v > 0n) out.set(a.categoryId, v)
+  }
+  return out
+}

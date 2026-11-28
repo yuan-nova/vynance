@@ -1,4 +1,5 @@
 export { AddTransactionForm } from "./components/AddTransactionForm"
+export { CategoryGroups } from "./components/CategoryGroups"
 export { ScanFlow } from "./components/ScanFlow"
 export { TransactionList } from "./components/TransactionList"
 export { TransactionRow } from "./components/TransactionRow"
