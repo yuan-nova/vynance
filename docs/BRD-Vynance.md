@@ -165,8 +165,8 @@ B -- Sudah --> H
 
 ### PB-04 Rencana Bulanan (Alokasi Gaji)
 1. Pilih bulan.
-2. Penghasilan rencana terisi otomatis dari **Sumber Penghasilan** yang rutin (PB-10, BR-52). Pengguna boleh menambah atau mengubah penghasilan khusus bulan itu. Pemasukan yang sudah tercatat tidak dijumlahkan lagi (risiko #8).
-   - *(Vynance)* Awal bulan: tombol **Salin rencana bulan lalu** menyalin plafon, rekening default, metode, dan semua alokasi beserta nominal/persennya (BR-53).
+2. Penghasilan rencana terisi otomatis dari **Sumber Penghasilan** yang rutin (PB-10, BR-62). Pengguna boleh menambah atau mengubah penghasilan khusus bulan itu. Pemasukan yang sudah tercatat tidak dijumlahkan lagi (risiko #8).
+   - *(Vynance)* Awal bulan: tombol **Salin rencana bulan lalu** menyalin plafon, rekening default, metode, dan semua alokasi beserta nominal/persennya (BR-63).
 3. Isi plafon pengeluaran, pilih rekening default.
 4. Tambah alokasi pengeluaran per kategori (nominal atau % dari plafon) dan alokasi investasi (nominal atau % dari total penghasilan).
 5. Sistem menyimpan otomatis (jeda 0,6 detik setelah berhenti mengetik).
@@ -224,8 +224,8 @@ H --> I[Akhir bulan: bawa sisa ke bulan depan]
 - Unggah slip gaji PDF. Sistem membaca periode, penghasilan kotor, potongan, dan penghasilan bersih, lalu menampilkan tren 12 bulan dan % perubahan.
 
 ### PB-13 Rencana Transaksi & Realisasi *(baru di Vynance)*
-1. Setiap bulan sistem menyiapkan **rencana transaksi** dari (a) sumber penghasilan yang rutin, nominal per bulan, dan (b) langganan aktif yang ditagih bulan itu. Rencana tidak dibuat dua kali untuk sumber dan bulan yang sama (BR-50).
-2. Rencana tampil di daftar transaksi dengan tanda **Rencana** dan tidak memengaruhi saldo, realisasi anggaran, skor, maupun Beranda (BR-51).
+1. Setiap bulan sistem menyiapkan **rencana transaksi** dari (a) sumber penghasilan yang rutin, nominal per bulan, dan (b) langganan aktif yang ditagih bulan itu. Rencana tidak dibuat dua kali untuk sumber dan bulan yang sama (BR-60).
+2. Rencana tampil di daftar transaksi dengan tanda **Rencana** dan tidak memengaruhi saldo, realisasi anggaran, skor, maupun Beranda (BR-61).
 3. Aksi **Realisasi** membuka form berisi nominal, tanggal, rekening, dan kategori dari rencana. Semuanya bisa diubah. Nominal boleh berbeda dari rencana.
 4. Nominal **0** berarti **Lewati**: tidak ada transaksi, rencana ditandai dilewati untuk bulan itu.
 5. Realisasi bisa dibatalkan dengan menghapus transaksinya; rencana kembali ke status belum direalisasi.
@@ -319,11 +319,11 @@ Label: **≥80 Sangat Baik**, **≥60 Baik**, **≥40 Cukup**, **<40 Perlu Perha
 | BR-42 | Zakat = 2,5% × harta jika harta ≥ 85 g × harga emas. |
 | BR-43 | Inflasi pendidikan bawaan 12%/tahun, bisa diubah pengguna. |
 | BR-44 | Mode privasi mengganti semua nominal menjadi "Rp ••••••". |
-| BR-50 | Rencana transaksi unik per (sumber: penghasilan/langganan, id sumber, bulan). Status: Belum, Direalisasi, Dilewati. |
-| BR-51 | Rencana belum direalisasi tidak dihitung di saldo, realisasi anggaran, skor, dan Beranda. |
-| BR-52 | Penghasilan rencana bulanan = Σ nominal sumber penghasilan rutin + penghasilan khusus bulan itu. |
-| BR-53 | Salin rencana bulan lalu menimpa alokasi bulan ini hanya setelah pengguna setuju bila bulan ini sudah berisi. |
-| BR-54 | Rencana per kategori (PB-14) = Σ rencana belum direalisasi bulan itu yang kategorinya sama. |
+| BR-60 | Rencana transaksi unik per (sumber: penghasilan/langganan, id sumber, bulan). Status: Belum, Direalisasi, Dilewati. |
+| BR-61 | Rencana belum direalisasi tidak dihitung di saldo, realisasi anggaran, skor, dan Beranda. |
+| BR-62 | Penghasilan rencana bulanan = Σ nominal sumber penghasilan rutin + penghasilan khusus bulan itu. |
+| BR-63 | Salin rencana bulan lalu menimpa alokasi bulan ini hanya setelah pengguna setuju bila bulan ini sudah berisi. |
+| BR-64 | Rencana per kategori (PB-14) = Σ rencana belum direalisasi bulan itu yang kategorinya sama. |
 
 ### 8.7 Buku & anggota
 | ID | Aturan |
