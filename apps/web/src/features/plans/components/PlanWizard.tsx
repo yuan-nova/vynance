@@ -45,14 +45,18 @@ export function PlanWizard({ bookId, plan, categories, onDone, onCancel }: PlanW
   const [fixed, setFixed] = useState<Record<Group, bigint | null>>({ needs: null, wants: null, savings: null })
   const nextKey = useRef(plan.incomes.length)
   const [incomes, setIncomes] = useState<Income[]>(
-    plan.incomes.length
-      ? plan.incomes.map((i, key) => ({ key, name: i.name, amount: BigInt(i.amount) }))
-      : [{ key: 0, name: "Gaji", amount: null }],
+    plan.incomes.some((i) => !i.fromSource)
+      ? plan.incomes.filter((i) => !i.fromSource).map((i, key) => ({ key, name: i.name, amount: BigInt(i.amount) }))
+      : plan.incomes.length
+        ? []
+        : [{ key: 0, name: "Gaji", amount: null }],
   )
   const [perCategory, setPerCategory] = useState<Record<string, bigint | null> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const totalIncome = incomes.reduce((s, i) => s + (i.amount ?? 0n), 0n)
+  // BR-62: penghasilan dari Sumber Penghasilan sudah masuk; wizard hanya menambah penghasilan khusus.
+  const sourceTotal = plan.incomes.filter((i) => i.fromSource).reduce((s, i) => s + BigInt(i.amount), 0n)
+  const totalIncome = sourceTotal + incomes.reduce((s, i) => s + (i.amount ?? 0n), 0n)
   const pctBp = customPct.map((v) => Math.round(Number(v.replace(",", ".") || "0") * 100)) as [number, number, number]
   const split: GroupSplit =
     method === "fixed"

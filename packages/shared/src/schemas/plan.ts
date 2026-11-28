@@ -62,7 +62,8 @@ export const planSchema = z.object({
   spendingCap: z.string().nullable(),
   defaultWalletId: z.string().nullable(),
   method: planMethodSchema,
-  incomes: z.array(z.object({ name: z.string(), amount: z.string() })),
+  /** `fromSource` = dari Sumber Penghasilan rutin (BR-62), hanya baca; sisanya penghasilan khusus bulan itu. */
+  incomes: z.array(z.object({ name: z.string(), amount: z.string(), fromSource: z.boolean().default(false) })),
   allocations: z.array(allocationOut),
   /** Pemasukan tercatat bulan itu (realisasi), ditampilkan terpisah dari rencana (temuan BRD §9 no. 8). */
   recordedIncome: z.string(),
