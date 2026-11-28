@@ -165,7 +165,8 @@ B -- Sudah --> H
 
 ### PB-04 Rencana Bulanan (Alokasi Gaji)
 1. Pilih bulan.
-2. Isi sumber penghasilan manual (minimal 1). Pemasukan yang sudah tercatat di bulan itu ikut dijumlahkan.
+2. Penghasilan rencana terisi otomatis dari **Sumber Penghasilan** yang rutin (PB-10, BR-52). Pengguna boleh menambah atau mengubah penghasilan khusus bulan itu. Pemasukan yang sudah tercatat tidak dijumlahkan lagi (risiko #8).
+   - *(Vynance)* Awal bulan: tombol **Salin rencana bulan lalu** menyalin plafon, rekening default, metode, dan semua alokasi beserta nominal/persennya (BR-53).
 3. Isi plafon pengeluaran, pilih rekening default.
 4. Tambah alokasi pengeluaran per kategori (nominal atau % dari plafon) dan alokasi investasi (nominal atau % dari total penghasilan).
 5. Sistem menyimpan otomatis (jeda 0,6 detik setelah berhenti mengetik).
@@ -190,7 +191,7 @@ H --> I[Akhir bulan: bawa sisa ke bulan depan]
 
 ### PB-05 Langganan & Tagihan Rutin
 1. Pengguna menambah langganan: nama (ikon & warna dikenali otomatis untuk 50+ layanan), biaya, mata uang (IDR/USD/SGD/EUR/MYR/JPY/AUD, kurs bisa diambil otomatis), siklus, tanggal bayar, rekening.
-2. Setiap kali aplikasi dibuka, sistem memeriksa: jika hari ini ≥ tanggal bayar bulan ini, dan belum ada transaksi untuk langganan itu di bulan ini, sistem membuat transaksi pengeluaran kategori **Langganan** dengan catatan "Tagihan Otomatis: {nama}".
+2. *(Vynance, mengganti tagihan otomatis)* Setiap bulan tagihan, langganan muncul sebagai **rencana transaksi** (PB-13) dengan kategori pilihan pengguna (bawaan **Langganan**). Saldo tidak berubah sampai pengguna menekan **Realisasi**.
 3. Tanggal bayar 31 di bulan pendek otomatis menjadi tanggal terakhir bulan itu.
 4. *(Vynance)* Pengingat H-3 sebelum tanggal bayar dan dukungan siklus tahunan.
 
@@ -221,6 +222,18 @@ H --> I[Akhir bulan: bawa sisa ke bulan depan]
 ### PB-10 Sumber Penghasilan & Slip Gaji
 - Catat sumber penghasilan aktif dan pasif per bulan. Sistem menghitung porsi pasif dan membandingkannya dengan target (bawaan 30%).
 - Unggah slip gaji PDF. Sistem membaca periode, penghasilan kotor, potongan, dan penghasilan bersih, lalu menampilkan tren 12 bulan dan % perubahan.
+
+### PB-13 Rencana Transaksi & Realisasi *(baru di Vynance)*
+1. Setiap bulan sistem menyiapkan **rencana transaksi** dari (a) sumber penghasilan yang rutin, nominal per bulan, dan (b) langganan aktif yang ditagih bulan itu. Rencana tidak dibuat dua kali untuk sumber dan bulan yang sama (BR-50).
+2. Rencana tampil di daftar transaksi dengan tanda **Rencana** dan tidak memengaruhi saldo, realisasi anggaran, skor, maupun Beranda (BR-51).
+3. Aksi **Realisasi** membuka form berisi nominal, tanggal, rekening, dan kategori dari rencana. Semuanya bisa diubah. Nominal boleh berbeda dari rencana.
+4. Nominal **0** berarti **Lewati**: tidak ada transaksi, rencana ditandai dilewati untuk bulan itu.
+5. Realisasi bisa dibatalkan dengan menghapus transaksinya; rencana kembali ke status belum direalisasi.
+6. Rencana bulan yang sudah lewat dan belum direalisasi tetap tampil sebagai **Terlewat** sampai direalisasi atau dilewati.
+
+### PB-14 Daftar Transaksi: Dua Mode *(baru di Vynance)*
+- **Riwayat** (bawaan, seperti sekarang): transaksi terealisasi urut tanggal, terbaru di atas. Rencana bulan ini tampil di bagian **Rencana** di atas daftar.
+- **Per kategori**: transaksi bulan terpilih dikelompokkan per kategori. Tiap kelompok menampilkan **pagu** (alokasi rencana bulanan), **realisasi** (BR-10), dan **rencana belum direalisasi** (penghasilan dan langganan yang belum direalisasi), lalu daftar transaksinya. Kategori tanpa transaksi tetapi punya pagu atau rencana tetap tampil.
 
 ### PB-11 AI Advisor
 1. Sistem merangkum kondisi keuangan: aset bersih, kas, investasi, utang kartu kredit, pemasukan & pengeluaran bulan ini, 5 kategori pengeluaran terbesar, skor kesehatan, target tabungan, 5 aset teratas.
@@ -302,10 +315,15 @@ Label: **≥80 Sangat Baik**, **≥60 Baik**, **≥40 Cukup**, **<40 Perlu Perha
 | ID | Aturan |
 |---|---|
 | BR-40 | Total langganan per bulan = Σ (bulanan: biaya; tahunan: biaya ÷ 12). |
-| BR-41 | Langganan otomatis dibuat maksimal satu kali per langganan per bulan. |
+| BR-41 | Rencana langganan dibuat maksimal satu kali per langganan per bulan. |
 | BR-42 | Zakat = 2,5% × harta jika harta ≥ 85 g × harga emas. |
 | BR-43 | Inflasi pendidikan bawaan 12%/tahun, bisa diubah pengguna. |
 | BR-44 | Mode privasi mengganti semua nominal menjadi "Rp ••••••". |
+| BR-50 | Rencana transaksi unik per (sumber: penghasilan/langganan, id sumber, bulan). Status: Belum, Direalisasi, Dilewati. |
+| BR-51 | Rencana belum direalisasi tidak dihitung di saldo, realisasi anggaran, skor, dan Beranda. |
+| BR-52 | Penghasilan rencana bulanan = Σ nominal sumber penghasilan rutin + penghasilan khusus bulan itu. |
+| BR-53 | Salin rencana bulan lalu menimpa alokasi bulan ini hanya setelah pengguna setuju bila bulan ini sudah berisi. |
+| BR-54 | Rencana per kategori (PB-14) = Σ rencana belum direalisasi bulan itu yang kategorinya sama. |
 
 ### 8.7 Buku & anggota
 | ID | Aturan |
@@ -382,6 +400,10 @@ Prioritas: **M** = Must (MVP), **S** = Should, **C** = Could.
 | FR-140 | Slip gaji | Unggah PDF, ekstrak, tren 12 bulan | C |
 | FR-150 | Umum | Mode privasi, mode gelap, ID/EN, tarik untuk muat ulang | M |
 | FR-151 | Umum | Impor data lama / mode demo | C |
+| FR-160 | Rencana | Rencana transaksi dari penghasilan dan langganan, aksi Realisasi/Lewati | S |
+| FR-161 | Langganan | Pilih kategori langganan, bisa diubah saat realisasi | S |
+| FR-162 | Transaksi | Mode Riwayat dan Per kategori (pagu, realisasi, rencana) | S |
+| FR-163 | Anggaran | Penghasilan otomatis dari sumber + salin rencana bulan lalu | S |
 
 ---
 
@@ -491,6 +513,7 @@ Sumber generator SVG: `design/_source/gen_svg.py` (token warna, ikon, dan kompon
 | **MVP** | Akun, buku (banyak buku per akun, ganti buku aktif), rekening, transaksi 5 tipe, kategori + anggaran, rencana bulanan, dashboard + skor, target tabungan, mode privasi/gelap, ekspor CSV |
 | **Fase 2** | Undang anggota ke buku, langganan + pengingat, investasi, scan struk, wizard & carry-over, zakat |
 | **Fase 3** | AI advisor, dana pendidikan, sumber penghasilan, slip gaji, offline penuh |
+| **Fase 4** | Rencana transaksi & realisasi, kategori langganan, daftar transaksi per kategori, penghasilan otomatis di anggaran |
 
 ---
 
