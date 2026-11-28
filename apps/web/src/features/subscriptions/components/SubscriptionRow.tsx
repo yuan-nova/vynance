@@ -4,10 +4,10 @@ import { Money } from "@/components/Money"
 import { Pill } from "@/components/Pill"
 import { usePrivacyMode } from "@/lib/hooks/usePrivacyMode"
 
-type SubscriptionRowProps = { sub: Subscription; onOpen: () => void }
+type SubscriptionRowProps = { sub: Subscription; categoryName?: string; onOpen: () => void }
 
 /** Baris langganan (design/11): ikon layanan, tanggal & rekening, biaya per bulan (BR-40). */
-export function SubscriptionRow({ sub, onOpen }: SubscriptionRowProps) {
+export function SubscriptionRow({ sub, categoryName, onOpen }: SubscriptionRowProps) {
   const privacy = usePrivacyMode()
   const svc = recognizeService(sub.name)
   const foreign = sub.currency !== "IDR"
@@ -17,7 +17,7 @@ export function SubscriptionRow({ sub, onOpen }: SubscriptionRowProps) {
       ? `Tercatat otomatis ${formatDateShort(sub.lastChargedOn)}`
       : foreign && !privacy
         ? `${CURRENCY_SYMBOL[sub.currency]}${Number(sub.originalAmount)} · kurs ${Number(sub.fxRate ?? 0) || "otomatis"}`
-        : `Tgl ${sub.billingDay}${sub.cycle === "yearly" ? ` · tahunan` : ""} · ${sub.walletName}`
+        : `Tgl ${sub.billingDay}${sub.cycle === "yearly" ? ` · tahunan` : ""} · ${sub.walletName}${categoryName ? ` · ${categoryName}` : ""}`
   return (
     <ListRow
       icon={(svc?.icon ?? "repeat") as IconName}

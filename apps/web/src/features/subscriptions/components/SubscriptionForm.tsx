@@ -1,4 +1,5 @@
 import {
+  type Category,
   CURRENCIES,
   CURRENCY_SYMBOL,
   type Currency,
@@ -16,8 +17,25 @@ import { ChipGroup } from "@/components/ChipGroup"
 import { TextField } from "@/components/TextField"
 import { splitApiError } from "@/lib/api-error"
 
-type Fields = "name" | "originalAmount" | "fxRate" | "billingDay" | "billingMonth" | "walletId" | "startDate"
-const FIELDS = ["name", "originalAmount", "fxRate", "billingDay", "billingMonth", "walletId", "startDate"] as const
+type Fields =
+  | "name"
+  | "originalAmount"
+  | "fxRate"
+  | "billingDay"
+  | "billingMonth"
+  | "walletId"
+  | "categoryId"
+  | "startDate"
+const FIELDS = [
+  "name",
+  "originalAmount",
+  "fxRate",
+  "billingDay",
+  "billingMonth",
+  "walletId",
+  "categoryId",
+  "startDate",
+] as const
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
 
 type Values = ReturnType<typeof createSubscriptionSchema.parse> & { paused: boolean }
@@ -25,6 +43,7 @@ type Values = ReturnType<typeof createSubscriptionSchema.parse> & { paused: bool
 type SubscriptionFormProps = {
   initial?: Subscription
   wallets: Wallet[]
+  categories: Category[]
   rates: FxRates
   pending: boolean
   onSubmit: (v: Values, onError: (err: unknown) => void) => void
@@ -32,7 +51,15 @@ type SubscriptionFormProps = {
 }
 
 /** Form langganan (PB-05 langkah 1): nama, biaya + mata uang (kurs otomatis/manual), siklus, tanggal, rekening. */
-export function SubscriptionForm({ initial, wallets, rates, pending, onSubmit, onDelete }: SubscriptionFormProps) {
+export function SubscriptionForm({
+  initial,
+  wallets,
+  categories,
+  rates,
+  pending,
+  onSubmit,
+  onDelete,
+}: SubscriptionFormProps) {
   const [name, setName] = useState(initial?.name ?? "")
   const [currency, setCurrency] = useState<Currency>(initial?.currency ?? "IDR")
   const [amount, setAmount] = useState(initial ? String(Number(initial.originalAmount)) : "")
@@ -41,6 +68,10 @@ export function SubscriptionForm({ initial, wallets, rates, pending, onSubmit, o
   const [day, setDay] = useState(String(initial?.billingDay ?? new Date().getDate()))
   const [month, setMonth] = useState(String(initial?.billingMonth ?? new Date().getMonth() + 1))
   const [walletId, setWalletId] = useState(initial?.walletId ?? wallets[0]?.id ?? "")
+  // Bawaan kategori "Langganan" bila ada (PB-05, FR-161); kategori ini jadi kategori rencana transaksinya.
+  const [categoryId, setCategoryId] = useState(
+    initial?.categoryId ?? categories.find((c) => c.name.toLowerCase() === "langganan")?.id ?? categories[0]?.id ?? "",
+  )
   const [paused, setPaused] = useState(initial?.paused ?? false)
   const [errors, setErrors] = useState<Partial<Record<Fields | "form", string>>>({})
   const autoRate = rates.find((r) => r.currency === currency)?.value ?? "1"
@@ -62,7 +93,7 @@ export function SubscriptionForm({ initial, wallets, rates, pending, onSubmit, o
       billingDay: Number(day),
       billingMonth: cycle === "yearly" ? Number(month) : null,
       walletId,
-      categoryId: initial?.categoryId ?? null,
+      categoryId: categoryId || null,
       startDate: initial?.startDate ?? dateOnlyOf(new Date()),
     })
     if (!parsed.success) {
@@ -144,6 +175,19 @@ export function SubscriptionForm({ initial, wallets, rates, pending, onSubmit, o
         value={walletId}
         onChange={setWalletId}
       />
+      {categories.length > 0 ? (
+        <ChipGroup
+          label="Kategori"
+          options={categories.map((c) => ({ value: c.id, label: c.name }))}
+          value={categoryId}
+          onChange={setCategoryId}
+        />
+      ) : null}
+      {errors.categoryId ? (
+        <p className="field-error" role="alert">
+          {errors.categoryId}
+        </p>
+      ) : null}
       {initial ? (
         <ChipGroup
           label="Status"
