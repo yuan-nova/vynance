@@ -7,6 +7,7 @@ import { Sheet } from "@/components/Sheet"
 import { EmptyState, ErrorState, Skeleton } from "@/components/States"
 import { TopBar } from "@/components/TopBar"
 import { useActiveBook } from "@/features/books"
+import { useCategories } from "@/features/categories"
 import {
   SubscriptionForm,
   SubscriptionRow,
@@ -36,6 +37,7 @@ export function SubscriptionsPage() {
   const query = useSubscriptions(bookId)
   const rates = useFxRates(bookId)
   const wallets = useWallets(bookId)
+  const categories = useCategories(bookId, "expense")
   const create = useCreateSubscription(bookId)
   const update = useUpdateSubscription(bookId)
   const remove = useDeleteSubscription(bookId)
@@ -45,7 +47,8 @@ export function SubscriptionsPage() {
   const today = dateOnlyOf(new Date())
   const activeWallets = (wallets.data?.wallets ?? []).filter((w) => w.archivedAt === null)
   const next = data?.subscriptions.find((s) => !s.paused)
-  const ready = rates.data && wallets.data
+  const ready = rates.data && wallets.data && categories.data
+  const activeCategories = (categories.data ?? []).filter((c) => !c.archivedAt)
   const monthly = BigInt(data?.monthlyTotal ?? "0")
 
   return (
@@ -101,7 +104,12 @@ export function SubscriptionsPage() {
         <section className="section">
           <div className="card plain-list">
             {data.subscriptions.map((s) => (
-              <SubscriptionRow key={s.id} sub={s} onOpen={() => setSheet({ kind: "edit", sub: s })} />
+              <SubscriptionRow
+                key={s.id}
+                sub={s}
+                categoryName={activeCategories.find((c) => c.id === s.categoryId)?.name}
+                onOpen={() => setSheet({ kind: "edit", sub: s })}
+              />
             ))}
           </div>
           <p className="row-sub section-note">Transaksi dibuat otomatis tiap tanggal bayar.</p>
@@ -112,6 +120,7 @@ export function SubscriptionsPage() {
         {ready && sheet?.kind === "create" ? (
           <SubscriptionForm
             wallets={activeWallets}
+            categories={activeCategories}
             rates={rates.data}
             pending={create.isPending}
             onSubmit={({ paused: _p, ...v }, onError) =>
@@ -133,6 +142,7 @@ export function SubscriptionsPage() {
             key={sheet.sub.id}
             initial={sheet.sub}
             wallets={activeWallets}
+            categories={activeCategories}
             rates={rates.data}
             pending={update.isPending}
             onDelete={() => setSheet({ kind: "delete", sub: sheet.sub })}
